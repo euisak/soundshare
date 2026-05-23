@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SoundShare — 검색</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <script src="js/header-loader.js"></script>
+
+    <main class="container">
+      <div id="notice" class="notice" hidden></div>
+
+      <div style="margin-bottom:16px">
+        <form id="formSearch" style="display:flex;gap:8px">
+          <input id="searchInput" class="input" type="search" placeholder="노래, 아티스트, 태그, 장르 검색…" style="flex:1" />
+          <button class="btn primary" type="submit">검색</button>
+        </form>
+        <div id="searchMeta" class="muted small" style="margin-top:8px"></div>
+      </div>
+
+      <div class="grid" id="results"></div>
+    </main>
+
+    <script src="config.js"></script>
+    <script type="module">
+      import { loadHeader, initTopbar } from "./js/app.js";
+      import { searchPosts } from "./js/post.js";
+      import { renderPostCard, escHtml } from "./js/ui.js";
+
+      await loadHeader();
+      initTopbar();
+
+      const input = document.querySelector("#searchInput");
+      const meta = document.querySelector("#searchMeta");
+      const results = document.querySelector("#results");
+
+      // URL 파라미터에서 초기 키워드 읽기 (헤더 검색바 연동)
+      const q = new URLSearchParams(window.location.search).get("q") || "";
+      if (q) { input.value = q; await doSearch(q); }
+
+      document.querySelector("#formSearch")?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const kw = input.value.trim();
+        if (!kw) return;
+        history.replaceState({}, "", `?q=${encodeURIComponent(kw)}`);
+        await doSearch(kw);
+      });
+
+      async function doSearch(kw) {
+        results.innerHTML = '<div class="skeleton" style="height:120px"></div>';
+        meta.textContent = "";
+        try {
+          const posts = await searchPosts(kw);
+          meta.textContent = `"${kw}" 검색 결과 ${posts.length}건`;
+          results.innerHTML = posts.length
+            ? posts.map(renderPostCard).join("")
+            : `<div class="card empty-state">"${escHtml(kw)}"에 대한 결과가 없습니다.</div>`;
+        } catch (err) {
+          results.innerHTML = `<div class="card empty-state">${err.message}</div>`;
+        }
+      }
+    </script>
+  </body>
+</html>

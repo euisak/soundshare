@@ -1,0 +1,197 @@
+import { getConfig } from "./app.js";
+
+const LS_TOKENS = "spotify.tokens.v2";
+const LS_VERIFIER = "spotify.pkce.verifier";
+
+export function getSpotifyConfig() {
+  return getConfig().spotify;
+}
+
+// ── Token storage ─────────────────────────────────────────────────────────────
+
+export function getTokens() {
+  try { return JSON.parse(localStorage.getItem(LS_TOKENS) || "null"); }
+  catch { return null; }
+}
+
+export function setTokens(data) {
+  localStorage.setItem(LS_TOKENS, JSON.stringify({ ...data, acquiredAt: Date.now() }));
+}
+
+export function clearTokens() {
+  localStorage.removeItem(LS_TOKENS);
+  localStorage.removeItem(LS_VERIFIER);
+}
+
+export function isConnected() {
+  return !!getTokens()?.accessToken;
+}
+
+function isExpired() {
+  const t = getTokens();
+  if (!t) return true;
+  return Date.now() > t.acquiredAt + (t.expiresIn - 60) * 1000;
+}
+
+// ── PKCE helpers ──────────────────────────────────────────────────────────────
+
+function base64url(buf) {
+  return btoa(String.fromCharCode(...buf))
+    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+}
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return new Uint8Array(buf);
+}
+
+// ── Authorization ─────────────────────────────────────────────────────────────
+
+export async function buildSpotifyAuthorizeUrl({ state = "v2" } = {}) {
+  const { clientId, redirectUri } = getSpotifyConfig();
+
+  const verifier = base64url(crypto.getRandomValues(new Uint8Array(32)));
+  localStorage.setItem(LS_VERIFIER, verifier);
+  const challenge = base64url(await sha256(verifier));
+
+  const u = new URL("https://accounts.spotify.com/authorize");
+  u.searchParams.set("response_type", "code");
+  u.searchParams.set("client_id", clientId);
+  u.searchParams.set("redirect_uri", redirectUri);
+  u.searchParams.set("scope", [
+    "user-read-currently-playing",
+    "playlist-read-private",
+    "playlist-modify-private",
+    "playlist-modify-public",
+    "user-library-read",
+  ].join(" "));
+  u.searchParams.set("state", state);
+  u.searchParams.set("code_challenge_method", "S256");
+  u.searchParams.set("code_challenge", challenge);
+  return u.toString();
+}
+
+export async function exchangeCodeForTokens(code) {
+  const { clientId, redirectUri } = getSpotifyConfig();
+  const verifier = localStorage.getItem(LS_VERIFIER);
+  if (!verifier) throw new Error("PKCE verifier가 없습니다. 다시 연결해주세요.");
+
+  const res = await fetch("https://accounts.spotify.com/api/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "authorization_code",
+      code,
+      redirect_uri: redirectUri,
+      client_id: clientId,
+      code_verifier: verifier,
+    }),
+  });
+  if (!res.ok) throw new Error("토큰 교환 실패: " + (await res.text()));
+  const data = await res.json();
+  setTokens({
+    accessToken: data.access_token,
+    refreshToken: data.refresh_token,
+    expiresIn: data.expires_in,
+  });
+  localStorage.removeItem(LS_VERIFIER);
+}
+
+async function refreshAccessToken() {
+  const { clientId } = getSpotifyConfig();
+  const tokens = getTokens();
+  if (!tokens?.refreshToken) throw new Error("Refresh token이 없습니다. 다시 연결해주세요.");
+
+  const res = await fetch("https://accounts.spotify.com/api/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: tokens.refreshToken,
+      client_id: clientId,
+    }),
+  });
+  if (!res.ok) { clearTokens(); throw new Error("토큰 갱신 실패. 다시 연결해주세요."); }
+  const data = await res.json();
+  setTokens({
+    ...tokens,
+    accessToken: data.access_token,
+    expiresIn: data.expires_in,
+    ...(data.refresh_token ? { refreshToken: data.refresh_token } : {}),
+  });
+}
+
+// ── Spotify API fetch ─────────────────────────────────────────────────────────
+
+export async function spotifyFetch(path, { method = "GET", body } = {}) {
+  if (!isConnected()) throw new Error("Spotify가 연결되지 않았습니다.");
+  if (isExpired()) await refreshAccessToken();
+
+  const doRequest = async () => {
+    const tokens = getTokens();
+    return fetch(`https://api.spotify.com/v1${path}`, {
+      method,
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  };
+
+  let res = await doRequest();
+  if (res.status === 401) {
+    await refreshAccessToken();
+    res = await doRequest();
+  }
+  if (!res.ok) throw new Error(`Spotify API 오류 (${res.status})`);
+  return res.status === 204 ? null : res.json();
+}
+
+// ── Spotify API wrappers ──────────────────────────────────────────────────────
+
+// iTunes Search API (무료, 키 없음)
+export async function searchTracksItunes(q, limitN = 5) {
+  const res = await fetch(
+    `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=${limitN}&country=KR`
+  );
+  if (!res.ok) throw new Error("iTunes 검색 오류");
+  const data = await res.json();
+  return data.results.map((t) => ({
+    id: String(t.trackId),
+    name: t.trackName,
+    artist: t.artistName,
+    album: t.collectionName || "",
+    albumArt: t.artworkUrl100?.replace("100x100bb", "300x300bb") || "",
+    previewUrl: t.previewUrl || null,
+    appleMusicUrl: t.trackViewUrl || null,
+    spotifySearchUrl: `https://open.spotify.com/search/${encodeURIComponent(t.trackName + " " + t.artistName)}`,
+  }));
+}
+
+export async function getArtistGenres(artistId) {
+  if (!artistId) return [];
+  const data = await spotifyFetch(`/artists/${artistId}`);
+  return data.genres || [];
+}
+
+export async function getUserPlaylists() {
+  const data = await spotifyFetch("/me/playlists?limit=20");
+  return data.items.map((p) => ({
+    id: p.id,
+    name: p.name,
+    image: p.images[0]?.url || "",
+    trackCount: p.tracks.total,
+  }));
+}
+
+export async function addTrackToPlaylist(playlistId, trackUri) {
+  return spotifyFetch(`/playlists/${playlistId}/tracks`, {
+    method: "POST",
+    body: { uris: [trackUri] },
+  });
+}
+
+export async function getCurrentlyPlaying() {
+  return spotifyFetch("/me/player/currently-playing");
+}

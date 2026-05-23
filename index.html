@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SoundShare</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <script src="js/header-loader.js"></script>
+
+    <main class="container">
+      <div id="notice" class="notice" hidden></div>
+
+      <!-- Spotify 연결 배너 -->
+      <div id="spotifyBanner" class="card" style="margin-bottom:16px" hidden>
+        <div class="row">
+          <div>
+            <div style="font-weight:700;font-size:15px">Spotify 연결</div>
+            <p class="subtitle" style="margin-top:4px">트랙을 내 플레이리스트에 바로 추가하려면 연결하세요.</p>
+          </div>
+          <button class="btn spotify" id="btnSpotifyConnect">Spotify 연결</button>
+        </div>
+      </div>
+
+      <!-- 장르 필터 -->
+      <div class="chips" id="genreFilter" style="margin-bottom:16px">
+        <button class="chip active" data-genre="">전체</button>
+        <button class="chip" data-genre="k-pop">K-Pop</button>
+        <button class="chip" data-genre="pop">Pop</button>
+        <button class="chip" data-genre="indie">Indie</button>
+        <button class="chip" data-genre="hip-hop">Hip-Hop</button>
+        <button class="chip" data-genre="r&b">R&amp;B</button>
+        <button class="chip" data-genre="jazz">Jazz</button>
+        <button class="chip" data-genre="rock">Rock</button>
+        <button class="chip" data-genre="electronic">Electronic</button>
+        <button class="chip" data-genre="classical">Classical</button>
+      </div>
+
+      <!-- 게시글 목록 -->
+      <div class="grid" id="postList"></div>
+    </main>
+
+    <script src="config.js"></script>
+    <script type="module">
+      import { loadHeader, initTopbar, setNotice } from "./js/app.js";
+      import { getPosts } from "./js/post.js";
+      import { isConnected, buildSpotifyAuthorizeUrl, exchangeCodeForTokens } from "./js/spotify.js";
+      import { renderPostCard } from "./js/ui.js";
+
+      await loadHeader();
+      initTopbar();
+
+      // Spotify PKCE 콜백 처리
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
+      if (code) {
+        try {
+          await exchangeCodeForTokens(code);
+          history.replaceState({}, "", window.location.pathname);
+          setNotice("ok", "Spotify 연결 완료! 이제 트랙을 플레이리스트에 추가할 수 있습니다.");
+        } catch (err) {
+          setNotice("danger", "Spotify 연결 실패: " + err.message);
+        }
+      }
+
+      // Spotify 배너
+      const banner = document.querySelector("#spotifyBanner");
+      if (!isConnected()) banner.hidden = false;
+      document.querySelector("#btnSpotifyConnect")?.addEventListener("click", async () => {
+        const url = await buildSpotifyAuthorizeUrl({ state: "feed" });
+        window.location.href = url;
+      });
+
+      // 장르 필터
+      let currentGenre = "";
+      document.querySelector("#genreFilter")?.addEventListener("click", async (e) => {
+        const chip = e.target.closest("[data-genre]");
+        if (!chip) return;
+        document.querySelectorAll("#genreFilter .chip").forEach((c) => c.classList.remove("active"));
+        chip.classList.add("active");
+        currentGenre = chip.dataset.genre;
+        await loadPosts();
+      });
+
+      async function loadPosts() {
+        const list = document.querySelector("#postList");
+        list.innerHTML = Array(3).fill('<div class="skeleton" style="height:160px"></div>').join("");
+        try {
+          const posts = await getPosts({ genre: currentGenre || undefined });
+          if (!posts.length) {
+            list.innerHTML = '<div class="card empty-state">아직 게시글이 없습니다.<br>첫 번째 추천을 올려보세요!</div>';
+            return;
+          }
+          list.innerHTML = posts.map(renderPostCard).join("");
+        } catch (err) {
+          list.innerHTML = `<div class="card empty-state">${err.message}</div>`;
+        }
+      }
+
+      await loadPosts();
+    </script>
+  </body>
+</html>

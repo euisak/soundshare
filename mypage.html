@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SoundShare — 마이페이지</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <script src="js/header-loader.js"></script>
+
+    <main class="container">
+      <div id="notice" class="notice" hidden></div>
+
+      <!-- 프로필 카드 -->
+      <section class="card" style="margin-bottom:16px">
+        <div class="row">
+          <div style="display:flex;align-items:center;gap:14px">
+            <div id="profileAvatar" class="user-avatar" style="width:52px;height:52px;font-size:20px;border-radius:50%">?</div>
+            <div>
+              <div id="profileName" style="font-size:18px;font-weight:700">-</div>
+              <div id="profileEmail" class="muted small">-</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn spotify" id="btnSpotify">Spotify 연결</button>
+            <a class="btn" href="settings.html">설정</a>
+          </div>
+        </div>
+        <div id="spotifyStatus" class="muted small" style="margin-top:10px"></div>
+      </section>
+
+      <!-- 탭 -->
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="my">내 글</button>
+        <button class="tab-btn" data-tab="saved">저장한 글</button>
+        <button class="tab-btn" data-tab="liked">좋아요한 글</button>
+      </div>
+
+      <div class="grid" id="tabContent"></div>
+    </main>
+
+    <script src="config.js"></script>
+    <script type="module">
+      import { loadHeader, initTopbar, requireAuth, setNotice } from "./js/app.js";
+      import { getUserPosts, getSavedPosts, getLikedPosts } from "./js/post.js";
+      import { isConnected, buildSpotifyAuthorizeUrl, clearTokens } from "./js/spotify.js";
+      import { renderPostCard, avatarLetter, escHtml } from "./js/ui.js";
+
+      await loadHeader();
+      initTopbar();
+      const user = await requireAuth();
+
+      // 프로필 채우기
+      const name = user.displayName || user.email.split("@")[0];
+      document.querySelector("#profileAvatar").textContent = avatarLetter(name);
+      document.querySelector("#profileName").textContent = name;
+      document.querySelector("#profileEmail").textContent = user.email;
+
+      // Spotify 상태
+      const btnSpotify = document.querySelector("#btnSpotify");
+      const status = document.querySelector("#spotifyStatus");
+      function updateSpotifyUI() {
+        if (isConnected()) {
+          btnSpotify.textContent = "Spotify 연결 해제";
+          btnSpotify.classList.remove("spotify");
+          btnSpotify.classList.add("btn-danger");
+          status.textContent = "✓ Spotify 연결됨 — 트랙을 원클릭으로 플레이리스트에 추가할 수 있습니다.";
+        } else {
+          btnSpotify.textContent = "Spotify 연결";
+          btnSpotify.classList.add("spotify");
+          btnSpotify.classList.remove("btn-danger");
+          status.textContent = "Spotify를 연결하면 추천 트랙을 내 플레이리스트에 바로 추가할 수 있습니다.";
+        }
+      }
+      updateSpotifyUI();
+
+      btnSpotify.addEventListener("click", async () => {
+        if (isConnected()) {
+          if (!confirm("Spotify 연결을 해제할까요?")) return;
+          clearTokens();
+          updateSpotifyUI();
+        } else {
+          const url = await buildSpotifyAuthorizeUrl({ state: "mypage" });
+          window.location.href = url;
+        }
+      });
+
+      // 탭
+      let currentTab = "my";
+      const cache = {};
+
+      async function loadTab(tab) {
+        const content = document.querySelector("#tabContent");
+        content.innerHTML = '<div class="skeleton" style="height:120px"></div>';
+        try {
+          if (!cache[tab]) {
+            if (tab === "my") cache[tab] = await getUserPosts(user.uid);
+            else if (tab === "saved") cache[tab] = await getSavedPosts(user.uid);
+            else cache[tab] = await getLikedPosts(user.uid);
+          }
+          const posts = cache[tab];
+          content.innerHTML = posts.length
+            ? posts.map(renderPostCard).join("")
+            : '<div class="card empty-state">게시글이 없습니다.</div>';
+        } catch (err) {
+          content.innerHTML = `<div class="card empty-state">${err.message}</div>`;
+        }
+      }
+
+      document.querySelector(".tabs")?.addEventListener("click", (e) => {
+        const btn = e.target.closest(".tab-btn");
+        if (!btn) return;
+        document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentTab = btn.dataset.tab;
+        loadTab(currentTab);
+      });
+
+      await loadTab("my");
+    </script>
+  </body>
+</html>

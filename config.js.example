@@ -1,0 +1,29 @@
+// 1) 이 파일을 복사해서 config.js 로 이름을 바꾼 뒤 값을 채우세요.
+//    cp config.js.example config.js
+// 2) config.js 는 절대 커밋하지 마세요 (.gitignore 에 추가 권장)
+
+window.__CONFIG__ = {
+  // ── Firebase ────────────────────────────────────────────────────────────────
+  // Firebase Console → 프로젝트 설정 → 앱 추가(웹) 에서 복사
+  firebase: {
+    apiKey: "YOUR_FIREBASE_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID",
+  },
+
+  // ── Spotify ─────────────────────────────────────────────────────────────────
+  // Spotify Developer Dashboard → 앱 생성 → Client ID 복사
+  // Redirect URI 는 Dashboard 의 "Edit Settings → Redirect URIs" 에도 동일하게 추가해야 함
+  spotify: {
+    clientId: "YOUR_SPOTIFY_CLIENT_ID",
+
+    // 로컬 개발: python3 -m http.server 3000 으로 실행 시
+    redirectUri: "http://localhost:3000/index.html",
+
+    // GitHub Pages 배포 시 예시:
+    // redirectUri: "https://YOUR_USERNAME.github.io/YOUR_REPO/index.html",
+  },
+};
