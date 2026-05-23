@@ -4,6 +4,10 @@ import {
   onAuthStateChanged,
   signOut,
   sendPasswordResetEmail,
+  updatePassword,
+  deleteUser,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
 import {
   getFirestore,
@@ -16,6 +20,7 @@ import {
   getDocs,
   updateDoc,
   deleteDoc,
+  writeBatch,
   query,
   orderBy,
   limit,
@@ -40,9 +45,10 @@ export const db = getFirestore(app);
 
 export {
   onAuthStateChanged, signOut, sendPasswordResetEmail,
+  updatePassword, deleteUser, EmailAuthProvider, reauthenticateWithCredential,
   serverTimestamp,
   collection, doc, addDoc, setDoc,
-  getDoc, getDocs, updateDoc, deleteDoc,
+  getDoc, getDocs, updateDoc, deleteDoc, writeBatch,
   query, orderBy, limit, where,
   arrayUnion, arrayRemove, increment, onSnapshot,
 };

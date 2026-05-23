@@ -110,13 +110,16 @@
     <script src="config.js"></script>
     <script type="module">
       import { loadHeader, initTopbar, requireAuth, setNotice } from "./js/app.js";
-      import { createPost } from "./js/post.js";
+      import { createPost, updatePost, getPost } from "./js/post.js";
       import { searchTracksItunes } from "./js/spotify.js";
       import { escHtml, showToast } from "./js/ui.js";
 
       await loadHeader();
       initTopbar();
       await requireAuth();
+
+      // 수정 모드: write.html#postId 형식으로 접근
+      const editId = window.location.hash.slice(1) || null;
 
       // iTunes API 사용 — Spotify 연결 불필요
       document.querySelector("#spotifyHint").hidden = true;
@@ -284,22 +287,57 @@
           const title = titleInput.value.trim();
           if (!title) throw new Error("제목을 입력해주세요.");
 
-          const id = await createPost({
-            title,
-            body: bodyInput.value,
-            genre: [...selectedGenres],
-            tags: [...selectedMoods],
-            tracks: selectedTracks,
-          });
-
-          showToast("게시글이 등록되었습니다! 🎵");
-          window.location.href = `post.html?id=${id}`;
+          let targetId;
+          if (editId) {
+            await updatePost(editId, {
+              title,
+              body: bodyInput.value,
+              genre: [...selectedGenres],
+              tags: [...selectedMoods],
+              tracks: selectedTracks,
+            });
+            targetId = editId;
+            showToast("수정되었습니다!");
+          } else {
+            targetId = await createPost({
+              title,
+              body: bodyInput.value,
+              genre: [...selectedGenres],
+              tags: [...selectedMoods],
+              tracks: selectedTracks,
+            });
+            showToast("게시글이 등록되었습니다! 🎵");
+          }
+          window.location.href = `post.html#${targetId}`;
         } catch (err) {
           setNotice("danger", err.message);
           btn.disabled = false;
-          btn.textContent = "게시하기";
+          btn.textContent = editId ? "수정하기" : "게시하기";
         }
       });
+
+      // ── 수정 모드 초기화 (변수/함수 선언 이후에 실행) ────────────────
+      if (editId) {
+        document.querySelector("h1.title").textContent = "글 수정";
+        document.querySelector("#btnSubmit").textContent = "수정하기";
+        try {
+          const post = await getPost(editId);
+          if (post) {
+            titleInput.value = post.title || "";
+            bodyInput.value  = post.body  || "";
+            titleCount.textContent = titleInput.value.length;
+            bodyCount.textContent  = bodyInput.value.length;
+            (post.genre || []).forEach((g) => setGenre(g, true));
+            (post.tags || []).forEach((m) => {
+              const chip = document.querySelector(`#moodSelector [data-mood="${m}"]`);
+              if (chip) { selectedMoods.add(m); chip.classList.add("selected"); }
+            });
+            selectedTracks.push(...(post.tracks || []));
+          }
+        } catch {
+          setNotice("danger", "게시글을 불러오지 못했습니다.");
+        }
+      }
 
       renderTrackList();
     </script>

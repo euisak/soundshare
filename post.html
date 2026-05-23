@@ -11,6 +11,12 @@
 
     <main class="container">
       <div id="notice" class="notice" hidden></div>
+      <button class="back-btn" onclick="history.length > 1 ? history.back() : location.href='index.html'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+        뒤로
+      </button>
       <div id="postArea"></div>
     </main>
 
@@ -19,8 +25,8 @@
     <script type="module">
       import { loadHeader, initTopbar, getUrlParam, setNotice } from "./js/app.js";
       import { auth, onAuthStateChanged } from "./js/firebase.js";
-      import { getPost, toggleLike, toggleSave, addComment, listenComments, deletePost } from "./js/post.js";
-      import { renderTrackCard, renderChips, renderComment, timeAgo, escHtml, avatarLetter, showToast } from "./js/ui.js";
+      import { getPost, toggleLike, addComment, listenComments, deletePost, incrementViewCount, updateComment, deleteComment } from "./js/post.js";
+      import { renderTrackCard, renderChips, renderComment, timeAgo, escHtml, avatarLetter, showToast, resolveAvatars } from "./js/ui.js";
 
       await loadHeader();
       initTopbar();
@@ -32,6 +38,7 @@
       }
 
       const post = await getPost(postId).catch((err) => { console.error("getPost error:", err, postId); return null; });
+      incrementViewCount(postId);
       if (!post) {
         document.querySelector("#postArea").innerHTML = '<div class="card empty-state">게시글을 찾을 수 없습니다.</div>';
         throw new Error("post not found");
@@ -46,16 +53,22 @@
 
       const isOwner = user && user.uid === post.authorId;
       const liked = user && (post.likedBy || []).includes(user.uid);
-      const saved = user && (post.savedBy || []).includes(user.uid);
 
       document.querySelector("#postArea").innerHTML = `
         <article class="card post-card" style="margin-bottom:16px">
           <div class="post-meta">
-            <span class="post-author-avatar">${avatarLetter(post.authorName)}</span>
+            <span class="post-author-avatar" data-uid="${escHtml(post.authorId)}">${avatarLetter(post.authorName)}</span>
             <span>${escHtml(post.authorName)}</span>
             <span class="muted">·</span>
             <span class="muted">${timeAgo(post.createdAt)}</span>
-            ${isOwner ? `<button class="btn btn-danger" id="btnDelete" style="margin-left:auto;padding:5px 10px;font-size:12px">삭제</button>` : ""}
+            ${isOwner ? `
+              <div class="post-list-more-wrap" style="margin-left:auto">
+                <button class="post-list-more-btn" id="btnPostMore" aria-label="게시글 메뉴">⋮</button>
+                <div class="post-list-dropdown" id="postMoreDropdown" hidden>
+                  <a class="post-list-dropdown-item" href="write.html#${post.id}">수정</a>
+                  <button class="post-list-dropdown-item danger" id="btnDelete">삭제</button>
+                </div>
+              </div>` : ""}
           </div>
           <h1 class="post-title" style="font-size:22px">${escHtml(post.title)}</h1>
           ${post.body ? `<p style="line-height:1.75;color:var(--muted);white-space:pre-wrap">${escHtml(post.body)}</p>` : ""}
@@ -69,12 +82,12 @@
               </svg>
               <span id="likeCount">${post.likeCount || 0}</span>
             </button>
-            <button class="action-btn ${saved ? "saved" : ""}" id="btnSave">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="${saved ? "currentColor" : "none"}" stroke="currentColor" stroke-width="2">
-                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+            <span class="action-btn" style="cursor:default;pointer-events:none">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
               </svg>
-              ${saved ? "저장됨" : "저장"}
-            </button>
+              ${(post.viewCount || 0) + 1}
+            </span>
           </div>
         </article>
 
@@ -89,6 +102,9 @@
             <button class="btn primary" type="submit">등록</button>
           </form>` : `<p class="muted small" style="margin-top:12px"><a href="login.html" style="color:var(--brand)">로그인</a>하면 댓글을 달 수 있습니다.</p>`}
         </section>`;
+
+      // 게시글 작성자 프로필 사진 로드
+      resolveAvatars(document.querySelector("#postArea"));
 
       // ── 오디오 미리듣기 ─────────────────────────────────────────────────────
       const audio = document.querySelector("#previewAudio");
@@ -125,20 +141,14 @@
         } finally { btn.disabled = false; }
       });
 
-      // ── 저장 ────────────────────────────────────────────────────────────────
-      document.querySelector("#btnSave")?.addEventListener("click", async () => {
-        if (!user) { showToast("로그인이 필요합니다.", "danger"); return; }
-        const btn = document.querySelector("#btnSave");
-        btn.disabled = true;
-        try {
-          const nowSaved = await toggleSave(postId);
-          btn.classList.toggle("saved", nowSaved);
-          btn.querySelector("svg").setAttribute("fill", nowSaved ? "currentColor" : "none");
-          btn.childNodes[btn.childNodes.length - 1].textContent = nowSaved ? "저장됨" : "저장";
-          showToast(nowSaved ? "저장되었습니다." : "저장이 해제되었습니다.");
-        } finally { btn.disabled = false; }
-      });
 
+
+      // ── 게시글 ⋮ 토글 ───────────────────────────────────────────────────────
+      document.querySelector("#btnPostMore")?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const dd = document.querySelector("#postMoreDropdown");
+        dd.hidden = !dd.hidden;
+      });
 
       // ── 삭제 ────────────────────────────────────────────────────────────────
       document.querySelector("#btnDelete")?.addEventListener("click", async () => {
@@ -155,11 +165,99 @@
       // ── 댓글 실시간 ─────────────────────────────────────────────────────────
       listenComments(postId, (comments) => {
         const list = document.querySelector("#commentList");
-        const cnt = document.querySelector("#commentCount");
+        const cnt  = document.querySelector("#commentCount");
         if (cnt) cnt.textContent = comments.length;
         list.innerHTML = comments.length
-          ? comments.map(renderComment).join("")
+          ? comments.map((c) => renderComment(c, user?.uid)).join("")
           : '<div class="muted small">아직 댓글이 없습니다.</div>';
+        resolveAvatars(list); // 댓글 작성자 프로필 사진 로드
+      });
+
+      // ── 댓글 ⋮ / 수정 / 삭제 ────────────────────────────────────────────────
+      document.querySelector("#commentList").addEventListener("click", async (e) => {
+
+        // ⋮ 토글
+        const moreBtn = e.target.closest(".comment-more-btn");
+        if (moreBtn) {
+          e.stopPropagation();
+          const cid = moreBtn.dataset.commentId;
+          const dd  = document.querySelector(`.post-list-dropdown[data-comment-id="${cid}"]`);
+          document.querySelectorAll(".post-list-dropdown:not([hidden])").forEach((d) => { if (d !== dd) d.hidden = true; });
+          dd.hidden = !dd.hidden;
+          return;
+        }
+
+        // 수정 폼 열기
+        const editBtn = e.target.closest("[data-action='edit-comment']");
+        if (editBtn) {
+          const cid     = editBtn.dataset.commentId;
+          const item    = document.querySelector(`.comment-item[data-id="${cid}"]`);
+          const textEl  = item.querySelector(".comment-text");
+          const origTxt = textEl.dataset.text;
+          document.querySelectorAll(".post-list-dropdown:not([hidden])").forEach((d) => d.hidden = true);
+          textEl.innerHTML = `
+            <textarea class="input" style="width:100%;min-height:64px;resize:vertical;font-size:13px;padding:8px 10px">${escHtml(origTxt)}</textarea>
+            <div style="display:flex;gap:6px;margin-top:8px">
+              <button class="btn primary" data-action="save-comment-post"
+                      data-comment-id="${escHtml(cid)}"
+                      style="font-size:12px;padding:5px 12px">저장</button>
+              <button class="btn" data-action="cancel-edit-comment-post"
+                      data-comment-id="${escHtml(cid)}"
+                      style="font-size:12px;padding:5px 12px">취소</button>
+            </div>`;
+          textEl.querySelector("textarea").focus();
+          return;
+        }
+
+        // 수정 저장
+        const saveBtn = e.target.closest("[data-action='save-comment-post']");
+        if (saveBtn) {
+          const cid     = saveBtn.dataset.commentId;
+          const item    = document.querySelector(`.comment-item[data-id="${cid}"]`);
+          const textEl  = item.querySelector(".comment-text");
+          const newText = textEl.querySelector("textarea").value.trim();
+          if (!newText) { showToast("내용을 입력해주세요.", "danger"); return; }
+          saveBtn.disabled = true;
+          saveBtn.textContent = "저장 중…";
+          try {
+            await updateComment(postId, cid, newText);
+            // listenComments 가 자동으로 DOM 갱신
+          } catch (err) {
+            showToast(err.message, "danger");
+            saveBtn.disabled = false;
+            saveBtn.textContent = "저장";
+          }
+          return;
+        }
+
+        // 수정 취소
+        const cancelBtn = e.target.closest("[data-action='cancel-edit-comment-post']");
+        if (cancelBtn) {
+          const cid    = cancelBtn.dataset.commentId;
+          const item   = document.querySelector(`.comment-item[data-id="${cid}"]`);
+          const textEl = item.querySelector(".comment-text");
+          textEl.innerHTML = escHtml(textEl.dataset.text);
+          return;
+        }
+
+        // 삭제
+        const delBtn = e.target.closest("[data-action='delete-comment']");
+        if (delBtn) {
+          if (!confirm("댓글을 삭제할까요?")) return;
+          const cid = delBtn.dataset.commentId;
+          try {
+            await deleteComment(postId, cid);
+            // listenComments 가 자동으로 DOM 갱신
+          } catch (err) {
+            showToast(err.message, "danger");
+          }
+          return;
+        }
+      });
+
+      // ⋮ 외부 클릭 시 닫기
+      document.addEventListener("click", () => {
+        document.querySelectorAll(".post-list-dropdown:not([hidden])").forEach((d) => d.hidden = true);
       });
 
       document.querySelector("#formComment")?.addEventListener("submit", async (e) => {
