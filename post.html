@@ -11,7 +11,7 @@
 
     <main class="container">
       <div id="notice" class="notice" hidden></div>
-      <button class="back-btn" onclick="history.length > 1 ? history.back() : location.href='index.html'">
+      <button class="back-btn" id="btnBack">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="M19 12H5M12 5l-7 7 7 7"/>
         </svg>
@@ -30,6 +30,19 @@
 
       await loadHeader();
       initTopbar();
+
+      // ── 뒤로가기 ─────────────────────────────────────────────────────────────
+      // ?edited=1 이면 수정 후 진입 → write 페이지 + 구 상세 페이지 모두 건너뜀
+      const fromEdit = new URLSearchParams(location.search).has("edited");
+      document.querySelector("#btnBack").addEventListener("click", () => {
+        if (fromEdit) {
+          // history 스택: ...이전페이지 → 구상세 → 수정된상세(현재)
+          // go(-2) 로 구상세도 건너뛰고 목록/마이페이지로 복귀
+          history.length > 2 ? history.go(-2) : location.replace("index.html");
+        } else {
+          history.length > 1 ? history.back() : location.replace("index.html");
+        }
+      });
 
       const postId = getUrlParam("id") || window.location.hash.slice(1);
       if (!postId) {
@@ -57,38 +70,45 @@
       document.querySelector("#postArea").innerHTML = `
         <article class="card post-card" style="margin-bottom:16px">
           <div class="post-meta">
-            <span class="post-author-avatar" data-uid="${escHtml(post.authorId)}">${avatarLetter(post.authorName)}</span>
-            <span>${escHtml(post.authorName)}</span>
+            ${post.authorId
+              ? `<a class="post-author-link" href="profile.html#${escHtml(post.authorId)}">
+                   <span class="post-author-avatar" data-uid="${escHtml(post.authorId)}">${avatarLetter(post.authorName)}</span>
+                   <span>${escHtml(post.authorName)}</span>
+                 </a>`
+              : `<span class="post-author-link" style="cursor:default">
+                   <span class="post-author-avatar">${avatarLetter(post.authorName)}</span>
+                   <span>${escHtml(post.authorName)}</span>
+                 </span>`}
             <span class="muted">·</span>
             <span class="muted">${timeAgo(post.createdAt)}</span>
-            ${isOwner ? `
-              <div class="post-list-more-wrap" style="margin-left:auto">
-                <button class="post-list-more-btn" id="btnPostMore" aria-label="게시글 메뉴">⋮</button>
-                <div class="post-list-dropdown" id="postMoreDropdown" hidden>
-                  <a class="post-list-dropdown-item" href="write.html#${post.id}">수정</a>
-                  <button class="post-list-dropdown-item danger" id="btnDelete">삭제</button>
-                </div>
-              </div>` : ""}
+            <div style="margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0">
+              <button class="action-btn ${liked ? "liked" : ""}" id="btnLike" style="font-size:12px;padding:3px 7px">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="${liked ? "currentColor" : "none"}" stroke="currentColor" stroke-width="2">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+                <span id="likeCount">${post.likeCount || 0}</span>
+              </button>
+              <span class="action-btn" style="cursor:default;pointer-events:none;font-size:12px;padding:3px 7px">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+                ${(post.viewCount || 0) + 1}
+              </span>
+              ${isOwner ? `
+                <div class="post-list-more-wrap">
+                  <button class="post-list-more-btn" id="btnPostMore" aria-label="게시글 메뉴">⋮</button>
+                  <div class="post-list-dropdown" id="postMoreDropdown" hidden>
+                    <a class="post-list-dropdown-item" href="write.html#${post.id}">수정</a>
+                    <button class="post-list-dropdown-item danger" id="btnDelete">삭제</button>
+                  </div>
+                </div>` : ""}
+            </div>
           </div>
           <h1 class="post-title" style="font-size:22px">${escHtml(post.title)}</h1>
-          ${post.body ? `<p style="line-height:1.75;color:var(--muted);white-space:pre-wrap">${escHtml(post.body)}</p>` : ""}
+          ${post.body ? `<p style="line-height:1.75;color:var(--muted);white-space:pre-wrap;overflow-wrap:break-word;word-break:break-word">${escHtml(post.body)}</p>` : ""}
           ${(post.tracks?.length ? post.tracks : post.track ? [post.track] : []).map((t) => renderTrackCard(t)).join("")}
           ${renderChips(post.genre)}${renderChips(post.tags, "tag")}
 
-          <div class="action-bar" style="margin-top:8px">
-            <button class="action-btn ${liked ? "liked" : ""}" id="btnLike">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="${liked ? "currentColor" : "none"}" stroke="currentColor" stroke-width="2">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-              </svg>
-              <span id="likeCount">${post.likeCount || 0}</span>
-            </button>
-            <span class="action-btn" style="cursor:default;pointer-events:none">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-              </svg>
-              ${(post.viewCount || 0) + 1}
-            </span>
-          </div>
         </article>
 
         <!-- 댓글 -->
@@ -97,9 +117,10 @@
           <div class="comment-list" id="commentList"><div class="muted small">댓글을 불러오는 중…</div></div>
 
           ${user ? `
-          <form id="formComment" style="display:flex;gap:8px;margin-top:14px">
-            <input class="input" id="commentInput" placeholder="댓글을 입력하세요…" style="flex:1" />
-            <button class="btn primary" type="submit">등록</button>
+          <form id="formComment" style="display:flex;gap:8px;margin-top:14px;align-items:flex-end">
+            <textarea class="input" id="commentInput" placeholder="댓글을 입력하세요… (Shift+Enter 줄바꿈)"
+              rows="1" style="flex:1;resize:none;overflow:hidden;line-height:1.5;padding-top:9px;padding-bottom:9px"></textarea>
+            <button class="btn primary" type="submit" style="flex-shrink:0">등록</button>
           </form>` : `<p class="muted small" style="margin-top:12px"><a href="login.html" style="color:var(--brand)">로그인</a>하면 댓글을 달 수 있습니다.</p>`}
         </section>`;
 
@@ -221,7 +242,9 @@
           saveBtn.textContent = "저장 중…";
           try {
             await updateComment(postId, cid, newText);
-            // listenComments 가 자동으로 DOM 갱신
+            // 저장 성공 시 DOM 즉시 복원 (listenComments 재렌더링 전 빈 화면 방지)
+            textEl.dataset.text = newText;
+            textEl.innerHTML = escHtml(newText);
           } catch (err) {
             showToast(err.message, "danger");
             saveBtn.disabled = false;
@@ -260,6 +283,20 @@
         document.querySelectorAll(".post-list-dropdown:not([hidden])").forEach((d) => d.hidden = true);
       });
 
+      // textarea 자동 높이 조절
+      document.querySelector("#commentInput")?.addEventListener("input", function () {
+        this.style.height = "auto";
+        this.style.height = this.scrollHeight + "px";
+      });
+
+      // Enter 제출 / Shift+Enter 줄바꿈
+      document.querySelector("#commentInput")?.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          document.querySelector("#formComment")?.requestSubmit();
+        }
+      });
+
       document.querySelector("#formComment")?.addEventListener("submit", async (e) => {
         e.preventDefault();
         const input = document.querySelector("#commentInput");
@@ -270,11 +307,18 @@
         try {
           await addComment(postId, text);
           input.value = "";
+          input.style.height = "auto"; // 높이 초기화
         } catch (err) {
           showToast(err.message, "danger");
         } finally {
           btn.disabled = false;
         }
+      });
+
+      // ── bfcache 복원 감지 ──────────────────────────────────────────────────
+      // 브라우저 뒤로/앞으로가기로 복원될 때 항상 최신 데이터로 재로딩
+      window.addEventListener("pageshow", (e) => {
+        if (e.persisted) location.reload();
       });
     </script>
   </body>

@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SoundShare — 프로필</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <script src="js/header-loader.js"></script>
+
+    <main class="container">
+      <div id="notice" class="notice" hidden></div>
+
+      <button class="back-btn" onclick="history.length > 1 ? history.back() : location.href='index.html'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+        뒤로
+      </button>
+
+      <!-- 프로필 카드 -->
+      <section class="card" style="margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+          <div id="profileAvatar" class="user-avatar-link"
+               style="width:56px;height:56px;font-size:22px;flex-shrink:0;pointer-events:none">?</div>
+          <div style="flex:1;min-width:0">
+            <div id="profileName" style="font-size:18px;font-weight:700;margin-bottom:2px">-</div>
+          </div>
+          <a class="btn" href="settings.html" id="btnSettings" hidden>설정</a>
+        </div>
+      </section>
+
+      <!-- 탭 -->
+      <div class="tabs" id="tabNav">
+        <button class="tab-btn active" data-tab="posts">작성한 글</button>
+        <button class="tab-btn" data-tab="comments">작성한 댓글</button>
+      </div>
+
+      <div id="tabContent"></div>
+    </main>
+
+    <script src="config.js"></script>
+    <script type="module">
+      import { loadHeader, initTopbar } from "./js/app.js";
+      import { auth, onAuthStateChanged, db, getDoc, doc } from "./js/firebase.js";
+      import { getUserPosts, getCommentedPosts } from "./js/post.js";
+      import { avatarLetter, timeAgo, escHtml } from "./js/ui.js";
+
+      await loadHeader();
+      initTopbar();
+
+      // ── URL 해시에서 uid 읽기 (서버가 ?query를 날리므로 #hash 사용) ──
+      const uid = window.location.hash.slice(1);
+      const tabContent = document.querySelector("#tabContent");
+
+      if (!uid || uid === "undefined" || uid === "null") {
+        // uid가 없으면 안내 메시지만 표시하고 종료 (throw 없이)
+        tabContent.innerHTML = '<div class="card empty-state">사용자를 찾을 수 없습니다.</div>';
+      } else {
+        // ── 이하 코드는 uid가 유효한 경우에만 실행 ──────────────────
+
+        // ── 현재 로그인 유저 확인 ───────────────────────────────────
+        const currentUser = await new Promise((resolve) => {
+          const unsub = onAuthStateChanged(auth, (u) => { unsub(); resolve(u); });
+        });
+        const isOwn = currentUser && currentUser.uid === uid;
+
+        // 본인 프로필이면 설정 버튼 표시
+        if (isOwn) document.querySelector("#btnSettings").hidden = false;
+
+        // ── Firestore 유저 문서 읽기 ──────────────────────────────
+        const userSnap = await getDoc(doc(db, "users", uid)).catch(() => null);
+        const userData       = userSnap?.exists() ? userSnap.data() : {};
+        const postsPublic    = userData.postsPublic    !== false; // 기본값 true
+        const commentsPublic = userData.commentsPublic !== false; // 기본값 true
+
+        // 닉네임: Firestore 문서 없으면 posts에서 authorName을 가져옴
+        let displayName = userData.nickname || userData.email?.split("@")[0] || "";
+        if (!displayName) {
+          const fallbackPosts = await getUserPosts(uid).catch(() => []);
+          displayName = fallbackPosts[0]?.authorName || "알 수 없음";
+        }
+
+        // ── 프로필 표시 ─────────────────────────────────────────────
+        document.title = `${displayName} — SoundShare`;
+        const avatarEl = document.querySelector("#profileAvatar");
+        avatarEl.textContent = avatarLetter(displayName);
+        if (userData.photoURL) {
+          avatarEl.innerHTML = `<img src="${userData.photoURL}" alt="프로필" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
+        }
+        document.querySelector("#profileName").textContent = displayName;
+
+        const PER_PAGE = 10;
+        const cache     = {};
+        const pageState = { posts: 1, comments: 1 };
+        let   activeTab = "posts";
+
+        // ── 게시글 아이템 렌더 ───────────────────────────────────────
+        function renderPostItem(post) {
+          const pid = escHtml(post.id);
+          return `
+          <div class="post-list-item">
+            <div class="post-list-header">
+              <a class="post-list-title-link" href="post.html#${pid}">${escHtml(post.title)}</a>
+              <span class="post-list-time">${timeAgo(post.createdAt)}</span>
+            </div>
+            ${post.body ? `<div class="post-list-body">${escHtml(post.body)}</div>` : ""}
+            <div class="post-list-footer">
+              <span>♥ ${post.likeCount || 0}</span>
+              <span>💬 ${post.commentCount || 0}</span>
+              <span>👁 ${post.viewCount || 0}</span>
+            </div>
+          </div>`;
+        }
+
+        // ── 댓글 아이템 렌더 ─────────────────────────────────────────
+        function renderCommentedItem({ post, comment }) {
+          const pid = escHtml(post.id);
+          return `
+          <div class="post-list-item">
+            <div class="post-list-header">
+              <a class="post-list-title-link" href="post.html#${pid}">${escHtml(post.title)}</a>
+              <span class="post-list-time">${timeAgo(post.createdAt)}</span>
+            </div>
+            <div class="post-list-comment-row">
+              <span class="post-list-comment-label">댓글</span>
+              <div class="post-list-comment-text" style="flex:1;min-width:0">${escHtml(comment.text)}</div>
+            </div>
+          </div>`;
+        }
+
+        // ── 페이지네이션 ───────────────────────────────────────────
+        function renderPagination(total, page, tab) {
+          const totalPages = Math.ceil(total / PER_PAGE);
+          if (totalPages <= 1) return "";
+          const prev = `<button class="page-btn" data-page="${page - 1}" data-tab="${tab}"${page === 1 ? " disabled" : ""}>‹</button>`;
+          const next = `<button class="page-btn" data-page="${page + 1}" data-tab="${tab}"${page === totalPages ? " disabled" : ""}>›</button>`;
+          let nums = "", prevN = 0;
+          for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || Math.abs(i - page) <= 2) {
+              if (prevN && i - prevN > 1) nums += `<span style="padding:0 4px;color:var(--muted)">…</span>`;
+              nums += `<button class="page-btn${i === page ? " active" : ""}" data-page="${i}" data-tab="${tab}">${i}</button>`;
+              prevN = i;
+            }
+          }
+          return `<div class="pagination">${prev}${nums}${next}</div>`;
+        }
+
+        // ── 탭 렌더 ─────────────────────────────────────────────────
+        function renderTab(tab) {
+          const data = cache[tab];
+          const page = pageState[tab];
+          if (!data || !data.length) {
+            tabContent.innerHTML = `<div class="card empty-state">${tab === "posts" ? "작성한 글이 없습니다." : "작성한 댓글이 없습니다."}</div>`;
+            return;
+          }
+          const slice = data.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+          const items = tab === "comments"
+            ? slice.map(renderCommentedItem).join("")
+            : slice.map(renderPostItem).join("");
+          tabContent.innerHTML = `<div class="post-list">${items}</div>${renderPagination(data.length, page, tab)}`;
+        }
+
+        // ── 탭 로드 ─────────────────────────────────────────────────
+        async function loadTab(tab) {
+          activeTab = tab;
+
+          // 비공개 탭: 즉시 메시지 표시
+          if (tab === "posts" && !postsPublic && !isOwn) {
+            tabContent.innerHTML = '<div class="card empty-state">비공개 처리된 게시글입니다.</div>';
+            return;
+          }
+          if (tab === "comments" && !commentsPublic && !isOwn) {
+            tabContent.innerHTML = '<div class="card empty-state">비공개 처리된 댓글입니다.</div>';
+            return;
+          }
+
+          tabContent.innerHTML = '<div class="skeleton" style="height:200px;border-radius:12px"></div>';
+          try {
+            if (!(tab in cache)) {
+              cache[tab] = tab === "posts"
+                ? await getUserPosts(uid)
+                : await getCommentedPosts(uid);
+            }
+            renderTab(tab);
+          } catch (err) {
+            tabContent.innerHTML = `<div class="card empty-state">${escHtml(err.message)}</div>`;
+          }
+        }
+
+        // ── 탭 전환 ─────────────────────────────────────────────────
+        document.querySelector("#tabNav").addEventListener("click", (e) => {
+          const btn = e.target.closest(".tab-btn");
+          if (!btn || btn.dataset.tab === activeTab) return;
+          document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          loadTab(btn.dataset.tab);
+        });
+
+        // ── 페이지네이션 클릭 ───────────────────────────────────────
+        tabContent.addEventListener("click", (e) => {
+          const pageBtn = e.target.closest(".page-btn[data-page]");
+          if (pageBtn && !pageBtn.disabled) {
+            const pg = Number(pageBtn.dataset.page);
+            if (pg) { pageState[pageBtn.dataset.tab] = pg; renderTab(activeTab); }
+            document.querySelector("#tabNav").scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        });
+
+        await loadTab("posts");
+
+        // bfcache 복원 시 캐시 초기화
+        window.addEventListener("pageshow", (e) => {
+          if (e.persisted) {
+            Object.keys(cache).forEach((k) => delete cache[k]);
+            loadTab(activeTab);
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

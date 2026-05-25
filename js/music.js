@@ -148,10 +148,9 @@ export async function spotifyFetch(path, { method = "GET", body } = {}) {
   return res.status === 204 ? null : res.json();
 }
 
-// ── Spotify API wrappers ──────────────────────────────────────────────────────
+// ── iTunes Search API (무료, 키 없음) ─────────────────────────────────────────
 
-// iTunes Search API (무료, 키 없음)
-export async function searchTracksItunes(q, limitN = 5) {
+export async function searchTracksItunes(q, limitN = 50) {
   const res = await fetch(
     `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=${limitN}&country=KR`
   );
@@ -166,6 +165,7 @@ export async function searchTracksItunes(q, limitN = 5) {
     previewUrl: t.previewUrl || null,
     appleMusicUrl: t.trackViewUrl || null,
     spotifySearchUrl: `https://open.spotify.com/search/${encodeURIComponent(t.trackName + " " + t.artistName)}`,
+    genreName: t.primaryGenreName || "",  // iTunes 원본 장르 (카드 표시용)
   }));
 }
 

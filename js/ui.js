@@ -90,34 +90,52 @@ export function renderChips(items, color = "default") {
 }
 
 export function renderPostCard(post) {
-  // tracks 배열 또는 구버전 track 단일 모두 지원
+  // 첫 번째 트랙 썸네일 (없으면 ♪ 플레이스홀더)
   const trackList = post.tracks?.length ? post.tracks : (post.track ? [post.track] : []);
-  const track = trackList.length ? trackList.map((t) => renderTrackCard(t, { compact: true })).join("") : "";
-  const genres = renderChips(post.genre);
-  const tags = renderChips(post.tags, "tag");
+  const firstTrack = trackList[0] || null;
+  const thumbHtml = firstTrack?.albumArt
+    ? `<img src="${escHtml(firstTrack.albumArt)}" alt="" />`
+    : `<span style="font-size:22px;opacity:.45">♪</span>`;
+
+  // 감성 태그 우선, 없으면 장르 태그 — 최대 2개, 단일 행
+  const moodTags = post.tags || [];
+  const genreTags = post.genre || [];
+  const displayTags = moodTags.length ? moodTags : genreTags;
+  const tagsHtml = displayTags.length
+    ? `<div class="feed-tags">${displayTags.slice(0, 2).map((t) =>
+        `<span class="chip" style="font-size:11px;padding:2px 8px;line-height:1.3">${escHtml(t)}</span>`
+      ).join("")}</div>`
+    : "";
+
   return `
-  <a class="card post-card" href="post.html#${escHtml(post.id)}" data-id="${escHtml(post.id)}">
-    <div class="post-meta">
-      <span class="post-author-avatar" data-uid="${escHtml(post.authorId)}">${avatarLetter(post.authorName)}</span>
-      <span>${escHtml(post.authorName)}</span>
-      <span class="muted">·</span>
-      <span class="muted">${timeAgo(post.createdAt)}</span>
-    </div>
-    <h2 class="post-title">${escHtml(post.title)}</h2>
-    ${post.body ? `<p class="post-body">${escHtml(post.body)}</p>` : ""}
-    ${track}
-    ${genres}${tags}
-    <div class="post-footer">
-      <div class="action-bar">
-        <span class="action-btn like-count">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-          ${post.likeCount || 0}
-        </span>
-        <span class="action-btn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          ${post.commentCount || 0}
-        </span>
+  <a class="card feed-card" href="post.html#${escHtml(post.id)}" data-id="${escHtml(post.id)}">
+    <div class="feed-thumb">${thumbHtml}</div>
+    <div class="feed-content">
+      <div class="post-meta" style="font-size:12px">
+        ${post.authorId
+          ? `<button class="post-author-link" type="button" onclick="event.stopPropagation();window.location.href='profile.html#${escHtml(post.authorId)}'">
+               <span class="post-author-avatar" data-uid="${escHtml(post.authorId)}" style="width:18px;height:18px;font-size:8px">${avatarLetter(post.authorName)}</span>
+               <span>${escHtml(post.authorName)}</span>
+             </button>`
+          : `<span class="post-author-link" style="cursor:default">
+               <span class="post-author-avatar" style="width:18px;height:18px;font-size:8px">${avatarLetter(post.authorName)}</span>
+               <span>${escHtml(post.authorName)}</span>
+             </span>`}
+        <span class="muted">·</span>
+        <span class="muted">${timeAgo(post.createdAt)}</span>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:5px;flex-shrink:0">
+          <span class="action-btn like-count" style="font-size:11px;padding:2px 5px;gap:3px">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            ${post.likeCount || 0}
+          </span>
+          <span class="action-btn" style="font-size:11px;padding:2px 5px;gap:3px">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            ${post.commentCount || 0}
+          </span>
+        </div>
       </div>
+      <h2 class="post-title feed-title">${escHtml(post.title)}</h2>
+      ${tagsHtml}
     </div>
   </a>`;
 }
@@ -139,8 +157,15 @@ export function renderComment(c, currentUid = null) {
   return `
   <div class="comment-item" data-id="${escHtml(c.id)}">
     <div class="comment-header">
-      <span class="post-author-avatar" data-uid="${escHtml(c.authorId)}" style="width:20px;height:20px;font-size:9px">${avatarLetter(c.authorName)}</span>
-      <strong>${escHtml(c.authorName)}</strong>
+      ${c.authorId
+        ? `<a class="post-author-link" href="profile.html#${escHtml(c.authorId)}">
+             <span class="post-author-avatar" data-uid="${escHtml(c.authorId)}" style="width:20px;height:20px;font-size:9px">${avatarLetter(c.authorName)}</span>
+             <strong>${escHtml(c.authorName)}</strong>
+           </a>`
+        : `<span class="post-author-link" style="cursor:default">
+             <span class="post-author-avatar" style="width:20px;height:20px;font-size:9px">${avatarLetter(c.authorName)}</span>
+             <strong>${escHtml(c.authorName)}</strong>
+           </span>`}
       <span class="muted small">${timeAgo(c.createdAt)}</span>
       ${moreMenu}
     </div>

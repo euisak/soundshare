@@ -47,42 +47,36 @@ export async function incrementViewCount(postId) {
   } catch { /* 조용히 무시 */ }
 }
 
-export async function getPosts({ genre, tag, limitN = 20 } = {}) {
-  let q;
-  if (genre) {
-    q = query(
-      collection(db, "posts"),
-      where("genre", "array-contains", genre),
-      orderBy("createdAt", "desc"),
-      limit(limitN)
-    );
-  } else if (tag) {
-    q = query(
-      collection(db, "posts"),
-      where("tags", "array-contains", tag),
-      orderBy("createdAt", "desc"),
-      limit(limitN)
-    );
-  } else {
-    q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(limitN));
-  }
+export async function getPosts({ sort = "recent", limitN = 50 } = {}) {
+  const q = sort === "popular"
+    ? query(collection(db, "posts"), orderBy("likeCount", "desc"), limit(limitN))
+    : query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(limitN));
   const snap = await getDocs(q);
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
-export async function searchPosts(keyword) {
-  // Firestore는 full-text search 미지원 — 제목 prefix 검색 (대소문자 구분)
-  const q = query(collection(db, "posts"), orderBy("title"), limit(50));
+export async function searchPosts(keyword, fields = ["title", "artist", "song"]) {
+  // Firestore full-text search 미지원 → 최신 200개 클라이언트 필터링
+  const q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(200));
   const snap = await getDocs(q);
-  const kw = keyword.toLowerCase();
+
+  // 소문자 + 공백 제거로 정규화 (대소문자·띄어쓰기 무관하게 비교)
+  const normalize = (str) => (str || "").toLowerCase().replace(/\s+/g, "");
+  const kw = normalize(keyword);
+  if (!kw) return [];
+
   return snap.docs
     .map((d) => ({ id: d.id, ...d.data() }))
-    .filter((p) =>
-      p.title?.toLowerCase().includes(kw) ||
-      p.tags?.some((t) => t.toLowerCase().includes(kw)) ||
-      p.genre?.some((g) => g.toLowerCase().includes(kw)) ||
-      p.authorName?.toLowerCase().includes(kw)
-    );
+    .filter((p) => {
+      if (fields.includes("title") && normalize(p.title).includes(kw)) return true;
+      const tracks = p.tracks?.length ? p.tracks : (p.track ? [p.track] : []);
+      if (tracks.some((t) => {
+        if (fields.includes("song")   && normalize(t.name).includes(kw))   return true;
+        if (fields.includes("artist") && normalize(t.artist).includes(kw)) return true;
+        return false;
+      })) return true;
+      return false;
+    });
 }
 
 export async function getPost(id) {

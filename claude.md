@@ -7,7 +7,7 @@ Spotify 사용자들이 노래/플레이리스트를 추천하고 공유하는 �
 ## 기술 스택
 - 프론트엔드: HTML5 + CSS3 + Vanilla JS
 - 인증/DB: Firebase Authentication + Firestore
-- 음악 API: Spotify Web API (OAuth 2.0 PKCE)
+- 음악 API: iTunes Search API (무료, 인증 불필요)
 - 호스팅: GitHub Pages / Firebase Hosting
 
 ## 페이지 구조
@@ -39,7 +39,7 @@ SoundShare/
 └── js/
     ├── firebase.js
     ├── auth.js
-    ├── spotify.js
+    ├── music.js
     ├── post.js
     ├── notify.js
     ├── ui.js
@@ -49,7 +49,7 @@ SoundShare/
 ## JS 파일 역할
 - js/firebase.js: Firebase 초기화 및 Firestore/Auth 함수 export
 - js/auth.js: 회원가입, 로그인, 비밀번호 찾기
-- js/spotify.js: Spotify OAuth (PKCE), 노래 검색, 플레이리스트 추가, Embed
+- js/music.js: iTunes Search API 기반 노래 검색 (장르 자동 태그 포함)
 - js/post.js: 게시글 CRUD, 좋아요, 댓글
 - js/notify.js: 알림 Firestore 실시간 리스너
 - js/ui.js: 공통 UI (토스트, 모달, 드롭다운)
@@ -59,7 +59,7 @@ SoundShare/
 ## 주요 기능
 - 노래/플레이리스트 검색 (장르, 제목 필터 — index.html 내 라디오 버튼)
 - 게시글 작성/수정 (트랙 첨부, 장르 태그, 감성 태그)
-- 원클릭 Spotify 플레이리스트 추가
+- Apple Music / Spotify 링크 제공 (트랙 카드)
 - 좋아요/저장/댓글
 - 본인 게시글: 수정(write.html?id=) / 삭제 버튼 노출
 - 본인 댓글: ··· 버튼으로 수정/삭제
@@ -76,4 +76,4 @@ SoundShare/
 - 공통 헤더는 components/header.html — js/header-loader.js로 fetch include
 - CSS는 style.css 단일 파일
 - 비동기 처리는 async/await 사용
-- Spotify 인증은 Authorization Code + PKCE (Implicit Grant 사용 금지)
+- 음악 검색은 iTunes Search API 사용 (js/music.js)

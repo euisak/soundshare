@@ -64,22 +64,13 @@
             </div>
           </div>
 
-          <!-- 장르 태그 (Spotify 자동 + 수동 선택) -->
+          <!-- 장르 태그 (노래 선택 시 자동 설정) -->
           <div>
-            <label style="margin:0 0 6px">장르 태그
-              <span class="muted small" id="genreAutoHint" hidden>— 노래 선택 시 자동 태그됩니다</span>
+            <label style="margin:0 0 8px;display:block">장르 태그
+              <span class="muted small">— 곡 선택 시 자동으로 설정됩니다</span>
             </label>
             <div class="genre-selector" id="genreSelector">
-              <span class="genre-chip" data-genre="k-pop">K-Pop</span>
-              <span class="genre-chip" data-genre="pop">Pop</span>
-              <span class="genre-chip" data-genre="indie">Indie</span>
-              <span class="genre-chip" data-genre="hip-hop">Hip-Hop</span>
-              <span class="genre-chip" data-genre="r&b">R&amp;B</span>
-              <span class="genre-chip" data-genre="jazz">Jazz</span>
-              <span class="genre-chip" data-genre="rock">Rock</span>
-              <span class="genre-chip" data-genre="electronic">Electronic</span>
-              <span class="genre-chip" data-genre="classical">Classical</span>
-              <span class="genre-chip" data-genre="lo-fi">Lo-Fi</span>
+              <span class="muted small">곡을 선택하면 자동으로 설정됩니다</span>
             </div>
           </div>
 
@@ -87,18 +78,13 @@
           <div>
             <label style="margin:0 0 6px">감성 / 상황 태그</label>
             <div class="genre-selector" id="moodSelector">
-              <span class="genre-chip" data-mood="드라이브">🚗 드라이브</span>
               <span class="genre-chip" data-mood="운동">💪 운동</span>
+              <span class="genre-chip" data-mood="산책">🚶 산책</span>
+              <span class="genre-chip" data-mood="드라이브">🚗 드라이브</span>
               <span class="genre-chip" data-mood="공부·집중">📚 공부·집중</span>
               <span class="genre-chip" data-mood="수면·휴식">😴 수면·휴식</span>
               <span class="genre-chip" data-mood="힐링">🌿 힐링</span>
               <span class="genre-chip" data-mood="새벽감성">🌙 새벽감성</span>
-              <span class="genre-chip" data-mood="파티">🎉 파티</span>
-              <span class="genre-chip" data-mood="데이트">💕 데이트</span>
-              <span class="genre-chip" data-mood="비오는날">🌧 비오는날</span>
-              <span class="genre-chip" data-mood="산책">🚶 산책</span>
-              <span class="genre-chip" data-mood="요리">👨‍🍳 요리</span>
-              <span class="genre-chip" data-mood="독서">📖 독서</span>
             </div>
           </div>
 
@@ -111,7 +97,7 @@
     <script type="module">
       import { loadHeader, initTopbar, requireAuth, setNotice } from "./js/app.js";
       import { createPost, updatePost, getPost } from "./js/post.js";
-      import { searchTracksItunes } from "./js/spotify.js";
+      import { searchTracksItunes } from "./js/music.js";
       import { escHtml, showToast } from "./js/ui.js";
 
       await loadHeader();
@@ -137,42 +123,27 @@
         bodyCount.textContent = bodyInput.value.length;
       });
 
-      // ── 장르 선택 (수동 + 자동) ──────────────────────────────────────────────
+      // ── 장르 (트랙 genreName 기반 자동 설정) ───────────────────────────────────
       const selectedGenres = new Set();
+      const genreSelector  = document.querySelector("#genreSelector");
 
-      function setGenre(genre, on) {
-        const chip = document.querySelector(`#genreSelector [data-genre="${genre}"]`);
-        if (!chip) return;
-        if (on) { selectedGenres.add(genre); chip.classList.add("selected"); }
-        else     { selectedGenres.delete(genre); chip.classList.remove("selected"); }
+      function renderGenreChips() {
+        if (selectedGenres.size === 0) {
+          genreSelector.innerHTML = '<span class="muted small">곡을 선택하면 자동으로 설정됩니다</span>';
+        } else {
+          genreSelector.innerHTML = [...selectedGenres]
+            .map((g) => `<span class="genre-chip selected" style="pointer-events:none;cursor:default">${escHtml(g)}</span>`)
+            .join("");
+        }
       }
 
-      document.querySelector("#genreSelector").addEventListener("click", (e) => {
-        const chip = e.target.closest(".genre-chip");
-        if (!chip) return;
-        const g = chip.dataset.genre;
-        setGenre(g, !selectedGenres.has(g));
-      });
-
-      // Spotify 장르 → 우리 카테고리 매핑
-      const GENRE_MAP = {
-        "k-pop":       ["k-pop", "korean pop", "k pop", "kpop"],
-        "pop":         ["pop", "dance pop", "electropop", "teen pop", "synth-pop"],
-        "indie":       ["indie", "south korean indie", "korean indie", "indie pop"],
-        "hip-hop":     ["hip-hop", "hip hop", "rap", "trap", "korean hip hop"],
-        "r&b":         ["r&b", "r & b", "soul", "neo soul", "urban contemporary"],
-        "jazz":        ["jazz", "smooth jazz", "vocal jazz", "bebop"],
-        "rock":        ["rock", "alternative rock", "hard rock", "punk", "metal"],
-        "electronic":  ["electronic", "edm", "house", "techno", "dance", "electronica"],
-        "classical":   ["classical", "orchestra", "chamber music", "piano"],
-        "lo-fi":       ["lo-fi", "lofi", "chillhop", "lo fi"],
-      };
-
-      function mapGenres(spotifyGenres) {
-        const lower = spotifyGenres.map((g) => g.toLowerCase());
-        return Object.entries(GENRE_MAP)
-          .filter(([, keywords]) => lower.some((g) => keywords.some((k) => g.includes(k))))
-          .map(([genre]) => genre);
+      // 선택된 트랙의 genreName(iTunes 원본)을 중복 없이 모아 칩으로 표시
+      function updateAutoGenres() {
+        selectedGenres.clear();
+        selectedTracks.forEach((t) => {
+          if (t.genreName) selectedGenres.add(t.genreName);
+        });
+        renderGenreChips();
       }
 
       // ── 감성/상황 태그 ────────────────────────────────────────────────────────
@@ -217,6 +188,7 @@
         if (!btn) return;
         selectedTracks.splice(Number(btn.dataset.remove), 1);
         renderTrackList();
+        updateAutoGenres(); // 트랙 제거 시 장르 재계산
       });
 
       // ── 트랙 검색 ─────────────────────────────────────────────────────────────
@@ -267,8 +239,7 @@
         dropdown.hidden = true;
         searchInput.value = "";
         renderTrackList();
-
-        // iTunes API 사용 — 장르 자동 태그 없음 (수동 선택)
+        updateAutoGenres(); // 트랙 추가 시 장르 자동 업데이트
       });
 
       document.addEventListener("click", (e) => {
@@ -308,7 +279,8 @@
             });
             showToast("게시글이 등록되었습니다! 🎵");
           }
-          window.location.href = `post.html#${targetId}`;
+          // replace로 write 페이지 히스토리 교체 + edited=1로 구 상세 건너뜀 신호
+          window.location.replace(`post.html?edited=1#${targetId}`);
         } catch (err) {
           setNotice("danger", err.message);
           btn.disabled = false;
@@ -327,12 +299,18 @@
             bodyInput.value  = post.body  || "";
             titleCount.textContent = titleInput.value.length;
             bodyCount.textContent  = bodyInput.value.length;
-            (post.genre || []).forEach((g) => setGenre(g, true));
             (post.tags || []).forEach((m) => {
               const chip = document.querySelector(`#moodSelector [data-mood="${m}"]`);
               if (chip) { selectedMoods.add(m); chip.classList.add("selected"); }
             });
             selectedTracks.push(...(post.tracks || []));
+            // 트랙에 genreName 있으면 자동 재계산, 없으면 저장된 장르를 그대로 표시
+            if (selectedTracks.some((t) => t.genreName)) {
+              updateAutoGenres();
+            } else {
+              (post.genre || []).forEach((g) => selectedGenres.add(g));
+              renderGenreChips();
+            }
           }
         } catch {
           setNotice("danger", "게시글을 불러오지 못했습니다.");

@@ -14,9 +14,21 @@
 
       <div style="margin-bottom:16px">
         <form id="formSearch" style="display:flex;gap:8px">
-          <input id="searchInput" class="input" type="search" placeholder="노래, 아티스트, 태그, 장르 검색…" style="flex:1" />
+          <input id="searchInput" class="input" type="search"
+            placeholder="게시글 제목, 가수, 노래 제목 검색…" style="flex:1" />
           <button class="btn primary" type="submit">검색</button>
         </form>
+
+        <!-- 검색 조건 필터 (검색 결과 표시 시) -->
+        <div id="searchFieldWrap" hidden>
+          <div class="chips" id="searchFieldChips" style="margin-top:8px;gap:6px;align-items:center">
+            <span class="muted small" style="white-space:nowrap">검색 조건</span>
+            <button class="chip active" data-field="title" type="button">게시글 제목</button>
+            <button class="chip active" data-field="artist" type="button">가수</button>
+            <button class="chip active" data-field="song" type="button">노래 제목</button>
+          </div>
+        </div>
+
         <div id="searchMeta" class="muted small" style="margin-top:8px"></div>
       </div>
 
@@ -27,19 +39,65 @@
     <script type="module">
       import { loadHeader, initTopbar } from "./js/app.js";
       import { searchPosts } from "./js/post.js";
-      import { renderPostCard, escHtml } from "./js/ui.js";
+      import { renderPostCard, resolveAvatars, escHtml } from "./js/ui.js";
 
       await loadHeader();
       initTopbar();
 
-      const input = document.querySelector("#searchInput");
-      const meta = document.querySelector("#searchMeta");
+      const input   = document.querySelector("#searchInput");
+      const meta    = document.querySelector("#searchMeta");
       const results = document.querySelector("#results");
 
-      // URL 파라미터에서 초기 키워드 읽기 (헤더 검색바 연동)
-      const q = new URLSearchParams(window.location.search).get("q") || "";
-      if (q) { input.value = q; await doSearch(q); }
+      // ── 선택된 검색 조건 가져오기 ──────────────────────────────────────
+      function getSearchFields() {
+        return [...document.querySelectorAll("#searchFieldChips .chip.active")]
+          .map((c) => c.dataset.field).filter(Boolean);
+      }
 
+      // ── 검색 실행 ─────────────────────────────────────────────────────
+      async function doSearch(kw) {
+        const fields = getSearchFields();
+        document.querySelector("#searchFieldWrap").hidden = false;
+        results.innerHTML = Array(3).fill('<div class="skeleton feed-skeleton"></div>').join("");
+        meta.textContent = "";
+        try {
+          const posts = await searchPosts(kw, fields);
+          meta.textContent = `"${kw}" 검색 결과 ${posts.length}건`;
+          if (!posts.length) {
+            results.innerHTML = `<div class="card empty-state">"${escHtml(kw)}"에 대한 결과가 없습니다.</div>`;
+            return;
+          }
+          results.innerHTML = posts.map(renderPostCard).join("");
+          resolveAvatars(results);
+        } catch (err) {
+          results.innerHTML = `<div class="card empty-state">${err.message}</div>`;
+        }
+      }
+
+      // ── 검색 조건 칩 토글 ─────────────────────────────────────────────
+      document.querySelector("#searchFieldChips")?.addEventListener("click", async (e) => {
+        const chip = e.target.closest("[data-field]");
+        if (!chip) return;
+        const active = document.querySelectorAll("#searchFieldChips .chip.active");
+        // 마지막 하나는 해제 불가
+        if (chip.classList.contains("active") && active.length <= 1) return;
+        chip.classList.toggle("active");
+        // 현재 검색어가 있으면 즉시 재검색
+        const kw = input.value.trim();
+        if (kw) await doSearch(kw);
+      });
+
+      // ── 헤더 검색창 (search.html 위에서 검색 시 in-place 실행) ──────────
+      document.querySelector(".header-search")?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const kw = (e.currentTarget.querySelector(".search-input")?.value || "").trim();
+        if (!kw) return;
+        input.value = kw;
+        history.replaceState({}, "", `?q=${encodeURIComponent(kw)}`);
+        await doSearch(kw);
+      });
+
+      // ── 페이지 내 검색창 ────────────────────────────────────────────
       document.querySelector("#formSearch")?.addEventListener("submit", async (e) => {
         e.preventDefault();
         const kw = input.value.trim();
@@ -48,19 +106,9 @@
         await doSearch(kw);
       });
 
-      async function doSearch(kw) {
-        results.innerHTML = '<div class="skeleton" style="height:120px"></div>';
-        meta.textContent = "";
-        try {
-          const posts = await searchPosts(kw);
-          meta.textContent = `"${kw}" 검색 결과 ${posts.length}건`;
-          results.innerHTML = posts.length
-            ? posts.map(renderPostCard).join("")
-            : `<div class="card empty-state">"${escHtml(kw)}"에 대한 결과가 없습니다.</div>`;
-        } catch (err) {
-          results.innerHTML = `<div class="card empty-state">${err.message}</div>`;
-        }
-      }
+      // ── 다른 페이지 헤더 검색바에서 이동 시 URL ?q= 자동 검색 ──────────
+      const q = new URLSearchParams(window.location.search).get("q") || "";
+      if (q) { input.value = q; await doSearch(q); }
     </script>
   </body>
 </html>

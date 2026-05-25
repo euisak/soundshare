@@ -629,12 +629,86 @@ label {
   width: 100%; height: 100%; object-fit: cover;
   border-radius: 50%; display: block;
 }
-.post-title { font-size: 17px; font-weight: 700; margin: 0; letter-spacing: -0.02em; }
+.post-author-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  text-decoration: none; color: inherit;
+  background: none; border: none; padding: 0; cursor: pointer;
+  font-size: inherit; font-family: inherit;
+  border-radius: 20px;
+  transition: opacity 0.15s;
+}
+.post-author-link:hover { opacity: 0.72; }
+.post-title { font-size: 17px; font-weight: 700; margin: 0; letter-spacing: -0.02em; overflow-wrap: break-word; word-break: break-word; }
 .post-body {
   margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  overflow-wrap: break-word; word-break: break-word;
 }
 .post-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+
+/* ── Feed card (피드 목록 가로형 카드) ───────────────── */
+.card.feed-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.card.feed-card:hover { border-color: rgba(255,255,255,0.22); }
+.feed-thumb {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(109,124,255,.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.feed-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.feed-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.feed-title {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+.feed-tags { display: flex; flex-wrap: nowrap; gap: 4px; overflow: hidden; }
+
+/* ── Feed controls (정렬 + 장르 필터) ───────────────── */
+.feed-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+#moodFilter {
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+#moodFilter::-webkit-scrollbar { display: none; }
+.feed-skeleton { height: 84px; border-radius: 16px; }
 
 /* ── Action bar ─────────────────────────── */
 .action-bar { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -659,7 +733,7 @@ label {
   background: rgba(255,255,255,.03); border: 1px solid var(--line);
 }
 .comment-header { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; font-size: 13px; }
-.comment-text { font-size: 14px; line-height: 1.6; white-space: pre-wrap; }
+.comment-text { font-size: 14px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: break-word; word-break: break-word; }
 
 /* ── Modal ──────────────────────────────── */
 .modal-backdrop {
@@ -690,7 +764,8 @@ label {
 .track-dropdown {
   position: absolute; top: calc(100% + 4px); left: 0; right: 0;
   background: #111833; border: 1px solid var(--line);
-  border-radius: 12px; overflow: hidden; z-index: 30;
+  border-radius: 12px; z-index: 30;
+  max-height: 340px; overflow-y: auto; overscroll-behavior: contain;
 }
 .track-dropdown-item {
   display: flex; align-items: center; gap: 10px;
@@ -983,6 +1058,32 @@ textarea.input { resize: vertical; min-height: 100px; font-family: inherit; line
   padding: 0;
 }
 .auth-view-btn:hover { text-decoration: underline; }
+
+/* ── Toggle switch (settings) ──────────── */
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 44px; height: 24px;
+  flex-shrink: 0;
+}
+.toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+.toggle-slider {
+  position: absolute; inset: 0;
+  background: rgba(255,255,255,0.15);
+  border-radius: 24px; cursor: pointer;
+  transition: background 0.2s;
+}
+.toggle-slider::before {
+  content: "";
+  position: absolute;
+  width: 18px; height: 18px;
+  left: 3px; top: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+.toggle input:checked + .toggle-slider { background: var(--brand); }
+.toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
 
 /* ── Genre selector (write page) ───────── */
 .genre-selector { display: flex; flex-wrap: wrap; gap: 6px; }

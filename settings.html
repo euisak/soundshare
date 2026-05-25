@@ -89,6 +89,35 @@
         </form>
       </section>
 
+      <!-- ── 공개 범위 ──────────────────────────────────────── -->
+      <section class="card" style="margin-bottom:14px">
+        <h2 style="font-size:15px;font-weight:700;margin:0 0 6px">공개 범위</h2>
+        <p class="muted small" style="margin:0 0 16px">다른 사람이 내 프로필에서 볼 수 있는 항목을 설정합니다.</p>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+            <div>
+              <div style="font-size:14px;font-weight:600">작성한 게시글</div>
+              <div class="muted small" style="margin-top:2px">내 프로필에서 작성한 글 목록을 공개합니다</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="togglePosts" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+            <div>
+              <div style="font-size:14px;font-weight:600">작성한 댓글</div>
+              <div class="muted small" style="margin-top:2px">내 프로필에서 작성한 댓글 목록을 공개합니다</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="toggleComments" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+        <div id="noticePrivacy" class="notice" hidden style="margin-top:14px"></div>
+      </section>
+
       <!-- ── 위험 구역 ──────────────────────────────────────── -->
       <section class="card" style="margin-bottom:14px;border-color:rgba(255,77,109,0.3)">
         <h2 style="font-size:15px;font-weight:700;margin:0 0 6px;color:var(--danger)">위험 구역</h2>
@@ -121,7 +150,7 @@
     <script type="module">
       import { loadHeader, initTopbar, requireAuth } from "./js/app.js";
       import { isNicknameTaken, changeNickname, changePassword, deleteAccount, updateProfilePhoto } from "./js/auth.js";
-      import { db, getDoc, doc } from "./js/firebase.js";
+      import { db, getDoc, setDoc, doc } from "./js/firebase.js";
       import { avatarLetter, showToast } from "./js/ui.js";
 
       await loadHeader();
@@ -427,6 +456,33 @@
 
       // 닉네임 초기 상태 설정
       updateNickUI();
+
+      // ════════════════════════════════════════════════════════
+      // 공개 범위
+      // ════════════════════════════════════════════════════════
+      const togglePosts    = document.querySelector("#togglePosts");
+      const toggleComments = document.querySelector("#toggleComments");
+
+      // 저장된 값 불러오기 (userSnap 은 위에서 이미 읽음)
+      togglePosts.checked    = userSnap.data()?.postsPublic    !== false;
+      toggleComments.checked = userSnap.data()?.commentsPublic !== false;
+
+      async function savePrivacy() {
+        setNotice("#noticePrivacy", "", "");
+        try {
+          await setDoc(doc(db, "users", user.uid), {
+            postsPublic:    togglePosts.checked,
+            commentsPublic: toggleComments.checked,
+          }, { merge: true });
+          setNotice("#noticePrivacy", "ok", "저장되었습니다.");
+          setTimeout(() => setNotice("#noticePrivacy", "", ""), 2000);
+        } catch (err) {
+          setNotice("#noticePrivacy", "danger", err.message);
+        }
+      }
+
+      togglePosts.addEventListener("change",    savePrivacy);
+      toggleComments.addEventListener("change", savePrivacy);
     </script>
   </body>
 </html>
