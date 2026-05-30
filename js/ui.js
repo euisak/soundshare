@@ -21,7 +21,7 @@ async function _fetchUserPhoto(uid) {
  * renderPostCard / renderComment 호출 후 실행
  */
 export async function resolveAvatars(container = document) {
-  const els = [...container.querySelectorAll(".post-author-avatar[data-uid]")];
+  const els = [...container.querySelectorAll(".post-author-avatar[data-uid], .post-feed-avatar[data-uid]")];
   if (!els.length) return;
   const uids = [...new Set(els.map((el) => el.dataset.uid).filter(Boolean))];
   await Promise.all(uids.map(_fetchUserPhoto));
