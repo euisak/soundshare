@@ -148,25 +148,57 @@ export async function spotifyFetch(path, { method = "GET", body } = {}) {
   return res.status === 204 ? null : res.json();
 }
 
-// ── iTunes Search API (무료, 키 없음) ─────────────────────────────────────────
+// ── iTunes Search API — JSONP (CORS 우회) ────────────────────────────────────
+
+function itunesJSONP(url) {
+  return new Promise((resolve, reject) => {
+    const cbName = "__itunes_" + Date.now();
+    const script = document.createElement("script");
+    const timer = setTimeout(() => {
+      cleanup();
+      reject(new Error("검색 요청 시간이 초과됐습니다."));
+    }, 8000);
+
+    function cleanup() {
+      clearTimeout(timer);
+      delete window[cbName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    window[cbName] = (data) => { cleanup(); resolve(data); };
+    script.onerror = () => { cleanup(); reject(new Error("검색에 실패했습니다.")); };
+    script.src = url + "&callback=" + cbName;
+    document.head.appendChild(script);
+  });
+}
 
 export async function searchTracksItunes(q, limitN = 50) {
-  const res = await fetch(
-    `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=${limitN}&country=KR`
-  );
-  if (!res.ok) throw new Error("iTunes 검색 오류");
-  const data = await res.json();
-  return data.results.map((t) => ({
-    id: String(t.trackId),
-    name: t.trackName,
-    artist: t.artistName,
-    album: t.collectionName || "",
-    albumArt: t.artworkUrl100?.replace("100x100bb", "300x300bb") || "",
-    previewUrl: t.previewUrl || null,
-    appleMusicUrl: t.trackViewUrl || null,
-    spotifySearchUrl: `https://open.spotify.com/search/${encodeURIComponent(t.trackName + " " + t.artistName)}`,
-    genreName: t.primaryGenreName || "",  // iTunes 원본 장르 (카드 표시용)
-  }));
+  const url = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=${limitN}&country=KR`;
+  const data = await itunesJSONP(url);
+  if (!data.results?.length) return [];
+
+  const isEnglishQuery = /^[a-zA-Z0-9\s\-_'".!?]+$/.test(q);
+  const lq = q.toLowerCase();
+
+  return data.results
+    .filter((t) => {
+      if (!isEnglishQuery) return true;
+      const name   = (t.trackName   || "").toLowerCase();
+      const artist = (t.artistName  || "").toLowerCase();
+      const album  = (t.collectionName || "").toLowerCase();
+      return name.includes(lq) || artist.includes(lq) || album.includes(lq);
+    })
+    .map((t) => ({
+      id: String(t.trackId),
+      name: t.trackName,
+      artist: t.artistName,
+      album: t.collectionName || "",
+      albumArt: t.artworkUrl100?.replace("100x100bb", "300x300bb") || "",
+      previewUrl: t.previewUrl || null,
+      appleMusicUrl: t.trackViewUrl || null,
+      spotifySearchUrl: `https://open.spotify.com/search/${encodeURIComponent(t.trackName + " " + t.artistName)}`,
+      genreName: t.primaryGenreName || "",
+    }));
 }
 
 export async function getArtistGenres(artistId) {

@@ -47,7 +47,7 @@ export async function incrementViewCount(postId) {
   } catch { /* 조용히 무시 */ }
 }
 
-export async function getPosts({ sort = "recent", limitN = 50 } = {}) {
+export async function getPosts({ sort = "recent", limitN = 30 } = {}) {
   const q = sort === "popular"
     ? query(collection(db, "posts"), orderBy("likeCount", "desc"), limit(limitN))
     : query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(limitN));
@@ -56,8 +56,8 @@ export async function getPosts({ sort = "recent", limitN = 50 } = {}) {
 }
 
 export async function searchPosts(keyword, fields = ["title", "artist", "song"]) {
-  // Firestore full-text search 미지원 → 최신 200개 클라이언트 필터링
-  const q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(200));
+  // Firestore full-text search 미지원 → 최신 50개 클라이언트 필터링
+  const q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(50));
   const snap = await getDocs(q);
 
   // 소문자 + 공백 제거로 정규화 (대소문자·띄어쓰기 무관하게 비교)

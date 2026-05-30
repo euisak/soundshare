@@ -89,6 +89,13 @@ export function initTopbar() {
   // ── 알림 리스너 ──────────────────────────────────────────────
   let notifUnsub = null;
 
+  // ── 프로필 팝오버 토글 ──────────────────────────────────────
+  const profilePopover = qs("#profilePopover");
+  avatar?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (profilePopover) profilePopover.hidden = !profilePopover.hidden;
+  });
+
   // ── 벨 버튼 토글 ────────────────────────────────────────────
   btnNotif?.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -112,6 +119,11 @@ export function initTopbar() {
     if (notifPanel && !notifPanel.hidden) {
       if (!notifPanel.contains(e.target) && e.target !== btnNotif) {
         notifPanel.hidden = true;
+      }
+    }
+    if (profilePopover && !profilePopover.hidden) {
+      if (!profilePopover.contains(e.target) && e.target !== avatar) {
+        profilePopover.hidden = true;
       }
     }
   });

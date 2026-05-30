@@ -4,211 +4,272 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SoundShare</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin />
+    <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com" />
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js" crossorigin />
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js" crossorigin />
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js" crossorigin />
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
     <script src="js/header-loader.js"></script>
 
     <main class="container">
-      <div id="notice" class="notice" hidden></div>
 
-      <!-- 정렬 + 분위기 태그 필터 (일반 모드) -->
-      <div class="feed-controls" id="feedControls">
-        <div class="chips" id="sortBtns">
-          <button class="chip active" data-sort="recent">최신순</button>
-          <button class="chip" data-sort="popular">인기순</button>
-        </div>
-        <div class="chips" id="moodFilter">
-          <button class="chip active" data-mood="">전체</button>
-          <button class="chip" data-mood="운동">💪 운동</button>
-          <button class="chip" data-mood="산책">🚶 산책</button>
-          <button class="chip" data-mood="드라이브">🚗 드라이브</button>
-          <button class="chip" data-mood="공부·집중">📚 공부·집중</button>
-          <button class="chip" data-mood="수면·휴식">😴 수면·휴식</button>
-          <button class="chip" data-mood="힐링">🌿 힐링</button>
-          <button class="chip" data-mood="새벽감성">🌙 새벽감성</button>
+      <!-- 페이지 헤더 -->
+      <div class="feed-page-header" id="feedHeader">
+        <h1 class="feed-page-title">포스트</h1>
+        <div class="feed-sort-wrap">
+          <button class="feed-sort-btn" id="sortBtn" type="button">
+            <strong id="sortLabel">최신순</strong> ⌄
+          </button>
+          <div class="feed-sort-menu" id="sortMenu" hidden>
+            <button type="button" data-sort="recent">최신순</button>
+            <button type="button" data-sort="popular">인기순</button>
+            <button type="button" data-sort="oldest">오래된순</button>
+          </div>
         </div>
       </div>
 
-      <!-- 검색 조건 + 메타 (검색 모드) -->
+      <!-- 검색 모드 메타 -->
       <div id="searchBar" hidden>
-        <div class="chips" id="searchFieldChips" style="gap:6px;align-items:center">
-          <span class="muted small" style="white-space:nowrap">검색 조건</span>
-          <button class="chip active" data-field="title" type="button">게시글 제목</button>
-          <button class="chip active" data-field="artist" type="button">가수</button>
-          <button class="chip active" data-field="song" type="button">노래 제목</button>
-        </div>
-        <div id="searchMeta" class="muted small" style="margin-top:6px"></div>
+        <div id="searchMeta" class="muted small" style="margin-bottom:14px"></div>
       </div>
 
-      <!-- 게시글 목록 + 페이지네이션 -->
-      <div class="grid" id="postList"></div>
+      <!-- 포스트 목록 -->
+      <div id="postList"></div>
       <div id="feedPagination"></div>
+
     </main>
 
     <script src="config.js"></script>
     <script type="module">
       import { loadHeader, initTopbar } from "./js/app.js";
-      import { getPosts, searchPosts } from "./js/post.js";
-      import { renderPostCard, resolveAvatars, escHtml } from "./js/ui.js";
+      import { getPosts, searchPosts }  from "./js/post.js";
+      import { escHtml, timeAgo, avatarLetter, resolveAvatars } from "./js/ui.js";
 
       await loadHeader();
       initTopbar();
 
-      const PER_PAGE = 10;
+      const PER_PAGE = 15;
       let currentSort   = "recent";
-      let currentMood   = "";
       let currentPage   = 1;
       let filteredPosts = [];
+      let isSearchMode  = false;
 
-      const listEl  = document.querySelector("#postList");
-      const pgEl    = document.querySelector("#feedPagination");
-      const ctrlEl  = document.querySelector("#feedControls");
-      const barEl   = document.querySelector("#searchBar");
-      const metaEl  = document.querySelector("#searchMeta");
+      const listEl  = document.getElementById("postList");
+      const pgEl    = document.getElementById("feedPagination");
+      const headerEl = document.getElementById("feedHeader");
+      const barEl   = document.getElementById("searchBar");
+      const metaEl  = document.getElementById("searchMeta");
 
-      // ── 선택된 검색 조건 가져오기 ─────────────────────────────────────
-      function getSearchFields() {
-        return [...document.querySelectorAll("#searchFieldChips .chip.active")]
-          .map((c) => c.dataset.field).filter(Boolean);
+      const sortLabels = { recent: "최신순", popular: "인기순", oldest: "오래된순" };
+
+      // ── 커버 스택 ─────────────────────────────────────────
+      function buildCover(tracks) {
+        const items = (tracks || []).slice(0, 5);
+        let html = '<div class="post-cover-stack">';
+        for (let i = 0; i < 5; i++) {
+          const t = items[i];
+          html += t?.albumArt
+            ? `<img class="post-cover-stack-img" src="${escHtml(t.albumArt)}" alt="" />`
+            : `<div class="post-cover-stack-empty"></div>`;
+        }
+        html += '</div>';
+        return html;
       }
 
-      // ── 페이지네이션 렌더 ─────────────────────────────────────────────
+      // ── 카드 렌더 ──────────────────────────────────────────
+      function renderCard(post) {
+        const tracks = Array.isArray(post.tracks) ? post.tracks : (post.track ? [post.track] : []);
+        const tags   = [...(post.tags || []), ...(post.genre || [])].slice(0, 3);
+        const tagsHtml = tags.length
+          ? `<div class="post-feed-tags">${tags.map(t => `<span class="post-feed-tag">${escHtml(t)}</span>`).join("")}</div>`
+          : "";
+
+        // 본문 텍스트 추출 (HTML 태그 제거) 후 2줄 요약
+        const rawBody = (post.body || "")
+          .replace(/<br\s*\/?>/gi, " ")
+          .replace(/<[^>]+>/g, "")
+          .trim();
+
+        const bodyHtml = rawBody
+          ? `<div class="post-feed-body-text">${escHtml(rawBody)}</div>`
+          : "";
+
+        return `
+        <a class="post-feed-card" href="post.html#${escHtml(post.id)}">
+          ${buildCover(tracks)}
+          <div class="post-feed-body">
+            <div class="post-feed-title">${escHtml(post.title)}</div>
+            <div class="post-feed-author-row">
+              <span class="post-feed-avatar" data-uid="${escHtml(post.authorId || "")}">${avatarLetter(post.authorName)}</span>
+              <span class="post-feed-author">${escHtml(post.authorName || "익명")}</span>
+              <span class="post-feed-time">· ${timeAgo(post.createdAt)}</span>
+            </div>
+            ${bodyHtml}
+            ${tagsHtml}
+            <div class="post-feed-stats">
+              <span class="post-feed-stat">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+                ${post.likeCount || 0}
+              </span>
+              <span class="post-feed-stat">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                ${post.commentCount || 0}
+              </span>
+              <span class="post-feed-stat">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+                ${post.viewCount || 0}
+              </span>
+            </div>
+          </div>
+        </a>`;
+      }
+
+      // ── 페이지네이션 ───────────────────────────────────────
       function renderPagination(total, page) {
         const totalPages = Math.ceil(total / PER_PAGE);
         if (totalPages <= 1) return "";
-        const prev = `<button class="page-btn" data-page="${page - 1}"${page === 1 ? " disabled" : ""}>‹</button>`;
-        const next = `<button class="page-btn" data-page="${page + 1}"${page === totalPages ? " disabled" : ""}>›</button>`;
+        const prev = `<button class="rd-page-btn" data-page="${page - 1}"${page === 1 ? " disabled" : ""}>‹</button>`;
+        const next = `<button class="rd-page-btn" data-page="${page + 1}"${page === totalPages ? " disabled" : ""}>›</button>`;
         let nums = "", prevN = 0;
         for (let i = 1; i <= totalPages; i++) {
           if (i === 1 || i === totalPages || Math.abs(i - page) <= 2) {
             if (prevN && i - prevN > 1) nums += `<span style="padding:0 4px;color:var(--muted)">…</span>`;
-            nums += `<button class="page-btn${i === page ? " active" : ""}" data-page="${i}">${i}</button>`;
+            nums += `<button class="rd-page-btn${i === page ? " active" : ""}" data-page="${i}">${i}</button>`;
             prevN = i;
           }
         }
-        return `<div class="pagination">${prev}${nums}${next}</div>`;
+        return `<div class="rd-pagination" style="display:flex;align-items:center;justify-content:center;gap:4px;margin-top:20px">${prev}${nums}${next}</div>`;
       }
 
-      // ── 현재 페이지 렌더 ─────────────────────────────────────────────
+      // ── 현재 페이지 렌더 ──────────────────────────────────
       function renderPage() {
         const slice = filteredPosts.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
         if (!slice.length) {
-          listEl.innerHTML = '<div class="card empty-state">게시글이 없습니다.<br>첫 번째 추천을 올려보세요!</div>';
+          listEl.innerHTML = '<div class="empty-state card">게시글이 없습니다.<br>첫 번째 추천을 올려보세요!</div>';
           pgEl.innerHTML = "";
           return;
         }
-        listEl.innerHTML = slice.map(renderPostCard).join("");
+        listEl.innerHTML = slice.map(renderCard).join("");
         pgEl.innerHTML   = renderPagination(filteredPosts.length, currentPage);
         resolveAvatars(listEl);
       }
 
-      // ── 데이터 조회 + 필터 ────────────────────────────────────────────
+      // ── 데이터 로드 ───────────────────────────────────────
       async function loadPosts() {
-        listEl.innerHTML = Array(5).fill('<div class="skeleton feed-skeleton"></div>').join("");
+        isSearchMode = false;
+        headerEl.hidden = false;
+        barEl.hidden    = true;
+        listEl.innerHTML = Array(6).fill(`
+          <div class="post-feed-skeleton">
+            <div class="post-feed-skeleton-cover"></div>
+            <div class="post-feed-skeleton-body">
+              <div class="post-feed-skeleton-line" style="width:55%"></div>
+              <div class="post-feed-skeleton-line" style="width:30%;height:11px"></div>
+              <div class="post-feed-skeleton-line" style="width:20%;height:10px;margin-top:4px"></div>
+            </div>
+          </div>`).join("");
         pgEl.innerHTML = "";
         try {
-          const posts = await getPosts({ sort: currentSort });
-          filteredPosts = currentMood
-            ? posts.filter((p) => (p.tags || []).includes(currentMood))
-            : posts;
+          filteredPosts = await getPosts({ sort: currentSort });
           currentPage = 1;
           renderPage();
         } catch (err) {
-          listEl.innerHTML = `<div class="card empty-state">${err.message}</div>`;
+          listEl.innerHTML = `<div class="card empty-state">${escHtml(err.message)}</div>`;
         }
       }
 
-      // ── 헤더 검색 in-place ────────────────────────────────────────────
-      async function doHeaderSearch(kw) {
-        const fields = getSearchFields();
-        ctrlEl.hidden  = true;
-        barEl.hidden   = false;
-        pgEl.innerHTML = "";
-        listEl.innerHTML = Array(3).fill('<div class="skeleton feed-skeleton"></div>').join("");
+      // ── 헤더 검색 ─────────────────────────────────────────
+      async function doSearch(kw) {
+        isSearchMode = true;
+        headerEl.hidden = true;
+        barEl.hidden    = false;
+        pgEl.innerHTML  = "";
+        listEl.innerHTML = Array(3).fill(`
+          <div class="post-feed-skeleton">
+            <div class="post-feed-skeleton-cover"></div>
+            <div class="post-feed-skeleton-body">
+              <div class="post-feed-skeleton-line" style="width:55%"></div>
+              <div class="post-feed-skeleton-line" style="width:30%;height:11px"></div>
+              <div class="post-feed-skeleton-line" style="width:20%;height:10px;margin-top:4px"></div>
+            </div>
+          </div>`).join("");
         metaEl.textContent = "";
         try {
-          const posts = await searchPosts(kw, fields);
-          metaEl.textContent = `"${kw}" 검색 결과 ${posts.length}건`;
-          if (!posts.length) {
+          filteredPosts = await searchPosts(kw, ["title", "artist", "song"]);
+          metaEl.textContent = `"${kw}" 검색 결과 ${filteredPosts.length}건`;
+          currentPage = 1;
+          if (!filteredPosts.length) {
             listEl.innerHTML = `<div class="card empty-state">"${escHtml(kw)}"에 대한 결과가 없습니다.</div>`;
           } else {
-            listEl.innerHTML = posts.map(renderPostCard).join("");
-            resolveAvatars(listEl);
+            renderPage();
           }
         } catch (err) {
-          listEl.innerHTML = `<div class="card empty-state">${err.message}</div>`;
+          listEl.innerHTML = `<div class="card empty-state">${escHtml(err.message)}</div>`;
         }
       }
 
       function exitSearch() {
-        const headerInput = document.querySelector(".search-input");
-        if (headerInput) headerInput.value = "";
-        ctrlEl.hidden  = false;
-        barEl.hidden   = true;
-        metaEl.textContent = "";
-        currentPage = 1;
+        const inp = document.querySelector(".topbar-search-input");
+        if (inp) inp.value = "";
         loadPosts();
       }
 
-      // ── 헤더 검색창 submit ────────────────────────────────────────────
-      document.querySelector(".header-search")?.addEventListener("submit", async (e) => {
+      // ── 헤더 검색창 이벤트 ────────────────────────────────
+      document.querySelector(".topbar-search")?.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const kw = (e.currentTarget.querySelector(".search-input")?.value || "").trim();
+        const kw = (e.currentTarget.querySelector(".topbar-search-input")?.value || "").trim();
         if (!kw) { exitSearch(); return; }
-        await doHeaderSearch(kw);
+        await doSearch(kw);
       });
-
-      // 헤더 검색창 X 버튼 → 피드 복귀
-      document.querySelector(".search-input")?.addEventListener("search", (e) => {
+      document.querySelector(".topbar-search-input")?.addEventListener("search", (e) => {
         if (!e.target.value) exitSearch();
       });
 
-      // ── 검색 조건 칩 토글 ─────────────────────────────────────────────
-      document.querySelector("#searchFieldChips")?.addEventListener("click", async (e) => {
-        const chip = e.target.closest("[data-field]");
-        if (!chip) return;
-        const active = document.querySelectorAll("#searchFieldChips .chip.active");
-        // 마지막 하나는 해제 불가
-        if (chip.classList.contains("active") && active.length <= 1) return;
-        chip.classList.toggle("active");
-        // 현재 검색어로 즉시 재검색
-        const kw = (document.querySelector(".search-input")?.value || "").trim();
-        if (kw) await doHeaderSearch(kw);
+      // ── 정렬 드롭다운 ────────────────────────────────────
+      const sortBtn  = document.getElementById("sortBtn");
+      const sortMenu = document.getElementById("sortMenu");
+      const sortLbl  = document.getElementById("sortLabel");
+
+      sortBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        sortMenu.hidden = !sortMenu.hidden;
+      });
+      sortMenu.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-sort]");
+        if (!btn) return;
+        currentSort = btn.dataset.sort;
+        sortLbl.textContent = sortLabels[currentSort];
+        sortMenu.hidden = true;
+        currentPage = 1;
+        loadPosts();
+      });
+      document.addEventListener("click", (e) => {
+        if (!e.target.closest(".feed-sort-wrap")) sortMenu.hidden = true;
       });
 
-      // ── 페이지 버튼 ──────────────────────────────────────────────────
+      // ── 페이지네이션 클릭 ────────────────────────────────
       pgEl.addEventListener("click", (e) => {
-        const btn = e.target.closest(".page-btn");
+        const btn = e.target.closest("[data-page]");
         if (!btn || btn.disabled) return;
         currentPage = Number(btn.dataset.page);
         renderPage();
         window.scrollTo({ top: 0, behavior: "smooth" });
       });
 
-      // ── 정렬 ────────────────────────────────────────────────────────
-      document.querySelector("#sortBtns")?.addEventListener("click", async (e) => {
-        const btn = e.target.closest("[data-sort]");
-        if (!btn) return;
-        document.querySelectorAll("#sortBtns .chip").forEach((c) => c.classList.remove("active"));
-        btn.classList.add("active");
-        currentSort = btn.dataset.sort;
-        await loadPosts();
-      });
-
-      // ── 분위기 태그 필터 ─────────────────────────────────────────────
-      document.querySelector("#moodFilter")?.addEventListener("click", async (e) => {
-        const chip = e.target.closest("[data-mood]");
-        if (!chip) return;
-        document.querySelectorAll("#moodFilter .chip").forEach((c) => c.classList.remove("active"));
-        chip.classList.add("active");
-        currentMood = chip.dataset.mood;
-        await loadPosts();
-      });
-
       await loadPosts();
 
-      // bfcache 복원 시 피드 재조회
       window.addEventListener("pageshow", (e) => {
         if (e.persisted) exitSearch();
       });

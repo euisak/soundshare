@@ -4,320 +4,438 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SoundShare — 글쓰기</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin />
+    <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com" />
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js" crossorigin />
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js" crossorigin />
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js" crossorigin />
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
     <link rel="stylesheet" href="css/style.css" />
   </head>
-  <body>
-    <script src="js/header-loader.js"></script>
+  <body class="list-page">
 
-    <main class="container">
-      <div id="notice" class="notice" hidden></div>
+    <!-- ── 헤더 ─────────────────────────────────────────── -->
+    <div class="le-header">
+      <h1 class="le-heading" id="pageHeading">새 포스트</h1>
+      <div class="le-header-actions">
+        <a href="index.html" class="le-cancel">취소</a>
+        <button class="le-publish" id="btnPublish" type="button">게시하기</button>
+      </div>
+    </div>
 
-      <section class="card">
-        <h1 class="title">추천 글 작성</h1>
+    <!-- ── 본문 (2열) ────────────────────────────────────── -->
+    <div class="le-body">
 
-        <form id="formWrite" class="stack" style="margin-top:14px">
+      <!-- 왼쪽: 폼 -->
+      <div class="le-left">
 
-          <!-- 제목 (최대 50자) -->
-          <div>
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <label for="postTitle" style="margin:0">제목 <span style="color:var(--danger)">*</span></label>
-              <span class="muted small"><span id="titleCount">0</span>/50</span>
-            </div>
-            <input id="postTitle" class="input" type="text" maxlength="50"
-              placeholder="어떤 곡을 추천하고 싶으신가요?" style="margin-top:6px" />
+        <div id="notice" class="notice" style="margin-bottom:16px" hidden></div>
+
+        <div class="le-field">
+          <label class="le-label">제목 <span class="le-required">*</span></label>
+          <input class="le-input" id="postTitle" type="text" maxlength="50"
+                 placeholder="어떤 곡을 추천하고 싶으신가요?" autocomplete="off" />
+          <div style="font-size:11px;color:#bbb;margin-top:4px;text-align:right">
+            <span id="titleCount">0</span>/50
           </div>
+        </div>
 
-          <!-- 본문 (최대 1000자) -->
-          <div>
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <label for="postBody" style="margin:0">추천 이유</label>
-              <span class="muted small"><span id="bodyCount">0</span>/1000</span>
+        <div class="le-field">
+          <label class="le-label">추천 이유</label>
+          <div class="le-desc-editor">
+            <div class="le-desc-toolbar" id="descToolbar">
+              <button type="button" data-cmd="bold"          title="굵게"><b>B</b></button>
+              <button type="button" data-cmd="italic"        title="기울임"><i>I</i></button>
+              <button type="button" data-cmd="strikeThrough" title="취소선"><s>S</s></button>
+              <button type="button" data-cmd="createLink"    title="링크">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                </svg>
+              </button>
             </div>
-            <textarea id="postBody" class="input" rows="5" maxlength="1000"
-              placeholder="이 곡을 추천하는 이유, 어울리는 순간, 감상 포인트를 적어보세요."
-              style="margin-top:6px"></textarea>
+            <div class="le-desc-content" id="postBody"
+                 contenteditable="true" spellcheck="false"></div>
           </div>
+        </div>
 
-          <!-- 노래 첨부 (최대 5곡) -->
-          <div>
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <label style="margin:0">노래 첨부 <span class="muted small">(최대 5곡)</span></label>
-              <span class="muted small" id="trackCountBadge">0 / 5</span>
-            </div>
-
-            <!-- 첨부된 트랙 목록 -->
-            <div id="trackList" style="display:flex;flex-direction:column;gap:8px;margin-top:8px"></div>
-
-            <!-- 검색 영역 (5곡 미만일 때만 표시) -->
-            <div id="trackSearchArea" style="margin-top:8px">
-              <div class="track-search-wrap">
-                <div style="display:flex;gap:8px">
-                  <input id="trackSearchInput" class="input" type="search"
-                    placeholder="곡 제목 또는 아티스트 검색…" autocomplete="off" />
-                </div>
-                <div class="track-dropdown" id="trackDropdown" hidden></div>
-              </div>
-              <p class="muted small" id="spotifyHint" style="margin-top:6px" hidden>
-                Spotify 연결 후 트랙을 검색할 수 있습니다.
-                <a href="index.html" style="color:var(--brand)">연결하기</a>
-              </p>
-            </div>
+        <div class="le-field">
+          <label class="le-label">태그</label>
+          <div class="le-tags-wrap" id="tagsWrap">
+            <input class="le-tags-input" id="tagsInput" type="text"
+                   placeholder="태그 추가 (Enter)..." autocomplete="off" maxlength="10" />
           </div>
+          <div class="le-tags-hint" id="tagsHint">최대 5개 · 태그당 10자 <span id="tagsCount">(0/5)</span></div>
+        </div>
 
-          <!-- 장르 태그 (노래 선택 시 자동 설정) -->
-          <div>
-            <label style="margin:0 0 8px;display:block">장르 태그
-              <span class="muted small">— 곡 선택 시 자동으로 설정됩니다</span>
-            </label>
-            <div class="genre-selector" id="genreSelector">
-              <span class="muted small">곡을 선택하면 자동으로 설정됩니다</span>
+        <div class="le-field">
+          <span class="le-settings-label">설정</span>
+          <div class="le-setting-row">
+            <div class="le-setting-text">
+              <div class="le-setting-name">공개 여부</div>
+              <div class="le-setting-desc">공개하면 다른 사람도 이 글을 볼 수 있어요.</div>
             </div>
+            <select class="le-select" id="settingVisibility">
+              <option value="public">공개</option>
+              <option value="private">비공개</option>
+            </select>
           </div>
+        </div>
 
-          <!-- 감성/상황 태그 (수동 선택) -->
-          <div>
-            <label style="margin:0 0 6px">감성 / 상황 태그</label>
-            <div class="genre-selector" id="moodSelector">
-              <span class="genre-chip" data-mood="운동">💪 운동</span>
-              <span class="genre-chip" data-mood="산책">🚶 산책</span>
-              <span class="genre-chip" data-mood="드라이브">🚗 드라이브</span>
-              <span class="genre-chip" data-mood="공부·집중">📚 공부·집중</span>
-              <span class="genre-chip" data-mood="수면·휴식">😴 수면·휴식</span>
-              <span class="genre-chip" data-mood="힐링">🌿 힐링</span>
-              <span class="genre-chip" data-mood="새벽감성">🌙 새벽감성</span>
-            </div>
+      </div><!-- /le-left -->
+
+      <!-- 오른쪽: 검색 + 트랙 목록 -->
+      <div class="le-right">
+
+        <!-- 검색 바 -->
+        <div class="le-search-bar">
+          <div class="le-search-inner">
+            <span class="le-search-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+              </svg>
+            </span>
+            <input class="le-search-input" id="searchInput" type="search"
+                   placeholder="가수 이름, 노래 제목, 앨범으로 검색..." autocomplete="off" />
           </div>
+          <div class="le-search-results" id="searchResults" hidden></div>
+        </div>
 
-          <button class="btn primary" type="submit" id="btnSubmit">게시하기</button>
-        </form>
-      </section>
-    </main>
+        <!-- 트랙 헤더 -->
+        <div class="le-releases-header">
+          <span class="le-releases-title">
+            트랙 <span class="le-releases-count" id="releasesCount">0</span>
+          </span>
+        </div>
+
+        <!-- 트랙 목록 -->
+        <div class="le-releases-list" id="releasesList">
+          <div class="le-empty-state" id="emptyState">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ddd"
+                 stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+            </svg>
+            <span>위 검색창에서 곡을 추가하세요</span>
+          </div>
+        </div>
+
+      </div><!-- /le-right -->
+    </div><!-- /le-body -->
 
     <script src="config.js"></script>
     <script type="module">
-      import { loadHeader, initTopbar, requireAuth, setNotice } from "./js/app.js";
-      import { createPost, updatePost, getPost } from "./js/post.js";
-      import { searchTracksItunes } from "./js/music.js";
-      import { escHtml, showToast } from "./js/ui.js";
+      import { loadHeader, requireAuth, setNotice } from "./js/app.js";
+      import { createPost, updatePost, getPost }    from "./js/post.js";
+      import { searchTracksItunes }                 from "./js/music.js";
+      import { escHtml, showToast }                 from "./js/ui.js";
 
-      await loadHeader();
-      initTopbar();
       await requireAuth();
 
-      // 수정 모드: write.html#postId 형식으로 접근
       const editId = window.location.hash.slice(1) || null;
+      if (editId) {
+        document.getElementById("pageHeading").textContent = "포스트 수정";
+        document.getElementById("btnPublish").textContent  = "수정하기";
+        document.title = "SoundShare — 포스트 수정";
+      }
 
-      // iTunes API 사용 — Spotify 연결 불필요
-      document.querySelector("#spotifyHint").hidden = true;
-
-      // ── 글자 수 카운터 ───────────────────────────────────────────────────────
-      const titleInput = document.querySelector("#postTitle");
-      const bodyInput = document.querySelector("#postBody");
-      const titleCount = document.querySelector("#titleCount");
-      const bodyCount = document.querySelector("#bodyCount");
-
+      // ── 제목 카운터 ──────────────────────────────────────
+      const titleInput  = document.getElementById("postTitle");
+      const titleCount  = document.getElementById("titleCount");
       titleInput.addEventListener("input", () => {
         titleCount.textContent = titleInput.value.length;
-      });
-      bodyInput.addEventListener("input", () => {
-        bodyCount.textContent = bodyInput.value.length;
+        titleInput.classList.remove("le-input--error");
       });
 
-      // ── 장르 (트랙 genreName 기반 자동 설정) ───────────────────────────────────
-      const selectedGenres = new Set();
-      const genreSelector  = document.querySelector("#genreSelector");
-
-      function renderGenreChips() {
-        if (selectedGenres.size === 0) {
-          genreSelector.innerHTML = '<span class="muted small">곡을 선택하면 자동으로 설정됩니다</span>';
+      // ── Description 툴바 ─────────────────────────────────
+      document.getElementById("descToolbar").addEventListener("mousedown", (e) => {
+        const btn = e.target.closest("[data-cmd]");
+        if (!btn) return;
+        e.preventDefault();
+        const cmd = btn.dataset.cmd;
+        if (cmd === "createLink") {
+          const url = prompt("URL을 입력하세요:");
+          if (url) document.execCommand("createLink", false, url);
         } else {
-          genreSelector.innerHTML = [...selectedGenres]
-            .map((g) => `<span class="genre-chip selected" style="pointer-events:none;cursor:default">${escHtml(g)}</span>`)
-            .join("");
+          document.execCommand(cmd, false, null);
+        }
+        document.getElementById("postBody").focus();
+      });
+
+      // ── 태그 ─────────────────────────────────────────────
+      const MAX_TAGS = 5;
+      const tags = [];
+      const tagsWrapEl = document.getElementById("tagsWrap");
+
+      function renderTags() {
+        const atLimit = tags.length >= MAX_TAGS;
+        const chips = tags.map((t) => `
+          <span class="le-tag-chip">
+            ${escHtml(t)}
+            <button type="button" class="le-tag-remove" data-tag="${escHtml(t)}">×</button>
+          </span>`).join("");
+        tagsWrapEl.innerHTML = chips + (atLimit ? "" :
+          `<input class="le-tags-input" id="tagsInput" type="text"
+                  placeholder="태그 추가 (Enter)..." autocomplete="off" maxlength="10" />`);
+        if (!atLimit) {
+          document.getElementById("tagsInput").addEventListener("keydown", onTagKey);
+        }
+        document.getElementById("tagsCount").textContent = `(${tags.length}/5)`;
+        document.getElementById("tagsCount").className = atLimit ? "at-limit" : "";
+      }
+
+      function addTag(val) {
+        const tag = val.trim().slice(0, 10);
+        if (!tag || tags.includes(tag) || tags.length >= MAX_TAGS) return;
+        tags.push(tag);
+        renderTags();
+      }
+
+      function onTagKey(e) {
+        if (e.key === "Enter" || e.key === ",") {
+          e.preventDefault();
+          addTag(e.target.value);
+          e.target.value = "";
+        } else if (e.key === "Backspace" && !e.target.value && tags.length) {
+          tags.pop();
+          renderTags();
         }
       }
 
-      // 선택된 트랙의 genreName(iTunes 원본)을 중복 없이 모아 칩으로 표시
+      document.getElementById("tagsInput").addEventListener("keydown", onTagKey);
+      tagsWrapEl.addEventListener("click", (e) => {
+        const btn = e.target.closest(".le-tag-remove");
+        if (!btn) return;
+        const i = tags.indexOf(btn.dataset.tag);
+        if (i > -1) { tags.splice(i, 1); renderTags(); }
+      });
+
+      // ── 장르 (저장용으로만 유지) ─────────────────────────
+      const selectedGenres = new Set();
+
       function updateAutoGenres() {
         selectedGenres.clear();
-        selectedTracks.forEach((t) => {
-          if (t.genreName) selectedGenres.add(t.genreName);
-        });
-        renderGenreChips();
+        tracks.forEach((t) => { if (t.genreName) selectedGenres.add(t.genreName); });
       }
 
-      // ── 감성/상황 태그 ────────────────────────────────────────────────────────
-      const selectedMoods = new Set();
-      document.querySelector("#moodSelector").addEventListener("click", (e) => {
-        const chip = e.target.closest(".genre-chip");
-        if (!chip) return;
-        const m = chip.dataset.mood;
-        if (selectedMoods.has(m)) { selectedMoods.delete(m); chip.classList.remove("selected"); }
-        else { selectedMoods.add(m); chip.classList.add("selected"); }
-      });
+      // ── 트랙 목록 ────────────────────────────────────────
+      const tracks = [];
+      const releasesListEl  = document.getElementById("releasesList");
+      const releasesCountEl = document.getElementById("releasesCount");
+      const emptyStateEl    = document.getElementById("emptyState");
 
-      // ── 트랙 목록 관리 ────────────────────────────────────────────────────────
-      const MAX_TRACKS = 5;
-      const selectedTracks = [];
+      function renderTracks() {
+        releasesCountEl.textContent = tracks.length;
+        emptyStateEl.hidden = tracks.length > 0;
 
-      const trackListEl   = document.querySelector("#trackList");
-      const trackBadge    = document.querySelector("#trackCountBadge");
-      const trackSearchArea = document.querySelector("#trackSearchArea");
-
-      function renderTrackList() {
-        trackBadge.textContent = `${selectedTracks.length} / ${MAX_TRACKS}`;
-        trackSearchArea.hidden = selectedTracks.length >= MAX_TRACKS;
-
-        trackListEl.innerHTML = selectedTracks.map((t, i) => `
-          <div class="track-card" style="gap:10px">
+        const items = tracks.map((t, i) => `
+          <div class="le-release-item" draggable="true" data-idx="${i}">
+            <span class="le-release-num">${i + 1}</span>
             ${t.albumArt
-              ? `<img class="track-art" src="${escHtml(t.albumArt)}" alt="" />`
-              : `<div class="track-art" style="background:rgba(109,124,255,.2);display:flex;align-items:center;justify-content:center">♪</div>`}
-            <div class="track-info">
-              <div class="track-name">${escHtml(t.name)}</div>
-              <div class="track-artist">${escHtml(t.artist)}</div>
+              ? `<img class="le-release-thumb" src="${escHtml(t.albumArt)}" alt="" style="cursor:default" />`
+              : `<div class="le-release-thumb" style="display:flex;align-items:center;justify-content:center;font-size:18px">♪</div>`}
+            <div class="le-release-info">
+              <span class="le-release-name" style="cursor:default">${escHtml(t.name)}</span>
+              <div class="le-release-meta">${escHtml(t.artist)}${t.album ? " · " + escHtml(t.album) : ""}</div>
+              <div class="le-release-note" contenteditable="true" data-idx="${i}"
+                   data-placeholder="이 곡에 대한 메모...">${escHtml(t.note || "")}</div>
             </div>
-            <button type="button" class="btn btn-danger"
-              style="padding:5px 10px;font-size:12px;flex-shrink:0"
-              data-remove="${i}">제거</button>
+            <div class="le-release-actions">
+              <button class="le-release-btn" type="button" data-remove="${i}" aria-label="제거"
+                      title="제거">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2.5" stroke-linecap="round">
+                  <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+              </button>
+              <button class="le-release-btn le-release-drag" type="button" aria-label="순서 변경">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 5h2M9 12h2M9 19h2M13 5h2M13 12h2M13 19h2"/>
+                </svg>
+              </button>
+            </div>
           </div>`).join("");
+
+        // 빈 상태 유지하되 items 앞에 emptyState 남김
+        releasesListEl.innerHTML = items;
+        if (!tracks.length) releasesListEl.appendChild(emptyStateEl);
+        emptyStateEl.hidden = tracks.length > 0;
+        setupDnd();
       }
 
-      trackListEl.addEventListener("click", (e) => {
+      releasesListEl.addEventListener("click", (e) => {
         const btn = e.target.closest("[data-remove]");
         if (!btn) return;
-        selectedTracks.splice(Number(btn.dataset.remove), 1);
-        renderTrackList();
-        updateAutoGenres(); // 트랙 제거 시 장르 재계산
+        tracks.splice(Number(btn.dataset.remove), 1);
+        renderTracks();
+        updateAutoGenres();
       });
 
-      // ── 트랙 검색 ─────────────────────────────────────────────────────────────
-      let debounceTimer;
-      const searchInput = document.querySelector("#trackSearchInput");
-      const dropdown    = document.querySelector("#trackDropdown");
+      releasesListEl.addEventListener("input", (e) => {
+        const el = e.target.closest(".le-release-note");
+        if (el) tracks[Number(el.dataset.idx)].note = el.innerText.trim();
+      });
 
-      searchInput.addEventListener("input", () => {
-        clearTimeout(debounceTimer);
-        const q = searchInput.value.trim();
-        if (!q) { dropdown.hidden = true; return; }
-        debounceTimer = setTimeout(() => doSearch(q), 400);
+      // ── Drag & Drop ──────────────────────────────────────
+      let dragIdx = null;
+
+      function setupDnd() {
+        releasesListEl.querySelectorAll(".le-release-item").forEach((item) => {
+          item.addEventListener("dragstart", (e) => {
+            dragIdx = Number(item.dataset.idx);
+            item.classList.add("le-dragging");
+            e.dataTransfer.effectAllowed = "move";
+          });
+          item.addEventListener("dragend",  () => item.classList.remove("le-dragging"));
+          item.addEventListener("dragover", (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; });
+          item.addEventListener("drop", (e) => {
+            e.preventDefault();
+            const to = Number(item.dataset.idx);
+            if (dragIdx === null || dragIdx === to) return;
+            const [moved] = tracks.splice(dragIdx, 1);
+            tracks.splice(to, 0, moved);
+            renderTracks();
+            updateAutoGenres();
+            dragIdx = null;
+          });
+        });
+      }
+
+      // ── 검색 ─────────────────────────────────────────────
+      const searchInputEl   = document.getElementById("searchInput");
+      const searchResultsEl = document.getElementById("searchResults");
+      let searchTimer = null;
+
+      searchInputEl.addEventListener("input", (e) => {
+        clearTimeout(searchTimer);
+        const q = e.target.value.trim();
+        if (!q) { searchResultsEl.hidden = true; return; }
+        if (q.length < 2) {
+          searchResultsEl.hidden = false;
+          searchResultsEl.innerHTML = '<div class="le-search-msg">두 글자 이상 입력하세요.</div>';
+          return;
+        }
+        searchResultsEl.hidden = false;
+        searchResultsEl.innerHTML = '<div class="le-search-msg">검색 중...</div>';
+        searchTimer = setTimeout(() => doSearch(q), 350);
       });
 
       async function doSearch(q) {
-        dropdown.innerHTML = '<div style="padding:12px;color:var(--muted);font-size:13px">검색 중…</div>';
-        dropdown.hidden = false;
         try {
-          const tracks = await searchTracksItunes(q);
-          if (!tracks.length) {
-            dropdown.innerHTML = '<div style="padding:12px;color:var(--muted);font-size:13px">결과 없음</div>';
+          const results = await searchTracksItunes(q, 25);
+          if (!results.length) {
+            searchResultsEl.innerHTML = '<div class="le-search-msg">결과가 없습니다.</div>';
             return;
           }
-          // 이미 선택된 곡 제외
-          const filtered = tracks.filter((t) => !selectedTracks.find((s) => s.id === t.id));
-          dropdown.innerHTML = filtered.map((t) => `
-            <div class="track-dropdown-item" data-track='${escHtml(JSON.stringify(t))}'>
-              ${t.albumArt
-                ? `<img class="track-dropdown-thumb" src="${escHtml(t.albumArt)}" alt="" />`
-                : '<div class="track-dropdown-thumb" style="background:rgba(109,124,255,.2)"></div>'}
-              <div style="min-width:0">
-                <div style="font-weight:650;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(t.name)}</div>
-                <div style="font-size:12px;color:var(--muted)">${escHtml(t.artist)}</div>
+          searchResultsEl.innerHTML = results.map((r, i) => `
+            <div class="le-search-result" data-idx="${i}">
+              ${r.albumArt
+                ? `<img class="le-search-thumb" src="${escHtml(r.albumArt)}" alt="" />`
+                : '<div class="le-search-thumb" style="display:flex;align-items:center;justify-content:center;font-size:16px">♪</div>'}
+              <div class="le-search-info">
+                <div class="le-search-name">${escHtml(r.name)}</div>
+                <div class="le-search-meta">${escHtml(r.artist)}${r.album ? " · " + escHtml(r.album) : ""}</div>
               </div>
-            </div>`).join("") || '<div style="padding:12px;color:var(--muted);font-size:13px">이미 모두 추가됨</div>';
+            </div>`).join("");
+
+          searchResultsEl.querySelectorAll(".le-search-result").forEach((el) => {
+            el.addEventListener("click", () => {
+              const r = results[Number(el.dataset.idx)];
+              if (!tracks.find((x) => x.id === r.id)) {
+                tracks.push(r);
+                renderTracks();
+                updateAutoGenres();
+              }
+              searchInputEl.value = "";
+              searchResultsEl.hidden = true;
+            });
+          });
         } catch (err) {
-          dropdown.innerHTML = `<div style="padding:12px;color:var(--danger);font-size:13px">${escHtml(err.message)}</div>`;
+          searchResultsEl.innerHTML = `<div class="le-search-msg" style="color:#e55">검색 중 오류가 발생했습니다.</div>`;
+          console.error(err);
         }
       }
 
-      dropdown.addEventListener("click", async (e) => {
-        const item = e.target.closest("[data-track]");
-        if (!item) return;
-        if (selectedTracks.length >= MAX_TRACKS) return;
-
-        const track = JSON.parse(item.dataset.track);
-        selectedTracks.push(track);
-        dropdown.hidden = true;
-        searchInput.value = "";
-        renderTrackList();
-        updateAutoGenres(); // 트랙 추가 시 장르 자동 업데이트
+      // 검색창 포커스 시 기존 검색어 있으면 결과 다시 표시
+      searchInputEl.addEventListener("focus", () => {
+        const q = searchInputEl.value.trim();
+        if (q.length >= 2 && searchResultsEl.innerHTML) {
+          searchResultsEl.hidden = false;
+        }
       });
 
       document.addEventListener("click", (e) => {
-        if (!e.target.closest(".track-search-wrap")) dropdown.hidden = true;
+        if (!e.target.closest(".le-search-bar")) searchResultsEl.hidden = true;
       });
 
-      // ── 제출 ─────────────────────────────────────────────────────────────────
-      document.querySelector("#formWrite").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const btn = document.querySelector("#btnSubmit");
+      // ── 게시 / 수정 ───────────────────────────────────────
+      document.getElementById("btnPublish").addEventListener("click", async () => {
+        const title = titleInput.value.trim();
+        if (!title) {
+          titleInput.classList.add("le-input--error");
+          titleInput.focus();
+          return;
+        }
+        const btn = document.getElementById("btnPublish");
         btn.disabled = true;
-        btn.textContent = "게시 중…";
-        setNotice("", "");
+        btn.textContent = editId ? "수정 중…" : "게시 중…";
 
         try {
-          const title = titleInput.value.trim();
-          if (!title) throw new Error("제목을 입력해주세요.");
+          const payload = {
+            title,
+            body:       document.getElementById("postBody").innerHTML,
+            genre:      [...selectedGenres],
+            tags:       [...tags],
+            tracks,
+            visibility: document.getElementById("settingVisibility").value,
+          };
 
           let targetId;
           if (editId) {
-            await updatePost(editId, {
-              title,
-              body: bodyInput.value,
-              genre: [...selectedGenres],
-              tags: [...selectedMoods],
-              tracks: selectedTracks,
-            });
+            await updatePost(editId, payload);
             targetId = editId;
             showToast("수정되었습니다!");
           } else {
-            targetId = await createPost({
-              title,
-              body: bodyInput.value,
-              genre: [...selectedGenres],
-              tags: [...selectedMoods],
-              tracks: selectedTracks,
-            });
+            targetId = await createPost(payload);
             showToast("게시글이 등록되었습니다! 🎵");
           }
-          // replace로 write 페이지 히스토리 교체 + edited=1로 구 상세 건너뜀 신호
           window.location.replace(`post.html?edited=1#${targetId}`);
         } catch (err) {
-          setNotice("danger", err.message);
+          const noticeEl = document.getElementById("notice");
+          noticeEl.hidden = false;
+          noticeEl.className = "notice danger";
+          noticeEl.textContent = err.message;
           btn.disabled = false;
           btn.textContent = editId ? "수정하기" : "게시하기";
         }
       });
 
-      // ── 수정 모드 초기화 (변수/함수 선언 이후에 실행) ────────────────
+      // ── 수정 모드 초기화 ─────────────────────────────────
       if (editId) {
-        document.querySelector("h1.title").textContent = "글 수정";
-        document.querySelector("#btnSubmit").textContent = "수정하기";
         try {
           const post = await getPost(editId);
           if (post) {
             titleInput.value = post.title || "";
-            bodyInput.value  = post.body  || "";
             titleCount.textContent = titleInput.value.length;
-            bodyCount.textContent  = bodyInput.value.length;
-            (post.tags || []).forEach((m) => {
-              const chip = document.querySelector(`#moodSelector [data-mood="${m}"]`);
-              if (chip) { selectedMoods.add(m); chip.classList.add("selected"); }
-            });
-            selectedTracks.push(...(post.tracks || []));
-            // 트랙에 genreName 있으면 자동 재계산, 없으면 저장된 장르를 그대로 표시
-            if (selectedTracks.some((t) => t.genreName)) {
-              updateAutoGenres();
-            } else {
-              (post.genre || []).forEach((g) => selectedGenres.add(g));
-              renderGenreChips();
-            }
+            document.getElementById("postBody").innerHTML = post.body || "";
+            (post.tags || []).forEach((t) => { tags.push(t); });
+            renderTags();
+            if (Array.isArray(post.tracks)) tracks.push(...post.tracks);
+            updateAutoGenres();
+            document.getElementById("settingVisibility").value = post.visibility || "public";
           }
         } catch {
-          setNotice("danger", "게시글을 불러오지 못했습니다.");
+          const noticeEl = document.getElementById("notice");
+          noticeEl.hidden = false;
+          noticeEl.className = "notice danger";
+          noticeEl.textContent = "게시글을 불러오지 못했습니다.";
         }
       }
 
-      renderTrackList();
+      renderTracks();
     </script>
   </body>
 </html>
