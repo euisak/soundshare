@@ -45,7 +45,6 @@ async function ensureUserDoc(user, nickname) {
       uid: user.uid,
       email: user.email,
       nickname: nickname || user.displayName || user.email.split("@")[0],
-      spotifyConnected: false,
       createdAt: serverTimestamp(),
     },
     { merge: true }

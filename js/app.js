@@ -19,12 +19,6 @@ export function setNotice(kind, msg) {
   el.hidden = !msg;
 }
 
-export function getConfig() {
-  const cfg = window.__CONFIG__;
-  if (!cfg) throw new Error("Missing config.js (create from config.js.example).");
-  return cfg;
-}
-
 export async function loadHeader() {
   if (window.__headerReady) await window.__headerReady;
 }

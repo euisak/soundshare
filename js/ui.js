@@ -162,7 +162,7 @@ const _SVG = {
 /**
  * 앨범아트 커버 스택 HTML (최대 5장)
  */
-export function buildCoverStack(tracks) {
+function buildCoverStack(tracks) {
   const items = (tracks || []).slice(0, 5);
   let html = '<div class="post-cover-stack">';
   for (let i = 0; i < 5; i++) {
