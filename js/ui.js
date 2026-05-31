@@ -55,35 +55,6 @@ export function avatarLetter(name) {
   return (name || "?")[0].toUpperCase();
 }
 
-export function renderTrackCard(track, { compact = false } = {}) {
-  if (!track) return "";
-  const art = track.albumArt
-    ? `<img class="track-art" src="${escHtml(track.albumArt)}" alt="${escHtml(track.name)}" />`
-    : `<div class="track-art" style="background:rgba(109,124,255,.2);display:flex;align-items:center;justify-content:center;font-size:22px;">♪</div>`;
-  const preview = track.previewUrl && !compact
-    ? `<audio id="previewAudio" src="${escHtml(track.previewUrl)}" preload="none"></audio>
-       <button class="audio-control" id="btnPreview" title="미리듣기">
-         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-       </button>`
-    : "";
-  const links = !compact ? `
-    <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
-      ${track.appleMusicUrl ? `<a href="${escHtml(track.appleMusicUrl)}" target="_blank" rel="noopener" style="font-size:11px;color:var(--brand);text-decoration:none">🍎 Apple Music</a>` : ""}
-      ${track.spotifySearchUrl ? `<a href="${escHtml(track.spotifySearchUrl)}" target="_blank" rel="noopener" style="font-size:11px;color:#1db954;text-decoration:none">🟢 Spotify</a>` : ""}
-    </div>` : "";
-  return `
-  <div class="track-card" style="flex-wrap:wrap">
-    ${art}
-    <div class="track-info" style="flex:1;min-width:0">
-      <div class="track-name">${escHtml(track.name)}</div>
-      <div class="track-artist">${escHtml(track.artist)}</div>
-      ${compact ? "" : `<div class="track-album muted small">${escHtml(track.album)}</div>`}
-      ${links}
-    </div>
-    ${preview}
-  </div>`;
-}
-
 export function renderChips(items, color = "default") {
   if (!items?.length) return "";
   return `<div class="chips">${items.map((t) => `<span class="chip ${color}">${escHtml(t)}</span>`).join("")}</div>`;

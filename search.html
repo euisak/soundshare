@@ -90,9 +90,9 @@
       });
 
       // ── 헤더 검색창 (search.html 위에서 검색 시 in-place 실행) ──────────
-      document.querySelector(".header-search")?.addEventListener("submit", async (e) => {
+      document.querySelector(".topbar-search")?.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const kw = (e.currentTarget.querySelector(".search-input")?.value || "").trim();
+        const kw = (e.currentTarget.querySelector(".topbar-search-input")?.value || "").trim();
         if (!kw) return;
         input.value = kw;
         history.replaceState({}, "", `?q=${encodeURIComponent(kw)}`);
