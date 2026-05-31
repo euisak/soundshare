@@ -1,0 +1,88 @@
+/* ── Feed 페이지 (index.html) ────────────────── */
+.feed-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.feed-page-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.03em;
+}
+
+/* 정렬 드롭다운 */
+.feed-sort-wrap { position: relative; }
+.feed-sort-btn {
+  border: none;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.feed-sort-btn strong { font-weight: 600; }
+.feed-sort-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  min-width: 130px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  z-index: 12;
+}
+.feed-sort-menu button {
+  width: 100%;
+  border: 0;
+  background: none;
+  border-radius: 6px;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 9px;
+  text-align: left;
+}
+.feed-sort-menu button:hover { background: #f3f3f3; }
+
+/* 포스트 카드 스켈레톤 */
+.post-feed-skeleton {
+  display: flex;
+  gap: 20px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--line);
+}
+.post-feed-skeleton:last-child { border-bottom: none; }
+.post-feed-skeleton-cover {
+  width: 390px;
+  height: 150px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e4e4e4 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+.post-feed-skeleton-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+}
+.post-feed-skeleton-line {
+  height: 13px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
