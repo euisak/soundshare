@@ -43,6 +43,20 @@ export function initTopbar() {
     });
   }
 
+  // index.html이 아닌 페이지에서 검색 시 index.html?q=... 으로 이동
+  const isIndex = /\/(index\.html)?(\?.*)?$/.test(location.pathname + location.search) && !location.pathname.includes("/");
+  const onIndex = location.pathname.endsWith("index.html") || location.pathname.endsWith("/") || location.pathname === "";
+  if (!onIndex) {
+    const searchForm = qs(".topbar-search");
+    if (searchForm) {
+      searchForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const kw = (qs(".topbar-search-input")?.value || "").trim();
+        if (kw) location.href = `index.html?q=${encodeURIComponent(kw)}`;
+      });
+    }
+  }
+
   const authOnly = qsa("[data-auth='in']");
   const guestOnly = qsa("[data-auth='out']");
   const avatar    = qs("#userAvatar");
@@ -55,32 +69,32 @@ export function initTopbar() {
   function renderNotifList(notifs) {
     if (!notifList) return;
     if (!notifs.length) {
-      notifList.innerHTML = '<div class="notif-empty">새 알림이 없습니다</div>';
+      notifList.innerHTML = '<div class="notify-empty">새 알림이 없습니다</div>';
       return;
     }
     notifList.innerHTML = notifs.map((n) => {
-      const icon   = n.type === "like" ? "❤️" : "💬";
-      const action = n.type === "like"
+      const isLike = n.type === "like";
+      const action = isLike
         ? "님이 회원님의 게시글에 좋아요를 눌렀습니다"
         : "님이 댓글을 달았습니다";
-      const title  = n.postTitle
-        ? `<span class="notif-post-title"> — ${escHtml(
+      const title = n.postTitle
+        ? `<span class="notify-item-title"> — ${escHtml(
             n.postTitle.length > 20 ? n.postTitle.slice(0, 20) + "…" : n.postTitle
           )}</span>`
         : "";
-      const preview = (n.type === "comment" && n.commentText)
-        ? `<div class="notif-comment">"${escHtml(
+      const preview = (!isLike && n.commentText)
+        ? `<div class="notify-item-title" style="font-style:normal">"${escHtml(
             n.commentText.length > 50 ? n.commentText.slice(0, 50) + "…" : n.commentText
           )}"</div>`
         : "";
       const when = n.createdAt ? timeAgo(n.createdAt) : "";
       return `
-        <div class="notif-item" data-notif-id="${escHtml(n.id)}" data-post-id="${escHtml(n.postId)}">
-          <span class="notif-icon">${icon}</span>
-          <div class="notif-body">
-            <div class="notif-text"><strong>${escHtml(n.fromName)}</strong>${action}${title}</div>
+        <div class="notify-item" data-notif-id="${escHtml(n.id)}" data-post-id="${escHtml(n.postId)}">
+          <span class="notify-item-icon ${isLike ? "notify-icon-like" : "notify-icon-cmt"}">${isLike ? "❤️" : "💬"}</span>
+          <div class="notify-item-body">
+            <div class="notify-item-text"><strong>${escHtml(n.fromName)}</strong>${action}${title}</div>
             ${preview}
-            <div class="notif-time">${when}</div>
+            <div class="notify-item-time">${when}</div>
           </div>
         </div>`;
     }).join("");
@@ -93,18 +107,20 @@ export function initTopbar() {
   const profilePopover = qs("#profilePopover");
   avatar?.addEventListener("click", (e) => {
     e.stopPropagation();
+    if (notifPanel) notifPanel.hidden = true;
     if (profilePopover) profilePopover.hidden = !profilePopover.hidden;
   });
 
   // ── 벨 버튼 토글 ────────────────────────────────────────────
   btnNotif?.addEventListener("click", (e) => {
     e.stopPropagation();
+    if (profilePopover) profilePopover.hidden = true;
     if (notifPanel) notifPanel.hidden = !notifPanel.hidden;
   });
 
   // ── 알림 항목 클릭: 삭제 완료 후 해당 게시글로 이동 ────────────
   notifList?.addEventListener("click", async (e) => {
-    const item = e.target.closest(".notif-item");
+    const item = e.target.closest(".notify-item");
     if (!item) return;
     const notifId = item.dataset.notifId;
     const postId  = item.dataset.postId;

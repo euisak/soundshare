@@ -17,7 +17,7 @@
   <body>
     <script src="js/header-loader.js"></script>
 
-    <main class="container" style="max-width:560px">
+    <main style="width:min(560px,calc(100% - 32px));margin:0 auto;padding:24px 0 80px">
 
       <button class="back-btn" onclick="history.length > 1 ? history.back() : location.href='mypage.html'">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -25,43 +25,37 @@
         </svg>
         뒤로
       </button>
-      <!-- 페이지 제목 -->
-      <h1 style="font-size:22px;font-weight:800;margin:0 0 20px;letter-spacing:-.02em">설정</h1>
 
-      <!-- ── 프로필 정보 ─────────────────────────────────────── -->
-      <section class="card" style="margin-bottom:14px">
+      <h1 style="font-size:22px;font-weight:800;margin:0 0 4px;letter-spacing:-.02em">설정</h1>
+
+      <!-- ── 프로필 ──────────────────────────────────────────── -->
+      <div style="padding:28px 0;border-bottom:1px solid var(--line)">
         <div style="display:flex;align-items:center;gap:16px">
-
-          <!-- 사진 업로드 영역 -->
           <div class="photo-upload-wrap" id="photoUploadWrap" title="프로필 사진 변경">
             <div class="photo-upload-avatar" id="profileAvatar">?</div>
             <div class="photo-upload-overlay">사진<br>변경</div>
-            <input type="file" id="photoFileInput" accept=".jpg,.jpeg,.png"
-                   style="display:none" />
+            <input type="file" id="photoFileInput" accept=".jpg,.jpeg,.png" style="display:none" />
           </div>
-
           <div style="flex:1;min-width:0">
             <div id="profileName" style="font-size:16px;font-weight:700">-</div>
             <div id="profileEmail" class="muted small" style="margin-top:2px">-</div>
           </div>
         </div>
-
-        <!-- 사진 저장 버튼 (사진 선택 후에만 표시) -->
         <div id="photoSaveRow" hidden style="margin-top:14px;display:flex;align-items:center;gap:10px">
           <div id="noticePhoto" class="notice" hidden style="flex:1;margin:0"></div>
           <button class="btn primary" id="btnSavePhoto" style="flex-shrink:0">사진 저장</button>
           <button class="btn" id="btnCancelPhoto" style="flex-shrink:0">취소</button>
         </div>
-      </section>
+      </div>
 
       <!-- ── 닉네임 변경 ─────────────────────────────────────── -->
-      <section class="card" style="margin-bottom:14px">
-        <h2 style="font-size:15px;font-weight:700;margin:0 0 14px">닉네임 변경</h2>
+      <div style="padding:28px 0;border-bottom:1px solid var(--line)">
+        <div style="font-size:15px;font-weight:700;margin:0 0 18px">닉네임 변경</div>
         <div id="noticeNickname" class="notice" hidden style="margin-bottom:12px"></div>
         <form id="formNickname" class="stack" novalidate>
           <div>
-            <label for="newNickname" style="font-size:13px">새 닉네임 <span class="muted small">(최대 10자)</span></label>
-            <div style="display:flex;gap:8px;margin-top:6px">
+            <label for="newNickname" style="font-size:13px;display:block;margin-bottom:6px">새 닉네임 <span class="muted small">(최대 10자)</span></label>
+            <div style="display:flex;gap:8px">
               <input id="newNickname" class="input" type="text" maxlength="10"
                      placeholder="변경할 닉네임 입력" style="flex:1" autocomplete="off" />
               <button type="button" class="btn" id="btnCheckNick" style="flex-shrink:0">중복확인</button>
@@ -70,39 +64,38 @@
           </div>
           <button class="btn primary" type="submit" id="btnSaveNick" disabled>저장</button>
         </form>
-      </section>
+      </div>
 
       <!-- ── 비밀번호 변경 ──────────────────────────────────── -->
-      <section class="card" style="margin-bottom:14px">
-        <h2 style="font-size:15px;font-weight:700;margin:0 0 14px">비밀번호 변경</h2>
+      <div style="padding:28px 0;border-bottom:1px solid var(--line)">
+        <div style="font-size:15px;font-weight:700;margin:0 0 18px">비밀번호 변경</div>
         <div id="noticePw" class="notice" hidden style="margin-bottom:12px"></div>
         <form id="formPassword" class="stack" novalidate>
           <div>
-            <label for="currentPw" style="font-size:13px">현재 비밀번호</label>
+            <label for="currentPw" style="font-size:13px;display:block;margin-bottom:6px">현재 비밀번호</label>
             <input id="currentPw" class="input" type="password" autocomplete="current-password"
-                   placeholder="현재 비밀번호" maxlength="30" style="margin-top:6px" />
+                   placeholder="현재 비밀번호" maxlength="30" />
           </div>
           <div>
-            <label for="newPw" style="font-size:13px">새 비밀번호 <span class="muted small">(특수기호 포함 8~30자)</span></label>
+            <label for="newPw" style="font-size:13px;display:block;margin-bottom:6px">새 비밀번호 <span class="muted small">(특수기호 포함 8~30자)</span></label>
             <input id="newPw" class="input" type="password" autocomplete="new-password"
-                   placeholder="새 비밀번호" maxlength="30" style="margin-top:6px" />
+                   placeholder="새 비밀번호" maxlength="30" />
           </div>
           <div>
-            <label for="newPwConfirm" style="font-size:13px">새 비밀번호 확인</label>
+            <label for="newPwConfirm" style="font-size:13px;display:block;margin-bottom:6px">새 비밀번호 확인</label>
             <input id="newPwConfirm" class="input" type="password" autocomplete="new-password"
-                   placeholder="새 비밀번호 재입력" maxlength="30" style="margin-top:6px" />
+                   placeholder="새 비밀번호 재입력" maxlength="30" />
             <span id="pwConfirmStatus" class="small" style="display:block;margin-top:5px"></span>
           </div>
           <button class="btn primary" type="submit" id="btnSavePw" disabled>변경</button>
         </form>
-      </section>
+      </div>
 
       <!-- ── 공개 범위 ──────────────────────────────────────── -->
-      <section class="card" style="margin-bottom:14px">
-        <h2 style="font-size:15px;font-weight:700;margin:0 0 6px">공개 범위</h2>
-        <p class="muted small" style="margin:0 0 16px">다른 사람이 내 프로필에서 볼 수 있는 항목을 설정합니다.</p>
-        <div style="display:flex;flex-direction:column;gap:16px">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div style="padding:28px 0;border-bottom:1px solid var(--line)">
+        <div style="font-size:15px;font-weight:700;margin:0 0 18px">공개 범위</div>
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0">
             <div>
               <div style="font-size:14px;font-weight:600">작성한 게시글</div>
               <div class="muted small" style="margin-top:2px">내 프로필에서 작성한 글 목록을 공개합니다</div>
@@ -112,7 +105,7 @@
               <span class="toggle-slider"></span>
             </label>
           </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0">
             <div>
               <div style="font-size:14px;font-weight:600">작성한 댓글</div>
               <div class="muted small" style="margin-top:2px">내 프로필에서 작성한 댓글 목록을 공개합니다</div>
@@ -124,23 +117,17 @@
           </div>
         </div>
         <div id="noticePrivacy" class="notice" hidden style="margin-top:14px"></div>
-      </section>
+      </div>
 
-      <!-- ── 위험 구역 ──────────────────────────────────────── -->
-      <section class="card" style="margin-bottom:14px;border-color:rgba(255,77,109,0.3)">
-        <h2 style="font-size:15px;font-weight:700;margin:0 0 6px;color:var(--danger)">위험 구역</h2>
-        <p class="muted small" style="margin:0 0 14px">
-          계정을 삭제하면 모든 데이터가 영구적으로 제거되며 복구할 수 없습니다.
-        </p>
+      <!-- ── 회원탈퇴 ──────────────────────────────────────── -->
+      <div style="padding:28px 0">
         <div id="noticeDelete" class="notice" hidden style="margin-bottom:12px"></div>
-
-        <!-- 탈퇴 확인 영역 (처음엔 숨김) -->
-        <div id="deleteConfirmArea" hidden>
+        <div id="deleteConfirmArea" hidden style="margin-bottom:12px">
           <form id="formDelete" class="stack" novalidate>
             <div>
-              <label for="deletePw" style="font-size:13px">비밀번호 확인</label>
+              <label for="deletePw" style="font-size:13px;display:block;margin-bottom:6px">비밀번호를 입력해 탈퇴를 확인해주세요</label>
               <input id="deletePw" class="input" type="password" autocomplete="current-password"
-                     placeholder="현재 비밀번호 입력" maxlength="30" style="margin-top:6px" />
+                     placeholder="현재 비밀번호" maxlength="30" />
             </div>
             <div style="display:flex;gap:8px">
               <button class="btn btn-danger" type="submit" style="flex:1">탈퇴 확인</button>
@@ -148,9 +135,8 @@
             </div>
           </form>
         </div>
-
         <button class="btn btn-danger" id="btnShowDelete" style="width:100%">회원 탈퇴</button>
-      </section>
+      </div>
 
     </main>
 
@@ -165,11 +151,9 @@
       initTopbar();
       const user = await requireAuth();
 
-      // ── 프로필 표시 ─────────────────────────────────────────
       const name = user.displayName || user.email.split("@")[0];
       const profileAvatarEl = document.querySelector("#profileAvatar");
 
-      // Firestore에서 photoURL 읽기 (Auth photoURL은 base64 저장 불가)
       const userSnap = await getDoc(doc(db, "users", user.uid));
       let currentPhotoURL = userSnap.data()?.photoURL || null;
 
@@ -189,9 +173,8 @@
       const photoSaveRow    = document.querySelector("#photoSaveRow");
       const btnSavePhoto    = document.querySelector("#btnSavePhoto");
       const btnCancelPhoto  = document.querySelector("#btnCancelPhoto");
-      let   pendingPhotoUrl = null; // canvas로 압축된 DataURL
+      let   pendingPhotoUrl = null;
 
-      // 클릭 → 파일 선택
       document.querySelector("#photoUploadWrap").addEventListener("click", () => {
         photoFileInput.click();
       });
@@ -199,41 +182,26 @@
       photoFileInput.addEventListener("change", () => {
         const file = photoFileInput.files[0];
         if (!file) return;
-
-        // 형식 검사
         if (!/\.(jpe?g|png)$/i.test(file.name)) {
           showToast("JPG 또는 PNG 파일만 업로드할 수 있습니다.", "danger");
-          photoFileInput.value = "";
-          return;
+          photoFileInput.value = ""; return;
         }
-
-        // 용량 검사 (5 MB)
         if (file.size > 5 * 1024 * 1024) {
           showToast("파일 크기는 5MB 이하여야 합니다.", "danger");
-          photoFileInput.value = "";
-          return;
+          photoFileInput.value = ""; return;
         }
-
-        // Canvas로 200×200 압축
         const reader = new FileReader();
         reader.onload = (ev) => {
           const img = new Image();
           img.onload = () => {
             const SIZE = 200;
             const canvas = document.createElement("canvas");
-            canvas.width = SIZE;
-            canvas.height = SIZE;
+            canvas.width = SIZE; canvas.height = SIZE;
             const ctx = canvas.getContext("2d");
-
-            // 정사각형 center-crop
             const side = Math.min(img.width, img.height);
-            const sx   = (img.width  - side) / 2;
-            const sy   = (img.height - side) / 2;
+            const sx = (img.width - side) / 2, sy = (img.height - side) / 2;
             ctx.drawImage(img, sx, sy, side, side, 0, 0, SIZE, SIZE);
-
             pendingPhotoUrl = canvas.toDataURL("image/jpeg", 0.75);
-
-            // 미리보기
             profileAvatarEl.innerHTML = `<img src="${pendingPhotoUrl}" alt="미리보기" />`;
             photoSaveRow.hidden = false;
             setNotice("#noticePhoto", "", "");
@@ -243,7 +211,6 @@
         reader.readAsDataURL(file);
       });
 
-      // 취소
       btnCancelPhoto.addEventListener("click", () => {
         pendingPhotoUrl = null;
         photoFileInput.value = "";
@@ -252,14 +219,13 @@
         setNotice("#noticePhoto", "", "");
       });
 
-      // 저장
       btnSavePhoto.addEventListener("click", async () => {
         if (!pendingPhotoUrl) return;
         setLoading(btnSavePhoto, true);
         setNotice("#noticePhoto", "", "");
         try {
           await updateProfilePhoto(pendingPhotoUrl);
-          currentPhotoURL = pendingPhotoUrl; // 로컬 변수 갱신
+          currentPhotoURL = pendingPhotoUrl;
           pendingPhotoUrl = null;
           showToast("프로필 사진이 변경되었습니다.");
           photoSaveRow.hidden = true;
@@ -286,18 +252,14 @@
         btn.textContent = on ? "처리 중…" : (label || btn.dataset.label);
       }
 
-      // ════════════════════════════════════════════════════════
-      // 닉네임 변경
-      // ════════════════════════════════════════════════════════
-      let nickState = null; // null=미확인 / true=사용가능 / false=중복
-
-      const nickInput  = document.querySelector("#newNickname");
-      const nickStatus = document.querySelector("#nickStatus");
+      // ── 닉네임 변경 ──────────────────────────────────────────
+      let nickState = null;
+      const nickInput    = document.querySelector("#newNickname");
+      const nickStatus   = document.querySelector("#nickStatus");
       const btnCheckNick = document.querySelector("#btnCheckNick");
       const btnSaveNick  = document.querySelector("#btnSaveNick");
 
-      // 현재 닉네임 미리 채우기
-      nickInput.value = user.displayName || "";
+      nickInput.value = "";
 
       function updateNickUI() {
         const val = nickInput.value.trim();
@@ -306,7 +268,7 @@
         } else if (val === (user.displayName || "")) {
           nickStatus.textContent = "현재 사용 중인 닉네임입니다.";
           nickStatus.style.color = "var(--muted)";
-          nickState = true; // 동일 닉네임은 그대로 저장 허용
+          nickState = true;
         } else if (nickState === null) {
           nickStatus.textContent = "중복 확인이 필요합니다.";
           nickStatus.style.color = "var(--muted)";
@@ -322,12 +284,7 @@
 
       nickInput.addEventListener("input", () => {
         const val = nickInput.value.trim();
-        // 현재 닉네임과 동일하면 확인 없이 허용
-        if (val === (user.displayName || "")) {
-          nickState = true;
-        } else {
-          nickState = null;
-        }
+        nickState = val === (user.displayName || "") ? true : null;
         updateNickUI();
       });
 
@@ -335,18 +292,14 @@
         const val = nickInput.value.trim();
         if (!val) {
           nickStatus.textContent = "닉네임을 입력해주세요.";
-          nickStatus.style.color = "var(--danger)";
-          return;
+          nickStatus.style.color = "var(--danger)"; return;
         }
         if (val === (user.displayName || "")) { nickState = true; updateNickUI(); return; }
         setLoading(btnCheckNick, true);
         try {
           nickState = !(await isNicknameTaken(val));
-        } catch {
-          nickState = null;
-        } finally {
-          setLoading(btnCheckNick, false);
-        }
+        } catch { nickState = null; }
+        finally { setLoading(btnCheckNick, false); }
         updateNickUI();
       });
 
@@ -356,13 +309,9 @@
         setNotice("#noticeNickname", "", "");
         try {
           await changeNickname(nickInput.value.trim());
-          // 프로필 표시 즉시 반영
           const newName = nickInput.value.trim();
           document.querySelector("#profileName").textContent = newName;
-          // 사진이 없을 때만 아바타 글자 업데이트
-          if (!currentPhotoURL && !pendingPhotoUrl) {
-            profileAvatarEl.textContent = avatarLetter(newName);
-          }
+          if (!currentPhotoURL && !pendingPhotoUrl) profileAvatarEl.textContent = avatarLetter(newName);
           nickState = null;
           updateNickUI();
           showToast("닉네임이 변경되었습니다.");
@@ -373,9 +322,7 @@
         }
       });
 
-      // ════════════════════════════════════════════════════════
-      // 비밀번호 변경
-      // ════════════════════════════════════════════════════════
+      // ── 비밀번호 변경 ──────────────────────────────────────
       const newPwInput      = document.querySelector("#newPw");
       const newPwConfirm    = document.querySelector("#newPwConfirm");
       const pwConfirmStatus = document.querySelector("#pwConfirmStatus");
@@ -383,23 +330,14 @@
 
       function updatePwBtn() {
         const cur = document.querySelector("#currentPw").value;
-        const np  = newPwInput.value;
-        const npc = newPwConfirm.value;
-        btnSavePw.disabled = !(cur && np && npc && np === npc);
+        btnSavePw.disabled = !(cur && newPwInput.value && newPwConfirm.value && newPwInput.value === newPwConfirm.value);
       }
 
       function updatePwConfirmStatus() {
-        const np  = newPwInput.value;
-        const npc = newPwConfirm.value;
-        if (!npc) {
-          pwConfirmStatus.textContent = ""; pwConfirmStatus.style.color = "";
-        } else if (np === npc) {
-          pwConfirmStatus.textContent = "비밀번호가 일치합니다.";
-          pwConfirmStatus.style.color = "var(--ok)";
-        } else {
-          pwConfirmStatus.textContent = "비밀번호가 일치하지 않습니다.";
-          pwConfirmStatus.style.color = "var(--danger)";
-        }
+        const np = newPwInput.value, npc = newPwConfirm.value;
+        if (!npc) { pwConfirmStatus.textContent = ""; pwConfirmStatus.style.color = ""; }
+        else if (np === npc) { pwConfirmStatus.textContent = "비밀번호가 일치합니다."; pwConfirmStatus.style.color = "var(--ok)"; }
+        else { pwConfirmStatus.textContent = "비밀번호가 일치하지 않습니다."; pwConfirmStatus.style.color = "var(--danger)"; }
         updatePwBtn();
       }
 
@@ -412,10 +350,7 @@
         setLoading(btnSavePw, true);
         setNotice("#noticePw", "", "");
         try {
-          await changePassword(
-            document.querySelector("#currentPw").value,
-            newPwInput.value
-          );
+          await changePassword(document.querySelector("#currentPw").value, newPwInput.value);
           document.querySelector("#formPassword").reset();
           pwConfirmStatus.textContent = "";
           updatePwBtn();
@@ -427,17 +362,17 @@
         }
       });
 
-      // ════════════════════════════════════════════════════════
-      // 회원 탈퇴
-      // ════════════════════════════════════════════════════════
+      // ── 회원 탈퇴 ──────────────────────────────────────────
       const btnShowDelete    = document.querySelector("#btnShowDelete");
       const btnCancelDelete  = document.querySelector("#btnCancelDelete");
       const deleteConfirmArea = document.querySelector("#deleteConfirmArea");
 
       btnShowDelete.addEventListener("click", () => {
+        if (!confirm("정말 탈퇴하시겠습니까?\n모든 데이터가 영구적으로 삭제되며 복구할 수 없습니다.")) return;
         deleteConfirmArea.hidden = false;
         btnShowDelete.hidden = true;
         setNotice("#noticeDelete", "", "");
+        document.querySelector("#deletePw").focus();
       });
 
       btnCancelDelete.addEventListener("click", () => {
@@ -462,16 +397,12 @@
         }
       });
 
-      // 닉네임 초기 상태 설정
       updateNickUI();
 
-      // ════════════════════════════════════════════════════════
-      // 공개 범위
-      // ════════════════════════════════════════════════════════
+      // ── 공개 범위 ──────────────────────────────────────────
       const togglePosts    = document.querySelector("#togglePosts");
       const toggleComments = document.querySelector("#toggleComments");
 
-      // 저장된 값 불러오기 (userSnap 은 위에서 이미 읽음)
       togglePosts.checked    = userSnap.data()?.postsPublic    !== false;
       toggleComments.checked = userSnap.data()?.commentsPublic !== false;
 

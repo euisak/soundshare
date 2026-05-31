@@ -26,7 +26,7 @@ export async function createPost({ title, body, genre, tags, tracks }) {
   return ref.id;
 }
 
-export async function updatePost(id, { title, body, genre, tags, tracks }) {
+export async function updatePost(id, { title, body, genre, tags, tracks, visibility }) {
   const user = auth.currentUser;
   if (!user) throw new Error("로그인이 필요합니다.");
   const snap = await getDoc(doc(db, "posts", id));
@@ -37,6 +37,7 @@ export async function updatePost(id, { title, body, genre, tags, tracks }) {
     genre: genre || [],
     tags: tags || [],
     tracks: tracks || [],
+    visibility: visibility || "public",
     updatedAt: serverTimestamp(),
   });
 }
@@ -73,6 +74,7 @@ export async function searchPosts(keyword, fields = ["title", "artist", "song"])
       if (tracks.some((t) => {
         if (fields.includes("song")   && normalize(t.name).includes(kw))   return true;
         if (fields.includes("artist") && normalize(t.artist).includes(kw)) return true;
+        if (fields.includes("album")  && normalize(t.album).includes(kw))  return true;
         return false;
       })) return true;
       return false;

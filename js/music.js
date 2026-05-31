@@ -150,9 +150,10 @@ export async function spotifyFetch(path, { method = "GET", body } = {}) {
 
 // ── iTunes Search API — JSONP (CORS 우회) ────────────────────────────────────
 
+let _itunesSeq = 0;
 function itunesJSONP(url) {
   return new Promise((resolve, reject) => {
-    const cbName = "__itunes_" + Date.now();
+    const cbName = "__itunes_" + Date.now() + "_" + (++_itunesSeq);
     const script = document.createElement("script");
     const timer = setTimeout(() => {
       cleanup();
@@ -172,23 +173,66 @@ function itunesJSONP(url) {
   });
 }
 
-export async function searchTracksItunes(q, limitN = 50) {
-  const url = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=${limitN}&country=KR`;
-  const data = await itunesJSONP(url);
-  if (!data.results?.length) return [];
+export async function searchTracksItunes(q, limitN = 30) {
+  const base = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=${limitN}`;
 
-  const isEnglishQuery = /^[a-zA-Z0-9\s\-_'".!?]+$/.test(q);
-  const lq = q.toLowerCase();
+  // KR + US 병렬 검색
+  const [krRes, usRes] = await Promise.allSettled([
+    itunesJSONP(base + "&country=KR"),
+    itunesJSONP(base + "&country=US"),
+  ]);
+  const krResults = krRes.status === "fulfilled" ? (krRes.value.results || []) : [];
+  const usResults = usRes.status === "fulfilled" ? (usRes.value.results || []) : [];
 
-  return data.results
-    .filter((t) => {
-      if (!isEnglishQuery) return true;
-      const name   = (t.trackName   || "").toLowerCase();
-      const artist = (t.artistName  || "").toLowerCase();
-      const album  = (t.collectionName || "").toLowerCase();
-      return name.includes(lq) || artist.includes(lq) || album.includes(lq);
-    })
-    .map((t) => ({
+  // KR 우선으로 병합 (중복 trackId 제거)
+  const seen = new Set();
+  const merged = [];
+  for (const t of [...krResults, ...usResults]) {
+    if (t.trackId && !seen.has(t.trackId)) {
+      seen.add(t.trackId);
+      merged.push(t);
+    }
+  }
+  if (!merged.length) return [];
+
+  // 관련도 점수
+  const lq    = q.toLowerCase().trim();
+  const words = lq.split(/\s+/).filter(Boolean);
+
+  function relevance(t) {
+    const name   = (t.trackName      || "").toLowerCase().trim();
+    const artist = (t.artistName     || "").toLowerCase().trim();
+    const album  = (t.collectionName || "").toLowerCase().trim();
+    const nameWords = name.split(/\s+/);
+
+    // 제목 완전 일치
+    if (name === lq) return 100;
+    // 쿼리 단어 전부 제목 단어에 정확히 포함 (순서 무관)
+    if (words.every(w => nameWords.includes(w))) return 95;
+    // 제목이 쿼리로 시작
+    if (name.startsWith(lq)) return 90;
+    // 제목에 쿼리 문자열 포함
+    if (name.includes(lq)) return 80;
+    // 쿼리 단어 전부 제목 어딘가에 포함 (substring)
+    if (words.length > 1 && words.every(w => name.includes(w))) return 75;
+    // 쿼리 단어 전부 제목+아티스트에 포함 (단어 기준)
+    if (words.length > 1 && words.every(w => (name + " " + artist).split(/\s+/).includes(w))) return 70;
+    // 제목+아티스트에 substring으로 전부 포함
+    if (words.length > 1 && words.every(w => (name + " " + artist).includes(w))) return 65;
+    // 아티스트 일치
+    if (artist === lq) return 60;
+    if (artist.startsWith(lq)) return 55;
+    if (artist.includes(lq)) return 50;
+    if (album.includes(lq)) return 30;
+    return 0;
+  }
+
+  // 관련도순 → 원래 순서(인기순) 유지
+  return merged
+    .map((t, i) => ({ t, r: relevance(t), i }))
+    .filter(({ r }) => r > 0)
+    .sort((a, b) => b.r - a.r || a.i - b.i)
+    .map(({ t }) => ({
       id: String(t.trackId),
       name: t.trackName,
       artist: t.artistName,
