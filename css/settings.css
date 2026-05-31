@@ -81,5 +81,5 @@
   border-radius: 50%;
   transition: transform 0.2s;
 }
-.toggle input:checked + .toggle-slider { background: var(--brand); }
+.toggle input:checked + .toggle-slider { background: #111; }
 .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }

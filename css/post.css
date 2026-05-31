@@ -138,7 +138,7 @@
   background: var(--bg-sub);
   color: var(--text);
 }
-.pd-play-btn.is-playing { color: var(--brand); }
+.pd-play-btn.is-playing { color: #111; }
 .pd-tag {
   display: inline-flex;
   align-items: center;

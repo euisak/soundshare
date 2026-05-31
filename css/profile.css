@@ -20,7 +20,7 @@
 }
 .tab-btn.active {
   color: var(--text);
-  border-bottom-color: var(--brand);
+  border-bottom-color: #111;
 }
 
 /* post-list title / time / comment text */

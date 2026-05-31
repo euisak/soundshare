@@ -6,7 +6,6 @@
   --muted: #999;
   --faint: #bbb;
   --line: #e8e8e8;
-  --brand: #111;
   --danger: #ff4d6d;
   --ok: #2de2a6;
   --avatar-grad: linear-gradient(135deg, #444, #111);
@@ -122,7 +121,7 @@ a {
   background: var(--bg-sub);
   color: var(--text);
   border-radius: 12px;
-  padding: 12px 12px;
+  padding: 12px;
   outline: none;
   font-family: inherit;
   font-size: 14px;

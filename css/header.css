@@ -357,7 +357,7 @@
   appearance: none;
   background: none;
   border: none;
-  color: var(--brand);
+  color: var(--text);
   cursor: pointer;
   font-size: 13px;
   font-family: inherit;

@@ -90,7 +90,6 @@
   font-family: inherit;
   outline: none;
   transition: background 0.15s;
-  box-sizing: border-box;
 }
 .le-input:focus { background: #ebebeb; }
 .le-input::placeholder { color: #bbb; }
