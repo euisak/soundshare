@@ -119,18 +119,6 @@ export async function toggleLike(postId) {
   return !liked;
 }
 
-export async function toggleSave(postId) {
-  const user = auth.currentUser;
-  if (!user) throw new Error("로그인이 필요합니다.");
-  const ref = doc(db, "posts", postId);
-  const snap = await getDoc(ref);
-  const saved = (snap.data()?.savedBy || []).includes(user.uid);
-  await updateDoc(ref, {
-    savedBy: saved ? arrayRemove(user.uid) : arrayUnion(user.uid),
-  });
-  return !saved;
-}
-
 export async function addComment(postId, text) {
   const user = auth.currentUser;
   if (!user) throw new Error("로그인이 필요합니다.");
@@ -171,12 +159,6 @@ function sortByCreatedAt(posts) {
 
 export async function getUserPosts(uid) {
   const q = query(collection(db, "posts"), where("authorId", "==", uid));
-  const snap = await getDocs(q);
-  return sortByCreatedAt(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-}
-
-export async function getSavedPosts(uid) {
-  const q = query(collection(db, "posts"), where("savedBy", "array-contains", uid));
   const snap = await getDocs(q);
   return sortByCreatedAt(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
 }

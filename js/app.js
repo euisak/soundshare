@@ -11,11 +11,6 @@ export function qsa(sel, parent = document) {
   return [...parent.querySelectorAll(sel)];
 }
 
-export function setText(sel, text) {
-  const el = qs(sel);
-  if (el) el.textContent = text ?? "";
-}
-
 export function setNotice(kind, msg) {
   const el = qs("#notice");
   if (!el) return;
@@ -44,7 +39,6 @@ export function initTopbar() {
   }
 
   // index.html이 아닌 페이지에서 검색 시 index.html?q=... 으로 이동
-  const isIndex = /\/(index\.html)?(\?.*)?$/.test(location.pathname + location.search) && !location.pathname.includes("/");
   const onIndex = location.pathname.endsWith("index.html") || location.pathname.endsWith("/") || location.pathname === "";
   if (!onIndex) {
     const searchForm = qs(".topbar-search");

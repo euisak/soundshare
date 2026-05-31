@@ -1,5 +1,5 @@
 import {
-  auth, db, serverTimestamp, sendPasswordResetEmail, onAuthStateChanged,
+  auth, db, serverTimestamp, sendPasswordResetEmail,
   collection, doc, query, where, getDocs, getDoc, setDoc, deleteDoc, writeBatch,
   updatePassword, deleteUser, EmailAuthProvider, reauthenticateWithCredential,
 } from "./firebase.js";
@@ -8,28 +8,6 @@ import {
   signInWithEmailAndPassword,
   updateProfile,
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
-
-function qs(sel) { return document.querySelector(sel); }
-
-function setNotice(kind, msg) {
-  const el = qs("#notice");
-  if (!el) return;
-  el.className = `notice ${kind || ""}`.trim();
-  el.textContent = msg || "";
-  el.hidden = !msg;
-}
-
-function getValue(id) {
-  const el = qs(id);
-  return el ? el.value.trim() : "";
-}
-
-function setLoading(btn, on) {
-  if (!btn) return;
-  btn.disabled = on;
-  if (!btn.dataset.label) btn.dataset.label = btn.textContent;
-  btn.textContent = on ? "처리 중…" : btn.dataset.label;
-}
 
 const ERROR_MAP = {
   "auth/invalid-email": "이메일 형식이 올바르지 않습니다.",
@@ -56,9 +34,6 @@ export async function isNicknameTaken(nickname) {
   return !snap.empty;
 }
 
-// 회원가입 진행 중 onAuthStateChanged 자동 리다이렉트 방지 플래그
-let registering = false;
-
 function authError(code) {
   return ERROR_MAP[code] || null; // null 반환 → err.message fallback 가능하게
 }
@@ -75,87 +50,6 @@ async function ensureUserDoc(user, nickname) {
     },
     { merge: true }
   );
-}
-
-async function onLogin(e) {
-  e.preventDefault();
-  const btn = qs("#formLogin [type=submit]");
-  setLoading(btn, true);
-  setNotice("", "");
-  try {
-    const email = getValue("#loginEmail");
-    const password = getValue("#loginPassword");
-    if (!email || !password) throw new Error("이메일/비밀번호를 입력해주세요.");
-    // 이메일 형식 확인
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      throw new Error("이메일 형식이 올바르지 않습니다.");
-    }
-    await signInWithEmailAndPassword(auth, email, password);
-    window.location.replace("index.html");
-  } catch (err) {
-    setNotice("danger", authError(err.code) || err.message || "오류가 발생했습니다. 다시 시도해주세요.");
-    setLoading(btn, false);
-  }
-}
-
-async function onRegister(e) {
-  e.preventDefault();
-  const btn = qs("#formRegister [type=submit]");
-  setLoading(btn, true);
-  setNotice("", "");
-  registering = true;
-  try {
-    const email = getValue("#regEmail");
-    const password = getValue("#regPassword");
-    const nickname = getValue("#regNickname");
-
-    // 필수 입력 확인
-    if (!email || !password || !nickname) {
-      throw new Error("닉네임, 이메일, 비밀번호를 모두 입력해주세요.");
-    }
-
-    // 이메일 형식 확인
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      throw new Error("이메일 형식이 올바르지 않습니다.");
-    }
-
-    // 비밀번호 검증 (8자 이상 + 특수기호)
-    const pwError = validatePassword(password);
-    if (pwError) throw new Error(pwError);
-
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
-
-    // 계정 생성 후 인증된 상태에서 닉네임 중복 확인 (Firestore 보안 규칙 통과)
-    if (await isNicknameTaken(nickname)) {
-      await cred.user.delete(); // 방금 만든 계정 롤백
-      throw new Error("이미 사용 중인 닉네임입니다.");
-    }
-
-    if (nickname) await updateProfile(cred.user, { displayName: nickname });
-    await ensureUserDoc(cred.user, nickname); // 닉네임 저장 완료 후 이동
-    window.location.href = "index.html";
-  } catch (err) {
-    registering = false;
-    setNotice("danger", authError(err.code) || err.message || "오류가 발생했습니다. 다시 시도해주세요.");
-    setLoading(btn, false);
-  }
-}
-
-async function onForgot(e) {
-  e.preventDefault();
-  const btn = qs("#formForgot [type=submit]");
-  setLoading(btn, true);
-  setNotice("", "");
-  try {
-    const email = getValue("#forgotEmail");
-    if (!email) throw new Error("이메일을 입력해주세요.");
-    await sendPasswordResetEmail(auth, email);
-    setNotice("ok", "비밀번호 재설정 이메일을 전송했습니다. 받은편지함을 확인해주세요.");
-  } catch (err) {
-    setNotice("danger", authError(err.code) || err.message || "오류가 발생했습니다. 다시 시도해주세요.");
-  } finally {
-    setLoading(btn, false);
-  }
 }
 
 // ── 모달용 export 함수들 ──────────────────────────────────────────
@@ -286,118 +180,3 @@ export async function deleteAccount(currentPassword) {
   await deleteUser(user);
 }
 
-export function initAuthPage() {
-  // 이미 로그인돼 있으면 바로 홈으로 (회원가입 진행 중엔 무시)
-  const unsub = onAuthStateChanged(auth, (user) => {
-    if (user && !registering) { unsub(); window.location.replace("index.html"); }
-  });
-
-  // ── 뷰 전환 ─────────────────────────────────────────────────────
-  const viewMap = { login: "#viewLogin", register: "#viewRegister", forgot: "#viewForgot" };
-
-  function showView(name) {
-    setNotice("", "");
-    Object.entries(viewMap).forEach(([k, sel]) => {
-      const el = qs(sel);
-      if (el) el.hidden = k !== name;
-    });
-    if (name !== "register") resetNicknameState();
-  }
-
-  // URL 해시로 초기 뷰 결정 (#signup → register, #forgot → forgot)
-  const hash = window.location.hash.slice(1);
-  if (hash === "signup") showView("register");
-  else if (hash === "forgot") showView("forgot");
-
-  document.querySelectorAll("[data-to]").forEach((btn) => {
-    btn.addEventListener("click", () => showView(btn.dataset.to));
-  });
-
-  // ── 닉네임 검증 상태 ─────────────────────────────────────────────
-  // null: 미확인 / true: 사용가능 / false: 중복
-  let nicknameState = null;
-
-  function resetNicknameState() {
-    nicknameState = null;
-    const el = qs("#nicknameStatus");
-    if (el) { el.textContent = ""; el.style.color = ""; }
-    updateRegisterBtn();
-  }
-
-  function updateNicknameStatus() {
-    const nickname = getValue("#regNickname");
-    const el = qs("#nicknameStatus");
-    if (!el) return;
-    if (!nickname) {
-      el.textContent = ""; el.style.color = "";
-    } else if (nicknameState === null) {
-      el.textContent = "닉네임 중복 확인이 필요합니다.";
-      el.style.color = "var(--muted)";
-    } else if (nicknameState === true) {
-      el.textContent = "사용 가능한 닉네임입니다.";
-      el.style.color = "var(--ok)";
-    } else {
-      el.textContent = "이미 사용 중인 닉네임입니다.";
-      el.style.color = "var(--danger)";
-    }
-    updateRegisterBtn();
-  }
-
-  // ── 이메일 실시간 검증 ───────────────────────────────────────────
-  function updateEmailStatus() {
-    const email = getValue("#regEmail");
-    const el = qs("#emailStatus");
-    if (!el) return;
-    if (!email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      el.textContent = ""; el.style.color = "";
-    } else {
-      el.textContent = "이메일 형식이 올바르지 않습니다.";
-      el.style.color = "var(--danger)";
-    }
-    updateRegisterBtn();
-  }
-
-  // ── 회원가입 버튼 활성화 조건 ────────────────────────────────────
-  function updateRegisterBtn() {
-    const nickname = getValue("#regNickname");
-    const email    = getValue("#regEmail");
-    const password = getValue("#regPassword");
-    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    const btn = qs("#btnRegister");
-    if (btn) btn.disabled = !(nickname && email && password && emailValid && nicknameState === true);
-  }
-
-  // 닉네임 입력 변경 → 상태 초기화
-  qs("#regNickname")?.addEventListener("input", () => {
-    nicknameState = null;
-    updateNicknameStatus();
-  });
-  qs("#regEmail")?.addEventListener("input", updateEmailStatus);
-  qs("#regPassword")?.addEventListener("input", updateRegisterBtn);
-
-  // 닉네임 중복확인 버튼
-  const btnCheck = qs("#btnCheckNickname");
-  btnCheck?.addEventListener("click", async () => {
-    const nickname = getValue("#regNickname");
-    if (!nickname) {
-      const el = qs("#nicknameStatus");
-      if (el) { el.textContent = "닉네임을 입력해주세요."; el.style.color = "var(--danger)"; }
-      return;
-    }
-    setLoading(btnCheck, true);
-    try {
-      const taken = await isNicknameTaken(nickname);
-      nicknameState = !taken;
-    } catch {
-      nicknameState = null;
-    } finally {
-      setLoading(btnCheck, false);
-    }
-    updateNicknameStatus();
-  });
-
-  // ── 폼 이벤트 연결 ───────────────────────────────────────────────
-  qs("#formLogin")?.addEventListener("submit", onLogin);
-  qs("#formRegister")?.addEventListener("submit", onRegister);
-  qs("#formForgot")?.addEventListener("submit", onForgot);
-}

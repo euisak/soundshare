@@ -55,11 +55,6 @@ export function avatarLetter(name) {
   return (name || "?")[0].toUpperCase();
 }
 
-export function renderChips(items, color = "default") {
-  if (!items?.length) return "";
-  return `<div class="chips">${items.map((t) => `<span class="chip ${color}">${escHtml(t)}</span>`).join("")}</div>`;
-}
-
 export function renderPostCard(post) {
   // 첫 번째 트랙 썸네일 (없으면 ♪ 플레이스홀더)
   const trackList = post.tracks?.length ? post.tracks : (post.track ? [post.track] : []);
