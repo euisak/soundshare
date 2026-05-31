@@ -6,74 +6,87 @@ Spotify 사용자들이 노래/플레이리스트를 추천하고 공유하는 �
 
 ## 기술 스택
 - 프론트엔드: HTML5 + CSS3 + Vanilla JS
-- 인증/DB: Firebase Authentication + Firestore
+- 인증/DB: Firebase Authentication + Firestore (v10 모듈 CDN)
 - 음악 API: iTunes Search API (무료, 인증 불필요)
 - 호스팅: GitHub Pages / Firebase Hosting
 
 ## 페이지 구조
-- index.html: 메인 피드 (게시글 목록, 검색/필터 — 라디오 버튼 조건 필터링)
-- login.html: 로그인
-- signup.html: 회원가입
-- forgot.html: 비밀번호 찾기
-- settings.html: 회원정보 수정
-- write.html: 게시글 작성 / 수정 (id 파라미터 있으면 수정 모드)
+- index.html: 메인 피드 (게시글 목록, 정렬, 검색)
+- login.html: 인증 모달 HTML 컨테이너 (직접 접근 시 index.html로 리다이렉트)
+- signup.html / forgot.html: index.html로 리다이렉트
+- write.html: 게시글 작성 / 수정 (hash에 id 있으면 수정 모드)
 - post.html: 게시글 상세 (본인 글이면 수정/삭제 버튼 노출)
-- user.html: 사용자 페이지
-- mypage.html: 내 페이지
+- search.html: 검색 전용 페이지
+- mypage.html: 내 페이지 (포스트 / 댓글 / 좋아요 탭)
+- profile.html: 다른 유저 프로필 (hash에 uid)
+- settings.html: 회원정보 수정 (닉네임, 비밀번호, 프로필 사진, 공개 범위, 탈퇴)
 
 ## 파일 구조
+```
 SoundShare/
 ├── index.html
 ├── login.html
 ├── signup.html
 ├── forgot.html
-├── settings.html
 ├── write.html
 ├── post.html
-├── user.html
+├── search.html
 ├── mypage.html
+├── profile.html
+├── settings.html
+├── config.js              — Firebase 설정 (gitignore 대상)
 ├── components/
-│   └── header.html
+│   ├── header.html        — 공통 헤더 (검색바, 알림, 프로필)
+│   └── header-auth.html   — 인증 페이지용 헤더 (로고만)
 ├── css/
-│   └── style.css
+│   ├── base.css           — 공통 변수, 레이아웃, 컴포넌트
+│   ├── header.css         — 헤더/탑바/알림 패널
+│   ├── feed.css           — 피드 카드 (index, mypage, profile 공통)
+│   ├── post.css           — 게시글 상세
+│   ├── write.css          — 글쓰기 에디터
+│   ├── profile.css        — 프로필/마이페이지
+│   ├── search.css         — 검색 페이지
+│   ├── settings.css       — 설정 페이지
+│   └── index.css          — 메인 피드 전용
 └── js/
-    ├── firebase.js
-    ├── auth.js
-    ├── music.js
-    ├── post.js
-    ├── notify.js
-    ├── ui.js
-    ├── app.js
-    └── header-loader.js
+    ├── firebase.js        — Firebase 초기화 및 Firestore/Auth export
+    ├── auth.js            — 닉네임 중복확인, 비밀번호 변경, 탈퇴 등
+    ├── music.js           — iTunes Search API 노래 검색
+    ├── post.js            — 게시글 CRUD, 좋아요, 댓글
+    ├── notify.js          — 알림 Firestore 실시간 리스너
+    ├── ui.js              — 공통 UI (renderFeedCard, renderPagination, showToast 등)
+    ├── app.js             — loadHeader, initTopbar, requireAuth
+    ├── header-loader.js   — 헤더 fetch 삽입 + Firebase 연결 힌트 주입
+    ├── index-page.js      — index.html 페이지 로직
+    ├── post-page.js       — post.html 페이지 로직
+    ├── write-page.js      — write.html 페이지 로직
+    ├── search-page.js     — search.html 페이지 로직
+    ├── mypage-page.js     — mypage.html 페이지 로직
+    ├── profile-page.js    — profile.html 페이지 로직
+    └── settings-page.js   — settings.html 페이지 로직
+```
 
 ## JS 파일 역할
-- js/firebase.js: Firebase 초기화 및 Firestore/Auth 함수 export
-- js/auth.js: 회원가입, 로그인, 비밀번호 찾기
-- js/music.js: iTunes Search API 기반 노래 검색 (장르 자동 태그 포함)
-- js/post.js: 게시글 CRUD, 좋아요, 댓글
-- js/notify.js: 알림 Firestore 실시간 리스너
-- js/ui.js: 공통 UI (토스트, 모달, 드롭다운)
-- js/app.js: 페이지 진입점 (loadHeader, initTopbar, requireAuth 등)
-- js/header-loader.js: 헤더 HTML을 fetch로 즉시 삽입 (모듈/Firebase와 독립 실행)
-
-## 주요 기능
-- 노래/플레이리스트 검색 (장르, 제목 필터 — index.html 내 라디오 버튼)
-- 게시글 작성/수정 (트랙 첨부, 장르 태그, 감성 태그)
-- Apple Music / Spotify 링크 제공 (트랙 카드)
-- 좋아요/저장/댓글
-- 본인 게시글: 수정(write.html?id=) / 삭제 버튼 노출
-- 본인 댓글: ··· 버튼으로 수정/삭제
-- 사용자 페이지 (현재 재생, 공개 범위 설정)
-- 추천곡 담기 알림 (Firestore 실시간)
+- **firebase.js**: Firebase 초기화 및 Firestore/Auth 함수 export
+- **auth.js**: 닉네임 중복확인, 비밀번호 변경, 계정 탈퇴, 프로필 사진 변경
+- **music.js**: iTunes Search API 기반 노래 검색 (장르 자동 태그 포함)
+- **post.js**: 게시글 CRUD, 좋아요, 댓글, 검색
+- **notify.js**: 알림 Firestore 실시간 리스너
+- **ui.js**: 공통 렌더 함수 (renderFeedCard, renderPagination, renderComment, renderCommentedItem, showToast, resolveAvatars 등)
+- **app.js**: loadHeader, initTopbar, requireAuth
+- **header-loader.js**: 헤더 HTML fetch 삽입 + Firebase preconnect/modulepreload 힌트 주입
+- **\*-page.js**: 각 페이지의 전용 로직 (HTML 인라인 스크립트 없음)
 
 ## 헤더 규칙
-- 로그인 / 회원가입 / 비밀번호 찾기 페이지: **로고만** 표시
-- 게시글 작성(write.html) 페이지: 글쓰기 버튼 **미표시**
-- 나머지 페이지: 로고, 검색바, 글쓰기 버튼, 🔔 알림, 프로필 표시
+- `login.html` / `signup.html` / `forgot.html`: 해당 없음 (index.html로 리다이렉트)
+- `write.html`: 커스텀 헤더 (`.le-header`) — header-loader.js 미사용
+- 나머지 페이지: `header-loader.js` → `components/header.html` 삽입 (로고, 검색바, 알림, 프로필)
 
 ## 개발 규칙
 - 프레임워크 사용 금지 (순수 HTML/CSS/JS만)
-- 공통 헤더는 components/header.html — js/header-loader.js로 fetch include
-- CSS는 style.css 단일 파일
-- 비동기 처리는 async/await 사용
-- 음악 검색은 iTunes Search API 사용 (js/music.js)
+- 공통 헤더는 `components/header.html` — `js/header-loader.js`로 fetch include
+- 페이지별 CSS 파일 분리 (`css/*.css`), 공통은 `base.css` + `header.css`
+- 페이지별 JS 파일 분리 (`js/*-page.js`), HTML에 인라인 스크립트 없음
+- 비동기 처리는 async/await + top-level await (ES module)
+- 음악 검색은 iTunes Search API 사용 (`js/music.js`)
+- Firebase 버전: `header-loader.js` 상단 `FB_VER` 상수 한 곳에서 관리
