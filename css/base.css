@@ -283,8 +283,6 @@ label {
   color: var(--text);
 }
 
-
-
 /* ── Dropdown menu (댓글·게시글 ⋮) ─────── */
 .post-list-more-wrap {
   position: relative;

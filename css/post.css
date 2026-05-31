@@ -62,7 +62,6 @@
   border-radius: 10px;
   transition: background 0.12s;
 }
-.pd-track-ext a:hover { filter: brightness(0.8); }
 .pd-track-num {
   min-width: 18px;
   text-align: right;
@@ -120,7 +119,7 @@
   font-size: 11px;
   text-decoration: none;
 }
-.pd-track-ext a:hover { text-decoration: underline; }
+.pd-track-ext a:hover { filter: brightness(0.8); text-decoration: underline; }
 .pd-play-btn {
   width: 28px;
   height: 28px;

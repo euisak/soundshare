@@ -35,7 +35,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.post-list-title-link:hover { color: var(--brand); }
 .post-list-time {
   flex-shrink: 0;
   font-size: 12px;

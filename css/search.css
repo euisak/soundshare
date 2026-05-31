@@ -58,7 +58,4 @@
   overflow: hidden;
 }
 
-.feed-skeleton {
-  height: 84px;
-  border-radius: 16px;
-}
+.feed-skeleton { height: 84px; }
