@@ -10,9 +10,7 @@ import {
   reauthenticateWithCredential,
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
 import {
-  initializeFirestore,
-  persistentLocalCache,
-  persistentMultipleTabManager,
+  getFirestore,
   serverTimestamp,
   collection,
   doc,
@@ -43,11 +41,7 @@ const { firebase } = getConfig();
 
 export const app  = initializeApp(firebase);
 export const auth = getAuth(app);
-export const db   = initializeFirestore(app, {
-  localCache: persistentLocalCache({
-    tabManager: persistentMultipleTabManager(),
-  }),
-});
+export const db   = getFirestore(app);
 
 export {
   onAuthStateChanged, signOut, sendPasswordResetEmail,
