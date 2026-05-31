@@ -393,12 +393,7 @@
       await loadTab("my");
 
       // bfcache 복원 시 캐시 초기화 후 현재 탭 재조회
-      window.addEventListener("pageshow", (e) => {
-        if (e.persisted) {
-          Object.keys(cache).forEach((k) => delete cache[k]);
-          loadTab(activeTab);
-        }
-      });
+      // bfcache 복원 시 그대로 유지
     </script>
   </body>
 </html>

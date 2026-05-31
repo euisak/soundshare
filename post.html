@@ -361,9 +361,7 @@
         finally { btn.disabled = false; }
       });
 
-      window.addEventListener("pageshow", (e) => {
-        if (e.persisted) location.reload();
-      });
+      // bfcache 복원 시 reload 금지 — Firestore 캐시로 즉시 표시
     </script>
   </body>
 </html>

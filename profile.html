@@ -235,12 +235,7 @@
 
         await loadTab("posts");
 
-        window.addEventListener("pageshow", (e) => {
-          if (e.persisted) {
-            Object.keys(cache).forEach((k) => delete cache[k]);
-            loadTab(activeTab);
-          }
-        });
+        // bfcache 복원 시 그대로 유지
       }
     </script>
   </body>
