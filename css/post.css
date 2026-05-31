@@ -62,12 +62,6 @@
   border-radius: 10px;
   transition: background 0.12s;
 }
-.pd-track-ext a {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  transition: color 0.12s;
-}
 .pd-track-ext a:hover { filter: brightness(0.8); }
 .pd-track-num {
   min-width: 18px;
