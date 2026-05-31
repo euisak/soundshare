@@ -150,3 +150,130 @@ export function showToast(msg, kind = "ok") {
     el.addEventListener("transitionend", () => el.remove());
   }, 2800);
 }
+
+// ── 피드 카드 공통 헬퍼 ──────────────────────────────────────────────
+
+const _SVG = {
+  heart: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`,
+  chat:  `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
+  eye:   `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
+};
+
+/**
+ * 앨범아트 커버 스택 HTML (최대 5장)
+ */
+export function buildCoverStack(tracks) {
+  const items = (tracks || []).slice(0, 5);
+  let html = '<div class="post-cover-stack">';
+  for (let i = 0; i < 5; i++) {
+    const t = items[i];
+    html += t?.albumArt
+      ? `<img class="post-cover-stack-img" src="${escHtml(t.albumArt)}" alt="" />`
+      : `<div class="post-cover-stack-empty"></div>`;
+  }
+  return html + '</div>';
+}
+
+/**
+ * 피드 카드 (post-feed-card) HTML
+ * @param {object} post
+ * @param {object} [opts]
+ * @param {boolean} [opts.showAuthor=false]  작성자 아바타/이름 표시
+ * @param {string}  [opts.dropdownHtml=""]   ⋮ 드롭다운 내부 버튼 HTML (없으면 미표시)
+ */
+export function renderFeedCard(post, { showAuthor = false, dropdownHtml = "" } = {}) {
+  const pid    = escHtml(post.id);
+  const tracks = Array.isArray(post.tracks) ? post.tracks : (post.track ? [post.track] : []);
+  const tags   = (post.tags || []).slice(0, 3);
+
+  const tagsHtml = tags.length
+    ? `<div class="post-feed-tags">${tags.map(t => `<span class="post-feed-tag">${escHtml(t)}</span>`).join("")}</div>`
+    : "";
+
+  const rawBody = (post.body || "").replace(/<br\s*\/?>/gi, " ").replace(/<[^>]+>/g, "").trim();
+  const bodyHtml = rawBody ? `<div class="post-feed-body-text">${escHtml(rawBody)}</div>` : "";
+
+  const authorHtml = showAuthor
+    ? `<span class="post-feed-avatar" data-uid="${escHtml(post.authorId || "")}">${avatarLetter(post.authorName)}</span>
+       <span class="post-feed-author">${escHtml(post.authorName || "익명")}</span>
+       <span class="post-feed-time">·</span>`
+    : "";
+
+  const card = `
+  <a class="post-feed-card" href="post.html#${pid}">
+    ${buildCoverStack(tracks)}
+    <div class="post-feed-body">
+      <div class="post-feed-title">${escHtml(post.title)}</div>
+      <div class="post-feed-author-row">
+        ${authorHtml}
+        <span class="post-feed-time">${timeAgo(post.createdAt)}</span>
+        ${post.visibility === "private" ? `<span class="post-feed-time">· 비공개</span>` : ""}
+      </div>
+      ${bodyHtml}
+      <div class="post-feed-footer">
+        ${tagsHtml}
+        <div class="post-feed-stats">
+          <span class="post-feed-stat">${_SVG.heart} ${post.likeCount || 0}</span>
+          <span class="post-feed-stat">${_SVG.chat} ${post.commentCount || 0}</span>
+          <span class="post-feed-stat">${_SVG.eye} ${post.viewCount || 0}</span>
+        </div>
+      </div>
+    </div>
+  </a>`;
+
+  if (!dropdownHtml) return card;
+
+  return `
+  <div style="position:relative">
+    ${card}
+    <div class="post-list-more-wrap" style="position:absolute;top:20px;right:0;z-index:2">
+      <button class="post-list-more-btn" data-id="${pid}" aria-label="더보기">⋮</button>
+      <div class="post-list-dropdown" data-id="${pid}" hidden>${dropdownHtml}</div>
+    </div>
+  </div>`;
+}
+
+/**
+ * 페이지네이션 버튼 HTML
+ * @param {number} total    전체 항목 수
+ * @param {number} page     현재 페이지 (1-based)
+ * @param {number} perPage  페이지당 항목 수
+ * @param {string} [tab]    data-tab 속성값 (탭 기반 페이지에서 사용)
+ */
+export function renderPagination(total, page, perPage, tab = null) {
+  const totalPages = Math.ceil(total / perPage);
+  if (totalPages <= 1) return "";
+  const tabAttr = tab ? ` data-tab="${escHtml(tab)}"` : "";
+  const prev = `<button class="rd-page-btn" data-page="${page - 1}"${tabAttr}${page === 1 ? " disabled" : ""}>‹</button>`;
+  const next = `<button class="rd-page-btn" data-page="${page + 1}"${tabAttr}${page === totalPages ? " disabled" : ""}>›</button>`;
+  let nums = "", prevN = 0;
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || Math.abs(i - page) <= 2) {
+      if (prevN && i - prevN > 1) nums += `<span style="padding:0 4px;color:var(--muted)">…</span>`;
+      nums += `<button class="rd-page-btn${i === page ? " active" : ""}" data-page="${i}"${tabAttr}>${i}</button>`;
+      prevN = i;
+    }
+  }
+  return `<div class="rd-pagination" style="display:flex;align-items:center;justify-content:center;gap:4px;margin-top:20px">${prev}${nums}${next}</div>`;
+}
+
+/**
+ * 댓글 단 글 목록 아이템 — 읽기 전용 (profile.html용)
+ */
+export function renderCommentedItem({ post, comment }) {
+  const pid = escHtml(post.id);
+  return `
+  <div style="display:flex;align-items:center;gap:12px;padding:16px 0;border-bottom:1px solid var(--line)">
+    <div style="flex:1;min-width:0;overflow:hidden">
+      <a class="post-list-title-link" href="post.html#${pid}"
+         style="display:block;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+        ${escHtml(post.title)}
+      </a>
+      <div class="post-list-comment-text"
+           style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+        ${escHtml(comment.text)}
+      </div>
+    </div>
+    <span class="post-list-time" style="flex-shrink:0">${timeAgo(post.createdAt)}</span>
+  </div>`;
+}

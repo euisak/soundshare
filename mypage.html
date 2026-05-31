@@ -50,7 +50,7 @@
         deletePost, updateComment, deleteComment, toggleLike,
       } from "./js/post.js";
       import { db, getDoc, doc } from "./js/firebase.js";
-      import { avatarLetter, timeAgo, escHtml, showToast, resolveAvatars } from "./js/ui.js";
+      import { avatarLetter, timeAgo, escHtml, showToast, resolveAvatars, renderFeedCard, renderPagination } from "./js/ui.js";
 
       await loadHeader();
       initTopbar();
@@ -82,80 +82,18 @@
       const pageState = { my: 1, commented: 1, liked: 1 };
       let   activeTab = "my";
 
-      // ── 커버 스택 (index.html과 동일) ────────────────────────────
-      function buildCover(tracks) {
-        const items = (tracks || []).slice(0, 5);
-        let html = '<div class="post-cover-stack">';
-        for (let i = 0; i < 5; i++) {
-          const t = items[i];
-          html += t?.albumArt
-            ? `<img class="post-cover-stack-img" src="${escHtml(t.albumArt)}" alt="" />`
-            : `<div class="post-cover-stack-empty"></div>`;
-        }
-        return html + '</div>';
-      }
-
-      // ── 포스트 / 좋아요 카드 (index.html post-feed-card 스타일) ──
-      function renderPostItem(post, tab) {
+      // ── 탭별 ⋮ 드롭다운 아이템 빌더 ──────────────────────────────
+      function buildDropdownItems(post, tab) {
         const pid     = escHtml(post.id);
         const isOwner = post.authorId === user.uid;
-        const isLiked = tab === "liked";
-        const tracks  = Array.isArray(post.tracks) ? post.tracks : (post.track ? [post.track] : []);
-        const tags    = (post.tags || []).slice(0, 3);
-        const tagsHtml = tags.length
-          ? `<div class="post-feed-tags">${tags.map(t => `<span class="post-feed-tag">${escHtml(t)}</span>`).join("")}</div>`
-          : "";
-        const rawBody = (post.body || "").replace(/<br\s*\/?>/gi, " ").replace(/<[^>]+>/g, "").trim();
-        const bodyHtml = rawBody ? `<div class="post-feed-body-text">${escHtml(rawBody)}</div>` : "";
-
-        let dropdownItems = "";
-        if (isLiked) {
-          dropdownItems = `<button class="post-list-dropdown-item danger" data-action="unlike-post" data-id="${pid}">좋아요 취소</button>`;
-        } else if (isOwner) {
-          dropdownItems = `<a class="post-list-dropdown-item" href="write.html#${pid}">수정</a>
-            <button class="post-list-dropdown-item danger" data-action="delete-post" data-id="${pid}">삭제</button>`;
+        if (tab === "liked") {
+          return `<button class="post-list-dropdown-item danger" data-action="unlike-post" data-id="${pid}">좋아요 취소</button>`;
         }
-
-        return `
-        <div style="position:relative">
-          <a class="post-feed-card" href="post.html#${pid}">
-            ${buildCover(tracks)}
-            <div class="post-feed-body">
-              <div class="post-feed-title">${escHtml(post.title)}</div>
-              <div class="post-feed-author-row">
-                ${isLiked ? `
-                <span class="post-feed-avatar" data-uid="${escHtml(post.authorId || '')}">${avatarLetter(post.authorName)}</span>
-                <span class="post-feed-author">${escHtml(post.authorName || '익명')}</span>
-                <span class="post-feed-time">·</span>` : ""}
-                <span class="post-feed-time">${timeAgo(post.createdAt)}</span>
-                ${post.visibility === "private" ? `<span class="post-feed-time">· 비공개</span>` : ""}
-              </div>
-              ${bodyHtml}
-              <div class="post-feed-footer">
-                ${tagsHtml}
-                <div class="post-feed-stats">
-                  <span class="post-feed-stat">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                    ${post.likeCount || 0}
-                  </span>
-                  <span class="post-feed-stat">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                    ${post.commentCount || 0}
-                  </span>
-                  <span class="post-feed-stat">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                    ${post.viewCount || 0}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </a>
-          ${dropdownItems ? `
-          <div class="post-list-more-wrap" style="position:absolute;top:20px;right:0;z-index:2">
-            <button class="post-list-more-btn" data-id="${pid}" aria-label="더보기">⋮</button>
-            <div class="post-list-dropdown" data-id="${pid}" hidden>${dropdownItems}</div>
-          </div>` : ""}
-        </div>`;
+        if (isOwner) {
+          return `<a class="post-list-dropdown-item" href="write.html#${pid}">수정</a>
+                  <button class="post-list-dropdown-item danger" data-action="delete-post" data-id="${pid}">삭제</button>`;
+        }
+        return "";
       }
 
       // ── 댓글 탭 아이템 ────────────────────────────────────────────
@@ -192,25 +130,6 @@
         </div>`;
       }
 
-      // ── 페이지네이션 ─────────────────────────────────────────────
-      function renderPagination(total, page, tab) {
-        const totalPages = Math.ceil(total / PER_PAGE);
-        if (totalPages <= 1) return "";
-
-        const prev = `<button class="rd-page-btn" data-page="${page-1}" data-tab="${tab}"${page===1?" disabled":""}>‹</button>`;
-        const next = `<button class="rd-page-btn" data-page="${page+1}" data-tab="${tab}"${page===totalPages?" disabled":""}>›</button>`;
-
-        let nums = "", prev_n = 0;
-        for (let i = 1; i <= totalPages; i++) {
-          if (i === 1 || i === totalPages || Math.abs(i - page) <= 2) {
-            if (prev_n && i - prev_n > 1) nums += `<span style="padding:0 4px;color:var(--muted)">…</span>`;
-            nums += `<button class="rd-page-btn${i===page?" active":""}" data-page="${i}" data-tab="${tab}">${i}</button>`;
-            prev_n = i;
-          }
-        }
-        return `<div class="rd-pagination" style="display:flex;align-items:center;justify-content:center;gap:4px;margin-top:20px">${prev}${nums}${next}</div>`;
-      }
-
       // ── 탭 렌더 ─────────────────────────────────────────────────
       function renderTab(tab) {
         const data    = cache[tab];
@@ -225,9 +144,12 @@
 
         const items = tab === "commented"
           ? `<div style="border-top:1px solid var(--line)">${slice.map(renderCommentedItem).join("")}</div>`
-          : slice.map((p) => renderPostItem(p, tab)).join("");
+          : slice.map(p => renderFeedCard(p, {
+              showAuthor: tab === "liked",
+              dropdownHtml: buildDropdownItems(p, tab),
+            })).join("");
 
-        content.innerHTML = items + renderPagination(data.length, page, tab);
+        content.innerHTML = items + renderPagination(data.length, page, PER_PAGE, tab);
         resolveAvatars(content);
       }
 

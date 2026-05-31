@@ -52,7 +52,7 @@
     <script type="module">
       import { loadHeader, initTopbar } from "./js/app.js";
       import { getPosts, searchPosts }  from "./js/post.js";
-      import { escHtml, timeAgo, avatarLetter, resolveAvatars } from "./js/ui.js";
+      import { escHtml, timeAgo, avatarLetter, resolveAvatars, buildCoverStack, renderFeedCard, renderPagination } from "./js/ui.js";
       import { auth, onAuthStateChanged } from "./js/firebase.js";
 
       await loadHeader();
@@ -76,94 +76,6 @@
 
       const sortLabels = { recent: "최신순", popular: "인기순", oldest: "오래된순" };
 
-      // ── 커버 스택 ─────────────────────────────────────────
-      function buildCover(tracks) {
-        const items = (tracks || []).slice(0, 5);
-        let html = '<div class="post-cover-stack">';
-        for (let i = 0; i < 5; i++) {
-          const t = items[i];
-          html += t?.albumArt
-            ? `<img class="post-cover-stack-img" src="${escHtml(t.albumArt)}" alt="" />`
-            : `<div class="post-cover-stack-empty"></div>`;
-        }
-        html += '</div>';
-        return html;
-      }
-
-      // ── 카드 렌더 ──────────────────────────────────────────
-      function renderCard(post) {
-        const tracks = Array.isArray(post.tracks) ? post.tracks : (post.track ? [post.track] : []);
-        const tags   = (post.tags || []).slice(0, 3);
-        const tagsHtml = tags.length
-          ? `<div class="post-feed-tags">${tags.map(t => `<span class="post-feed-tag">${escHtml(t)}</span>`).join("")}</div>`
-          : "";
-
-        // 본문 텍스트 추출 (HTML 태그 제거) 후 2줄 요약
-        const rawBody = (post.body || "")
-          .replace(/<br\s*\/?>/gi, " ")
-          .replace(/<[^>]+>/g, "")
-          .trim();
-
-        const bodyHtml = rawBody
-          ? `<div class="post-feed-body-text">${escHtml(rawBody)}</div>`
-          : "";
-
-        return `
-        <a class="post-feed-card" href="post.html#${escHtml(post.id)}">
-          ${buildCover(tracks)}
-          <div class="post-feed-body">
-            <div class="post-feed-title">${escHtml(post.title)}</div>
-            <div class="post-feed-author-row">
-              <span class="post-feed-avatar" data-uid="${escHtml(post.authorId || "")}">${avatarLetter(post.authorName)}</span>
-              <span class="post-feed-author">${escHtml(post.authorName || "익명")}</span>
-              <span class="post-feed-time">· ${timeAgo(post.createdAt)}</span>
-              ${post.visibility === "private" ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--muted);flex-shrink:0" title="비공개"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>` : ""}
-            </div>
-            ${bodyHtml}
-            <div class="post-feed-footer">
-              ${tagsHtml}
-              <div class="post-feed-stats">
-                <span class="post-feed-stat">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                  </svg>
-                  ${post.likeCount || 0}
-                </span>
-                <span class="post-feed-stat">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                  </svg>
-                  ${post.commentCount || 0}
-                </span>
-                <span class="post-feed-stat">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-                  </svg>
-                  ${post.viewCount || 0}
-                </span>
-              </div>
-            </div>
-          </div>
-        </a>`;
-      }
-
-      // ── 페이지네이션 ───────────────────────────────────────
-      function renderPagination(total, page) {
-        const totalPages = Math.ceil(total / PER_PAGE);
-        if (totalPages <= 1) return "";
-        const prev = `<button class="rd-page-btn" data-page="${page - 1}"${page === 1 ? " disabled" : ""}>‹</button>`;
-        const next = `<button class="rd-page-btn" data-page="${page + 1}"${page === totalPages ? " disabled" : ""}>›</button>`;
-        let nums = "", prevN = 0;
-        for (let i = 1; i <= totalPages; i++) {
-          if (i === 1 || i === totalPages || Math.abs(i - page) <= 2) {
-            if (prevN && i - prevN > 1) nums += `<span style="padding:0 4px;color:var(--muted)">…</span>`;
-            nums += `<button class="rd-page-btn${i === page ? " active" : ""}" data-page="${i}">${i}</button>`;
-            prevN = i;
-          }
-        }
-        return `<div class="rd-pagination" style="display:flex;align-items:center;justify-content:center;gap:4px;margin-top:20px">${prev}${nums}${next}</div>`;
-      }
-
       // ── 현재 페이지 렌더 ──────────────────────────────────
       function renderPage() {
         const slice = filteredPosts.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
@@ -172,8 +84,8 @@
           pgEl.innerHTML = "";
           return;
         }
-        listEl.innerHTML = slice.map(renderCard).join("");
-        pgEl.innerHTML   = renderPagination(filteredPosts.length, currentPage);
+        listEl.innerHTML = slice.map(p => renderFeedCard(p, { showAuthor: true })).join("");
+        pgEl.innerHTML   = renderPagination(filteredPosts.length, currentPage, PER_PAGE);
         resolveAvatars(listEl);
       }
 
