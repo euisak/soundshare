@@ -274,6 +274,6 @@ export function renderCommentedItem({ post, comment }) {
         ${escHtml(comment.text)}
       </div>
     </div>
-    <span class="post-list-time" style="flex-shrink:0">${timeAgo(post.createdAt)}</span>
+    <span class="post-list-time" style="flex-shrink:0">${timeAgo(comment.createdAt)}</span>
   </div>`;
 }

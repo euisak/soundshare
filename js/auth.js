@@ -147,7 +147,7 @@ export async function changePassword(currentPassword, newPassword) {
   try {
     await reauthenticateWithCredential(user, credential);
   } catch (err) {
-    throw new Error(authError(err.code) || "현재 비밀번호가 올바르지 않습니다.");
+    throw new Error("현재 비밀번호가 올바르지 않습니다.");
   }
   try {
     await updatePassword(user, newPassword);
@@ -171,7 +171,7 @@ export async function deleteAccount(currentPassword) {
   try {
     await reauthenticateWithCredential(user, credential);
   } catch (err) {
-    throw new Error(authError(err.code) || "비밀번호가 올바르지 않습니다.");
+    throw new Error("비밀번호가 올바르지 않습니다.");
   }
   // Firestore 유저 문서 삭제
   try { await deleteDoc(doc(db, "users", user.uid)); } catch {}
