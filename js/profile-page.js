@@ -52,7 +52,7 @@ if (!uid || uid === "undefined" || uid === "null") {
     }
     const slice = data.slice((page - 1) * PER_PAGE, page * PER_PAGE);
     const items = tab === "comments"
-      ? `<div style="border-top:1px solid var(--line)">${slice.map(renderCommentedItem).join("")}</div>`
+      ? `<div>${slice.map(renderCommentedItem).join("")}</div>`
       : slice.map(p => renderFeedCard(p)).join("");
     tabContent.innerHTML = items + renderPagination(data.length, page, PER_PAGE, tab);
     resolveAvatars(tabContent);

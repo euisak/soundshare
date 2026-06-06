@@ -97,7 +97,7 @@ function renderTab(tab) {
   }
 
   const items = tab === "commented"
-    ? `<div style="border-top:1px solid var(--line)">${slice.map(renderCommentedItem).join("")}</div>`
+    ? `<div>${slice.map(renderCommentedItem).join("")}</div>`
     : slice.map(p => renderFeedCard(p, {
         showAuthor: tab === "liked",
         dropdownHtml: buildDropdownItems(p, tab),
