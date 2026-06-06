@@ -61,11 +61,11 @@ if (!uid || uid === "undefined" || uid === "null") {
   async function loadTab(tab) {
     activeTab = tab;
     if (tab === "posts" && !postsPublic && !isOwn) {
-      tabContent.innerHTML = '<div class="muted small" style="text-align:center;padding:40px 0">비공개 처리된 게시글입니다.</div>';
+      tabContent.innerHTML = '<div class="muted small" style="text-align:center;padding:40px 0">사용자가 비공개로 설정했습니다.</div>';
       return;
     }
     if (tab === "comments" && !commentsPublic && !isOwn) {
-      tabContent.innerHTML = '<div class="muted small" style="text-align:center;padding:40px 0">비공개 처리된 댓글입니다.</div>';
+      tabContent.innerHTML = '<div class="muted small" style="text-align:center;padding:40px 0">사용자가 비공개로 설정했습니다.</div>';
       return;
     }
     tabContent.innerHTML = '<div class="skeleton" style="height:200px;border-radius:12px"></div>';
