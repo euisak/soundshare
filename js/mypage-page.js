@@ -69,7 +69,7 @@ function renderCommentedItem({ post, comment }) {
         </div>
       </div>
     </div>
-    <span class="post-list-time" style="flex-shrink:0">${timeAgo(post.createdAt)}</span>
+    <span class="post-list-time" style="flex-shrink:0">${timeAgo(comment.createdAt)}</span>
     <div class="post-list-more-wrap" style="flex-shrink:0">
       <button class="post-list-more-btn" data-id="${pid}" aria-label="더보기">⋮</button>
       <div class="post-list-dropdown" data-id="${pid}" hidden>
