@@ -172,7 +172,7 @@ document.querySelector("#postArea").innerHTML = `
           <textarea id="commentInput" placeholder="댓글을 작성하세요..."
             style="width:100%;height:90px;resize:none;overflow-y:auto;
                    border:1px solid var(--line);border-radius:12px;
-                   padding:10px 12px;font:14px/1.6 inherit;
+                   padding:10px 12px;font:14px/1.6 'Pretendard Variable',Pretendard,sans-serif;
                    background:#fff;color:var(--text);outline:none;
                    box-sizing:border-box"></textarea>
           <button type="submit"
@@ -286,7 +286,7 @@ document.querySelector("#commentList").addEventListener("click", async (e) => {
     const textEl = item.querySelector(".comment-text");
     document.querySelectorAll(".post-list-dropdown:not([hidden])").forEach((d) => d.hidden = true);
     textEl.innerHTML = `
-      <textarea class="input" style="width:100%;min-height:64px;resize:vertical;font-size:13px;padding:8px 10px">${escHtml(textEl.dataset.text)}</textarea>
+      <textarea class="input" style="width:100%;min-height:64px;resize:vertical;font-size:13px;padding:8px 10px;font-family:'Pretendard Variable',Pretendard,sans-serif">${escHtml(textEl.dataset.text)}</textarea>
       <div style="display:flex;gap:6px;margin-top:8px">
         <button class="btn primary" data-action="save-comment-post" data-comment-id="${escHtml(cid)}" style="font-size:12px;padding:5px 12px">저장</button>
         <button class="btn" data-action="cancel-edit-comment-post" data-comment-id="${escHtml(cid)}" style="font-size:12px;padding:5px 12px">취소</button>
