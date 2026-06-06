@@ -7,9 +7,9 @@ await requireAuth();
 
 const editId = window.location.hash.slice(1) || null;
 if (editId) {
-  document.getElementById("pageHeading").textContent = "포스트 수정";
+  document.getElementById("pageHeading").textContent = "게시글 수정";
   document.getElementById("btnPublish").textContent  = "수정하기";
-  document.title = "SoundShare — 포스트 수정";
+  document.title = "SoundShare — 게시글 수정";
   // 수정 모드: 취소 버튼 → 원본 게시글로 이동
   document.getElementById("cancelBtn").href = `post.html#${editId}`;
 }
