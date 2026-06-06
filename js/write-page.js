@@ -156,6 +156,7 @@ function setupDnd() {
 const searchInputEl   = document.getElementById("searchInput");
 const searchResultsEl = document.getElementById("searchResults");
 let searchTimer = null;
+let searchSeq = 0;
 
 searchInputEl.addEventListener("input", (e) => {
   clearTimeout(searchTimer);
@@ -168,12 +169,13 @@ searchInputEl.addEventListener("input", (e) => {
   }
   searchResultsEl.hidden = false;
   searchResultsEl.innerHTML = '<div class="le-search-msg">검색 중...</div>';
-  searchTimer = setTimeout(() => doSearch(q), 350);
+  searchTimer = setTimeout(() => doSearch(q, ++searchSeq), 350);
 });
 
-async function doSearch(q) {
+async function doSearch(q, seq) {
   try {
     const results = await searchTracksItunes(q, 25);
+    if (seq !== searchSeq) return; // 오래된 응답 무시
     if (!results.length) {
       searchResultsEl.innerHTML = '<div class="le-search-msg">결과가 없습니다.</div>';
       return;
@@ -201,6 +203,7 @@ async function doSearch(q) {
       });
     });
   } catch (err) {
+    if (seq !== searchSeq) return;
     searchResultsEl.innerHTML = `<div class="le-search-msg" style="color:#e55">검색 중 오류가 발생했습니다.</div>`;
     console.error(err);
   }
