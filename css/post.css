@@ -133,6 +133,8 @@
   justify-content: center;
   transition: background 0.12s, color 0.12s;
   flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 7px;
 }
 .pd-play-btn:hover {
   background: var(--bg-sub);

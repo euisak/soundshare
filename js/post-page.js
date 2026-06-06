@@ -81,9 +81,24 @@ function renderTags(tags) {
 
 function renderBody(raw) {
   if (!raw) return "";
-  const text = raw.replace(/<br\s*\/?>/gi, "\n").replace(/<[^>]+>/g, "").trim();
+  // 구버전 HTML(contenteditable) → 줄바꿈으로 변환 후 태그 제거
+  const text = raw
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/div>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
   if (!text) return "";
-  return `<p class="pd-body">${escHtml(text)}</p>`;
+  // pre-wrap CSS로 \n을 줄바꿈으로 렌더링
+  const el = document.createElement("p");
+  el.className = "pd-body";
+  el.textContent = text;
+  return el.outerHTML;
 }
 
 // ── 렌더 ──────────────────────────────────────────────────────────────────
@@ -181,8 +196,12 @@ document.querySelector("#postArea").addEventListener("click", (e) => {
   const noteBtn = e.target.closest(".pd-note-btn");
   if (noteBtn) {
     const body = noteBtn.nextElementSibling;
+    const anchor = noteBtn.closest(".pd-track-item") || noteBtn.parentElement;
+    const before = anchor.getBoundingClientRect().top;
     body.hidden = !body.hidden;
     noteBtn.textContent = body.hidden ? "메모 보기 ∨" : "메모 닫기 ∧";
+    const after = anchor.getBoundingClientRect().top;
+    window.scrollBy({ top: after - before, behavior: "instant" });
     return;
   }
   const btn = e.target.closest(".pd-play-btn[data-preview]");

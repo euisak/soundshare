@@ -20,21 +20,6 @@ titleInput.addEventListener("input", () => {
   titleInput.classList.remove("le-input--error");
 });
 
-// ── Description 툴바 ─────────────────────────────────
-document.getElementById("descToolbar").addEventListener("mousedown", (e) => {
-  const btn = e.target.closest("[data-cmd]");
-  if (!btn) return;
-  e.preventDefault();
-  const cmd = btn.dataset.cmd;
-  if (cmd === "createLink") {
-    const url = prompt("URL을 입력하세요:");
-    if (url) document.execCommand("createLink", false, url);
-  } else {
-    document.execCommand(cmd, false, null);
-  }
-  document.getElementById("postBody").focus();
-});
-
 // ── 태그 ─────────────────────────────────────────────
 const MAX_TAGS = 5;
 const tags = [];
@@ -255,7 +240,7 @@ document.getElementById("btnPublish").addEventListener("click", async () => {
   try {
     const payload = {
       title,
-      body:       document.getElementById("postBody").innerHTML,
+      body:       document.getElementById("postBody").value,
       genre:      [...selectedGenres],
       tags:       [...tags],
       tracks,
@@ -289,7 +274,7 @@ if (editId) {
     if (post) {
       titleInput.value = post.title || "";
       titleCount.textContent = titleInput.value.length;
-      document.getElementById("postBody").innerHTML = post.body || "";
+      document.getElementById("postBody").value = post.body || "";
       (post.tags || []).forEach((t) => { tags.push(t); });
       renderTags();
       if (Array.isArray(post.tracks)) tracks.push(...post.tracks);

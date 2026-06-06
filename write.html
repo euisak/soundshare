@@ -40,22 +40,7 @@
 
         <div class="le-field">
           <label class="le-label">추천 이유</label>
-          <div class="le-desc-editor">
-            <div class="le-desc-toolbar" id="descToolbar">
-              <button type="button" data-cmd="bold"          title="굵게"><b>B</b></button>
-              <button type="button" data-cmd="italic"        title="기울임"><i>I</i></button>
-              <button type="button" data-cmd="strikeThrough" title="취소선"><s>S</s></button>
-              <button type="button" data-cmd="createLink"    title="링크">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-                </svg>
-              </button>
-            </div>
-            <div class="le-desc-content" id="postBody"
-                 contenteditable="true" spellcheck="false"></div>
-          </div>
+          <textarea class="le-desc-content" id="postBody" rows="5" spellcheck="false" placeholder="이 음악을 추천하는 이유를 적어주세요."></textarea>
         </div>
 
         <div class="le-field">
@@ -87,6 +72,7 @@
       <div class="le-right">
 
         <!-- 검색 바 -->
+        <label class="le-label">노래 검색</label>
         <div class="le-search-bar">
           <div class="le-search-inner">
             <span class="le-search-icon">

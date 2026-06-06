@@ -98,55 +98,25 @@
   background: #fff0f0;
 }
 
-/* 설명 에디터 */
-.le-desc-editor {
-  border: 1px solid #e8e8e8;
-  border-radius: 8px;
-  overflow: hidden;
-}
-.le-desc-toolbar {
-  display: flex;
-  gap: 2px;
-  padding: 6px 8px;
-  border-bottom: 1px solid #e8e8e8;
-  background: #f2f2f2;
-}
-.le-desc-toolbar button {
-  width: 28px;
-  height: 28px;
-  border: none;
-  background: none;
-  cursor: pointer;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #555;
-  font-size: 13px;
-  font-family: inherit;
-  transition: background 0.15s;
-}
-.le-desc-toolbar button:hover {
-  background: #ddd;
-  color: #111;
-}
+/* 설명 textarea */
 .le-desc-content {
-  min-height: 100px;
-  max-height: 200px;
-  overflow-y: auto;
+  width: 100%;
+  height: 300px;
   padding: 10px 12px;
   font-size: 14px;
   line-height: 1.65;
-  outline: none;
-  background: #f8f8f8;
-  color: #111;
   font-family: inherit;
-  -webkit-user-modify: read-write;
+  color: #111;
+  background: #f8f8f8;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  resize: none;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
-.le-desc-content:empty::before {
-  content: "내용을 입력하세요...";
-  color: #bbb;
-  pointer-events: none;
+.le-desc-content:focus {
+  outline: none;
+  border-color: #bbb;
 }
 
 /* 태그 */
