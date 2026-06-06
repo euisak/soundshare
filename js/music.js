@@ -83,6 +83,5 @@ export async function searchTracksItunes(q, limitN = 30) {
       previewUrl: t.previewUrl || null,
       appleMusicUrl: t.trackViewUrl || null,
       spotifySearchUrl: `https://open.spotify.com/search/${encodeURIComponent(t.trackName + " " + t.artistName)}`,
-      genreName: t.primaryGenreName || "",
     }));
 }
