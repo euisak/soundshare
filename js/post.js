@@ -5,7 +5,7 @@ import {
 } from "./firebase.js";
 import { addNotification } from "./notify.js";
 
-export async function createPost({ title, body, genre, tags, tracks }) {
+export async function createPost({ title, body, tags, tracks }) {
   const user = auth.currentUser;
   if (!user) throw new Error("로그인이 필요합니다.");
   const ref = await addDoc(collection(db, "posts"), {
@@ -13,7 +13,6 @@ export async function createPost({ title, body, genre, tags, tracks }) {
     authorName: user.displayName || user.email.split("@")[0],
     title: title.trim(),
     body: body.trim(),
-    genre: genre || [],
     tags: tags || [],
     tracks: tracks || [],
     likeCount: 0,
@@ -26,7 +25,7 @@ export async function createPost({ title, body, genre, tags, tracks }) {
   return ref.id;
 }
 
-export async function updatePost(id, { title, body, genre, tags, tracks, visibility }) {
+export async function updatePost(id, { title, body, tags, tracks, visibility }) {
   const user = auth.currentUser;
   if (!user) throw new Error("로그인이 필요합니다.");
   const snap = await getDoc(doc(db, "posts", id));
@@ -34,7 +33,6 @@ export async function updatePost(id, { title, body, genre, tags, tracks, visibil
   await updateDoc(doc(db, "posts", id), {
     title: title.trim(),
     body: body.trim(),
-    genre: genre || [],
     tags: tags || [],
     tracks: tracks || [],
     visibility: visibility || "public",

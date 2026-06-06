@@ -63,10 +63,7 @@ export function renderPostCard(post) {
     ? `<img src="${escHtml(firstTrack.albumArt)}" alt="" />`
     : `<span style="font-size:22px;opacity:.45">♪</span>`;
 
-  // 감성 태그 우선, 없으면 장르 태그 — 최대 2개, 단일 행
-  const moodTags = post.tags || [];
-  const genreTags = post.genre || [];
-  const displayTags = moodTags.length ? moodTags : genreTags;
+  const displayTags = post.tags || [];
   const tagsHtml = displayTags.length
     ? `<div class="feed-tags">${displayTags.slice(0, 2).map((t) =>
         `<span class="chip" style="font-size:11px;padding:2px 8px;line-height:1.3">${escHtml(t)}</span>`

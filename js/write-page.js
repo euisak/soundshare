@@ -71,12 +71,6 @@ tagsWrapEl.addEventListener("click", (e) => {
 });
 
 // ── 장르 (저장용으로만 유지) ─────────────────────────
-const selectedGenres = new Set();
-
-function updateAutoGenres() {
-  selectedGenres.clear();
-  tracks.forEach((t) => { if (t.genreName) selectedGenres.add(t.genreName); });
-}
 
 // ── 트랙 목록 ────────────────────────────────────────
 const tracks = [];
@@ -127,7 +121,6 @@ releasesListEl.addEventListener("click", (e) => {
   if (!btn) return;
   tracks.splice(Number(btn.dataset.remove), 1);
   renderTracks();
-  updateAutoGenres();
 });
 
 releasesListEl.addEventListener("input", (e) => {
@@ -154,7 +147,6 @@ function setupDnd() {
       const [moved] = tracks.splice(dragIdx, 1);
       tracks.splice(to, 0, moved);
       renderTracks();
-      updateAutoGenres();
       dragIdx = null;
     });
   });
@@ -203,7 +195,6 @@ async function doSearch(q) {
         if (!tracks.find((x) => x.id === r.id)) {
           tracks.push(r);
           renderTracks();
-          updateAutoGenres();
         }
         searchInputEl.value = "";
         searchResultsEl.hidden = true;
@@ -243,7 +234,6 @@ document.getElementById("btnPublish").addEventListener("click", async () => {
     const payload = {
       title,
       body:       document.getElementById("postBody").value,
-      genre:      [...selectedGenres],
       tags:       [...tags],
       tracks,
       visibility: document.getElementById("settingVisibility").value,
@@ -280,7 +270,6 @@ if (editId) {
       (post.tags || []).forEach((t) => { tags.push(t); });
       renderTags();
       if (Array.isArray(post.tracks)) tracks.push(...post.tracks);
-      updateAutoGenres();
       document.getElementById("settingVisibility").value = post.visibility || "public";
     }
   } catch {
