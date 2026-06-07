@@ -267,6 +267,7 @@ label {
 .post-author-avatar img {
   width: 100%;
   height: 100%;
+  /* 이미지 비율을 유지하면서 원형 아바타 영역을 빈틈없이 채움 */
   object-fit: cover;
   border-radius: 50%;
   display: block;
@@ -298,6 +299,7 @@ label {
   font-weight: 600;
   margin: 0;
   letter-spacing: -0.02em;
+  /* 긴 단어나 URL도 카드 밖으로 삐져나가지 않도록 줄바꿈 허용 */
   overflow-wrap: break-word;
   word-break: break-word;
 }
@@ -477,6 +479,7 @@ label {
   position: fixed;
   bottom: 24px;
   left: 50%;
+  /* left:50% 기준에서 자기 너비의 절반만큼 이동해 정확히 중앙 배치 */
   transform: translateX(-50%) translateY(20px); /* 초기 위치: 20px 아래 (슬라이드 인 시작점) */
   z-index: 100;
   min-width: 200px;
@@ -484,6 +487,7 @@ label {
   padding: 12px 20px;
   border-radius: 12px;
   opacity: 0;                                   /* 초기엔 투명 */
+  /* opacity와 transform을 함께 애니메이션해 부드럽게 나타나고 사라짐 */
   transition: opacity 0.25s, transform 0.25s;
   pointer-events: none;                         /* 토스트 위 클릭 이벤트 무시 */
 }
@@ -642,6 +646,7 @@ textarea.input {
   width: 100%;
   height: 100%;
   border-radius: 50%;
+  /* 업로드한 프로필 사진을 원형 프레임에 맞춰 중앙 크롭 */
   object-fit: cover;
   display: block;
 }

@@ -9,6 +9,8 @@ const _userPhotoCache = new Map(); // uid → photoURL 캐시 (Firestore 중복 
 async function _fetchUserPhoto(uid) {
   if (_userPhotoCache.has(uid)) return _userPhotoCache.get(uid); // 캐시 히트
   try {
+    // users/{uid} 문서에서 photoURL만 읽어 아바타 렌더링에 사용
+    // 실패하거나 사진이 없으면 null을 캐시에 저장해 반복 요청 방지
     const snap = await getDoc(doc(db, "users", uid));
     const url = snap.data()?.photoURL || null;
     _userPhotoCache.set(uid, url);
@@ -26,6 +28,7 @@ async function _fetchUserPhoto(uid) {
 export async function resolveAvatars(container = document) {
   const els = [...container.querySelectorAll(".post-author-avatar[data-uid], .post-feed-avatar[data-uid]")];
   if (!els.length) return;
+  // 같은 uid가 여러 번 렌더링되어도 Firestore 요청은 한 번만 수행
   const uids = [...new Set(els.map((el) => el.dataset.uid).filter(Boolean))];
   await Promise.all(uids.map(_fetchUserPhoto));
   els.forEach((el) => {
@@ -63,6 +66,8 @@ export function avatarLetter(name) {
 
 
 export function renderComment(c, currentUid = null) {
+  // currentUid와 댓글 authorId가 같으면 수정/삭제 메뉴 표시
+  // 타인의 댓글에는 더보기 메뉴를 만들지 않음
   const isOwner = currentUid && c.authorId === currentUid;
   const moreMenu = isOwner ? `
     <div class="post-list-more-wrap ml-auto">
@@ -118,6 +123,8 @@ const _SVG = {
 
 // 앨범아트 커버 스택 HTML (최대 5장, 겹쳐서 표시)
 function buildCoverStack(tracks) {
+  // 게시글에 여러 곡이 있을 수 있으므로 최대 5개의 앨범아트를 겹쳐 표시
+  // 앨범아트가 부족한 자리는 빈 칸으로 채워 카드 크기 유지
   const items = (tracks || []).slice(0, 5);
   let html = '<div class="post-cover-stack">';
   for (let i = 0; i < 5; i++) {
@@ -132,6 +139,7 @@ function buildCoverStack(tracks) {
 // 피드 카드 HTML 생성
 // showAuthor: 작성자 표시 여부, dropdownHtml: ⋮ 메뉴 내용 (없으면 메뉴 자체 미표시)
 export function renderFeedCard(post, { showAuthor = false, dropdownHtml = "" } = {}) {
+  // Firestore 구버전 단일 track 데이터와 현재 tracks 배열 데이터 모두 지원
   const pid    = escHtml(post.id);
   const tracks = Array.isArray(post.tracks) ? post.tracks : (post.track ? [post.track] : []);
   const tags   = (post.tags || []).slice(0, 3);
@@ -141,6 +149,7 @@ export function renderFeedCard(post, { showAuthor = false, dropdownHtml = "" } =
     : "";
 
   const rawBody = (post.body || "").replace(/<br\s*\/?>/gi, " ").replace(/<[^>]+>/g, "").trim();
+  // 게시글 본문은 카드에서 짧게 보여주기 위해 HTML 태그 제거 후 텍스트만 사용
   const bodyHtml = rawBody ? `<div class="post-feed-body-text">${escHtml(rawBody)}</div>` : "";
 
   const authorHtml = showAuthor

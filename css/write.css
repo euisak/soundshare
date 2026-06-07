@@ -292,6 +292,7 @@
 
 /* 공개 설정 드롭다운 셀렉트박스 (커스텀 화살표 아이콘 포함) */
 .le-select {
+  /* 기본 select 화살표를 숨기고 background 이미지로 커스텀 화살표 표시 */
   appearance: none;
   background: #f2f2f2 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center;
   border: 1px solid #e0e0e0;
@@ -381,6 +382,7 @@
   width: 48px;
   height: 48px;
   border-radius: 6px;
+  /* 앨범아트 비율 유지 + 정사각형 썸네일 영역을 꽉 채우도록 크롭 */
   object-fit: cover;
   flex-shrink: 0;
   background: #ececec;
@@ -431,6 +433,7 @@
   border-bottom: 1px dashed transparent; /* 포커스 시 점선 밑줄 나타남 */
   transition: border-color 0.15s, color 0.15s;
   font-family: inherit;
+  /* Safari 계열에서 contenteditable 입력 가능 상태를 명시 */
   -webkit-user-modify: read-write;       /* contenteditable 대체 (Safari) */
 }
 
@@ -442,6 +445,7 @@
 
 /* 메모 비어 있을 때 플레이스홀더 텍스트 */
 .le-release-note:empty::before {
+  /* contenteditable은 placeholder 속성이 없어서 data-placeholder 값을 가상 요소로 표시 */
   content: attr(data-placeholder);
   color: #ccc;
   pointer-events: none;
@@ -569,6 +573,7 @@
   width: 42px;
   height: 42px;
   border-radius: 4px;
+  /* 검색 결과 앨범아트를 같은 크기의 정사각형으로 맞춤 */
   object-fit: cover;
   flex-shrink: 0;
   background: #ececec;

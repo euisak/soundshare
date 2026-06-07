@@ -109,6 +109,7 @@
 .photo-upload-avatar img {
   width: 100%;
   height: 100%;
+  /* 원본 사진 비율 유지 + 원형 영역을 꽉 채우도록 중앙 크롭 */
   object-fit: cover;
   border-radius: 50%;
   display: block;
@@ -150,6 +151,7 @@
 
 /* 실제 체크박스 input (시각적으로 숨기고 토글 슬라이더로 대체) */
 .toggle input {
+  /* 실제 checkbox는 접근성/상태 저장용으로 남기고 화면에서는 숨김 */
   opacity: 0;
   width: 0;
   height: 0;
@@ -176,6 +178,7 @@
   top: 3px;
   background: #fff;
   border-radius: 50%;
+  /* transform 이동에 애니메이션을 적용해 손잡이가 부드럽게 움직임 */
   transition: transform 0.2s;
 }
 
@@ -183,4 +186,5 @@
 .toggle input:checked + .toggle-slider { background: #111; }
 
 /* 활성(체크) 상태: 손잡이 오른쪽으로 이동 */
+/* + 선택자는 체크된 input 바로 다음 형제인 .toggle-slider를 대상으로 함 */
 .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
