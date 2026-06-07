@@ -1,30 +1,30 @@
 /* ── base.css ────────────────────────────────────────────────── */
 /* 전역 CSS 변수, 공통 컴포넌트 (버튼·카드·입력·토스트·아바타 등) */
 
+/* 전역 디자인 토큰 (모든 파일에서 var(--*)로 참조) */
 :root {
-  --bg: #fff;              /* 기본 배경 */
-  --bg-sub: #f4f4f4;       /* 서브 배경 (입력창·칩 등) */
+  --bg: #fff;              /* 페이지 기본 배경 */
+  --bg-sub: #f4f4f4;       /* 서브 배경 (입력창·칩 등 회색 배경) */
   --card: #fff;            /* 카드 배경 */
   --text: #111;            /* 기본 텍스트 */
-  --muted: #999;           /* 흐린 텍스트 */
-  --faint: #bbb;           /* 더 흐린 텍스트 (날짜·보조) */
+  --muted: #999;           /* 흐린 텍스트 (작성자·부제목 등) */
+  --faint: #bbb;           /* 더 흐린 텍스트 (날짜·보조 정보) */
   --line: #e8e8e8;         /* 구분선 */
-  --danger: #ff4d6d;       /* 위험/삭제 색상 */
-  --ok: #2de2a6;           /* 성공 색상 */
-  --avatar-grad: linear-gradient(135deg, #444, #111); /* 아바타 기본 그라디언트 */
+  --danger: #ff4d6d;       /* 위험/삭제 강조 색 */
+  --ok: #2de2a6;           /* 성공 강조 색 */
+  --avatar-grad: linear-gradient(135deg, #444, #111); /* 아바타 기본 그라데이션 (사진 없을 때) */
 }
 
-* {
-  box-sizing: border-box;
-}
+/* 모든 요소 box-sizing 통일 */
+* { box-sizing: border-box; }
 
-[hidden] { display: none !important; } /* hidden 속성 강제 숨김 */
+/* hidden 속성이 붙은 요소 강제 숨김 (JS에서 hidden = true/false로 토글) */
+[hidden] { display: none !important; }
 
-html,
-body {
-  height: 100%;
-}
+/* 페이지 전체 높이 확보 */
+html, body { height: 100%; }
 
+/* 기본 body 폰트·색·배경 설정 */
 body {
   margin: 0;
   font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
@@ -34,18 +34,22 @@ body {
   background: var(--bg);
 }
 
+/* 링크 기본 스타일 제거 (색 상속, 밑줄 없음) */
 a {
   color: inherit;
   text-decoration: none;
 }
 
+/* 페이지 본문 최대 너비 컨테이너 (좁은 화면에서 양쪽 16px 여백) */
 .container {
-  width: min(960px, calc(100% - 32px)); /* 최대 960px, 좁은 화면에서 양쪽 16px 여백 */
+  width: min(960px, calc(100% - 32px));
   margin: 0 auto;
   padding: 24px 0 48px;
 }
 
 /* ── 공통 버튼 ──────────────────────────── */
+
+/* 기본 버튼 (회색 배경, 라운드) */
 .btn {
   appearance: none;
   border: 1px solid var(--line);
@@ -61,22 +65,26 @@ a {
   white-space: nowrap;
 }
 
+/* 기본 버튼 호버 */
 .btn:hover {
   background: #e8e8e8;
   border-color: #d0d0d0;
 }
 
+/* 강조 버튼 (검정 배경 / 흰 텍스트) — 주요 동작에 사용 */
 .btn.primary {
   background: #111;
   border-color: #111;
   color: #fff;
 }
 
+/* 강조 버튼 호버 */
 .btn.primary:hover {
   background: #333;
   border-color: #333;
 }
 
+/* 강조 버튼 비활성 상태 */
 .btn.primary:disabled {
   background: #ccc;
   border-color: #ccc;
@@ -84,28 +92,33 @@ a {
   cursor: not-allowed;
 }
 
+/* 위험 버튼 (삭제·탈퇴 등 — 빨간 계열 배경) */
 .btn.danger,
 .btn.btn-danger {
   border-color: rgba(255, 77, 109, 0.45);
   background: rgba(255, 77, 109, 0.12);
 }
 
+/* 위험 버튼 호버 */
 .btn.danger:hover,
 .btn.btn-danger:hover {
   background: rgba(255, 77, 109, 0.22);
 }
 
+/* 비활성 버튼 공통 (반투명 + 클릭 불가) */
 .btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
 
+/* 카드 목록을 한 열로 세로 나열하는 그리드 */
 .grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 14px;
 }
 
+/* 테두리 + 그림자가 있는 기본 카드 박스 */
 .card {
   border: 1px solid var(--line);
   background: var(--card);
@@ -114,10 +127,10 @@ a {
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
-.muted {
-  color: var(--muted);
-}
+/* 흐린 텍스트 유틸리티 */
+.muted { color: var(--muted); }
 
+/* 공통 입력창 (검색·댓글 등) */
 .input {
   width: 100%;
   border: 1px solid var(--line);
@@ -130,17 +143,17 @@ a {
   font-size: 14px;
 }
 
+/* 폼 라벨 */
 label {
   display: block;
   font-weight: 500;
   margin: 10px 0 6px;
 }
 
-.stack {
-  display: grid;
-  gap: 10px;
-}
+/* 폼 필드들을 세로로 일정 간격으로 쌓는 그리드 */
+.stack { display: grid; gap: 10px; }
 
+/* 알림·에러·성공 메시지 박스 (기본: 회색) */
 .notice {
   padding: 10px 12px;
   border-radius: 12px;
@@ -148,27 +161,32 @@ label {
   background: var(--bg-sub);
 }
 
+/* 성공 메시지 박스 (초록 계열) */
 .notice.ok {
   border-color: rgba(45, 226, 166, 0.35);
   background: rgba(45, 226, 166, 0.08);
 }
 
+/* 오류 메시지 박스 (빨간 계열) */
 .notice.danger {
   border-color: rgba(255, 77, 109, 0.35);
   background: rgba(255, 77, 109, 0.08);
 }
 
-.small {
-  font-size: 13px;
-}
+/* 작은 텍스트 유틸리티 */
+.small { font-size: 13px; }
 
 /* ── 필터 칩 (검색 조건·태그 선택 등) ────── */
+
+/* 칩 여러 개를 가로로 감싸며 나열하는 컨테이너 */
 .chips {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   margin-top: 8px;
 }
+
+/* 개별 필터 칩 (비활성: 회색) */
 .chip {
   display: inline-flex;
   align-items: center;
@@ -182,10 +200,14 @@ label {
   color: var(--muted);
   white-space: nowrap;
 }
+
+/* 칩 호버 */
 .chip:hover {
   background: #e8e8e8;
   color: var(--text);
 }
+
+/* 선택된 칩 (활성 상태: 어두운 배경) */
 .chip.active {
   border-color: rgba(0, 0, 0, 0.3);
   background: rgba(0, 0, 0, 0.07);
@@ -193,6 +215,8 @@ label {
 }
 
 /* ── 뒤로가기 버튼 (게시글 상세·프로필 상단) */
+
+/* "← 뒤로" 버튼 (게시글 상세, 프로필 페이지 상단) */
 .back-btn {
   display: inline-flex;
   align-items: center;
@@ -208,9 +232,13 @@ label {
   margin-bottom: 14px;
   transition: color 0.15s;
 }
+
+/* 뒤로가기 버튼 호버 */
 .back-btn:hover { color: var(--text); }
 
 /* ── 게시글 작성자 정보 (아바타 + 닉네임) ── */
+
+/* 작성자 정보 행 전체 (아바타·이름·시간을 가로 나열) */
 .post-meta {
   display: flex;
   align-items: center;
@@ -218,6 +246,8 @@ label {
   font-size: 13px;
   color: var(--muted);
 }
+
+/* 작성자 아바타 원형 (26px, 사진 없으면 그라데이션 배경) */
 .post-author-avatar {
   width: 26px;
   height: 26px;
@@ -232,6 +262,8 @@ label {
   flex-shrink: 0;
   overflow: hidden;
 }
+
+/* 아바타 안 프로필 사진 */
 .post-author-avatar img {
   width: 100%;
   height: 100%;
@@ -239,6 +271,8 @@ label {
   border-radius: 50%;
   display: block;
 }
+
+/* 작성자 아바타 + 닉네임 링크 (프로필 페이지로 이동) */
 .post-author-link {
   display: inline-flex;
   align-items: center;
@@ -254,7 +288,11 @@ label {
   border-radius: 20px;
   transition: opacity 0.15s;
 }
+
+/* 작성자 링크 호버 */
 .post-author-link:hover { opacity: 0.72; }
+
+/* 게시글 제목 텍스트 */
 .post-title {
   font-size: 17px;
   font-weight: 600;
@@ -265,6 +303,8 @@ label {
 }
 
 /* ── 액션 버튼 (좋아요·수정·삭제 등 공통) ── */
+
+/* 아이콘 + 텍스트가 있는 액션 버튼 (게시글 상세 하단 등) */
 .action-btn {
   display: inline-flex;
   align-items: center;
@@ -280,16 +320,22 @@ label {
   transition: background 0.15s, color 0.15s, border-color 0.15s;
   appearance: none;
 }
+
+/* 액션 버튼 호버 */
 .action-btn:hover {
   background: #e8e8e8;
   color: var(--text);
 }
 
 /* ── ⋮ 더보기 드롭다운 (게시글·댓글 수정/삭제 메뉴) */
+
+/* ⋮ 버튼과 드롭다운을 함께 포지셔닝하는 래퍼 */
 .post-list-more-wrap {
   position: relative;
   flex-shrink: 0;
 }
+
+/* ⋮ 더보기 아이콘 버튼 */
 .post-list-more-btn {
   appearance: none;
   background: none;
@@ -302,10 +348,14 @@ label {
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
+
+/* ⋮ 버튼 호버 */
 .post-list-more-btn:hover {
   background: var(--bg-sub);
   color: var(--text);
 }
+
+/* 드롭다운 메뉴 패널 (수정 / 삭제 항목 포함) */
 .post-list-dropdown {
   position: absolute;
   top: calc(100% + 4px);
@@ -318,6 +368,8 @@ label {
   z-index: 50;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
+
+/* 드롭다운 메뉴 항목 (수정 / 삭제) */
 .post-list-dropdown-item {
   display: block;
   width: 100%;
@@ -332,28 +384,42 @@ label {
   text-decoration: none;
   transition: background 0.15s;
 }
+
+/* 드롭다운 메뉴 항목 호버 */
 .post-list-dropdown-item:hover { background: var(--bg-sub); }
+
+/* 삭제 항목 (빨간 텍스트) */
 .post-list-dropdown-item.danger { color: var(--danger); }
 
 /* ── 빈 상태 메시지 + 로딩 스켈레톤 ──────── */
+
+/* 탭 콘텐츠 로딩 중 스켈레톤 높이 */
 .skeleton-tab { height: 200px; }
+
+/* 결과 없음 / 빈 상태 안내 텍스트 (중앙 정렬) */
 .empty-state {
   text-align: center;
   padding: 40px 20px;
   color: var(--muted);
 }
+
+/* shimmer 애니메이션 기본 스켈레톤 블록 */
 .skeleton {
   background: linear-gradient(90deg, #f0f0f0 25%, #e4e4e4 50%, #f0f0f0 75%);
-  background-size: 200% 100%;     /* shimmer 그라디언트 너비 (슬라이드 효과용) */
+  background-size: 200% 100%;     /* 그라데이션 슬라이드를 위한 넓은 배경 */
   animation: shimmer 1.5s infinite;
   border-radius: 16px;
 }
+
+/* shimmer 애니메이션: 오른쪽→왼쪽으로 밝은 빛이 흐르는 효과 */
 @keyframes shimmer {
-  0% { background-position: 200% 0; }   /* 오른쪽에서 시작 */
-  100% { background-position: -200% 0; } /* 왼쪽으로 이동 */
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 /* ── 페이지네이션 (이전/다음/번호 버튼) ──── */
+
+/* 페이지네이션 버튼들을 가로 중앙 정렬로 나열하는 컨테이너 */
 .rd-pagination {
   display: flex;
   align-items: center;
@@ -361,15 +427,21 @@ label {
   gap: 4px;
   margin-top: 20px;
 }
+
+/* 페이지네이션 생략 부호 (…) */
 .rd-pagination-ellipsis {
   padding: 0 4px;
   color: var(--muted);
 }
 
 /* ── 인라인 알림 박스 (flex 레이아웃 내부용) */
+
+/* flex 컨테이너 안에서 남은 너비를 채우는 알림 박스 */
 .notice-flex { flex: 1; margin: 0; }
 
 /* ── 페이지네이션 버튼 (숫자·이전·다음) ───── */
+
+/* 페이지 번호 / 이전(‹) / 다음(›) 버튼 */
 .rd-page-btn {
   border: 1px solid #e0e0e0;
   background: #fff;
@@ -381,23 +453,31 @@ label {
   line-height: 1.4;
   font-family: inherit;
 }
+
+/* 페이지 버튼 호버 (비활성 제외) */
 .rd-page-btn:hover:not(:disabled) { background: #f5f5f5; }
+
+/* 현재 페이지 버튼 (검정 배경) */
 .rd-page-btn.active {
   background: #111;
   color: #fff;
   border-color: #111;
 }
+
+/* 이전/다음 버튼 첫 페이지·마지막 페이지에서 비활성 */
 .rd-page-btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
 }
 
 /* ── 화면 하단 토스트 메시지 (저장됨·오류 등) */
+
+/* 화면 하단 중앙에 나타났다가 사라지는 토스트 메시지 */
 .toast {
   position: fixed;
   bottom: 24px;
   left: 50%;
-  transform: translateX(-50%) translateY(20px); /* 초기엔 20px 아래 (슬라이드 인 시작점) */
+  transform: translateX(-50%) translateY(20px); /* 초기 위치: 20px 아래 (슬라이드 인 시작점) */
   z-index: 100;
   min-width: 200px;
   text-align: center;
@@ -405,19 +485,27 @@ label {
   border-radius: 12px;
   opacity: 0;                                   /* 초기엔 투명 */
   transition: opacity 0.25s, transform 0.25s;
-  pointer-events: none;                         /* 클릭 이벤트 무시 */
+  pointer-events: none;                         /* 토스트 위 클릭 이벤트 무시 */
 }
+
+/* 토스트 표시 상태 (제자리로 슬라이드 인 + 불투명) */
 .toast.toast-in {
   opacity: 1;
-  transform: translateX(-50%) translateY(0);    /* 제자리로 슬라이드 인 */
+  transform: translateX(-50%) translateY(0);
 }
 
 /* ── 입력창 포커스 상태 ──────────────────── */
+
+/* 입력창 포커스 시 테두리 어둡게 + 흰 배경 */
 .input:focus {
   border-color: rgba(0, 0, 0, 0.4);
   background: #fff;
 }
+
+/* 입력창 플레이스홀더 색 */
 .input::placeholder { color: var(--muted); }
+
+/* textarea 입력창 (세로 리사이즈 가능, 최소 100px) */
 textarea.input {
   resize: vertical;
   min-height: 100px;
@@ -426,6 +514,8 @@ textarea.input {
 }
 
 /* ── 섹션 제목 텍스트 ────────────────────── */
+
+/* 각 섹션 소제목 */
 .section-title {
   font-size: 16px;
   font-weight: 600;
@@ -433,48 +523,84 @@ textarea.input {
 }
 
 /* ── 폼 유틸리티 (입력+버튼 한 줄 배치 등) ─ */
+
+/* 입력창 + 버튼을 한 줄로 나란히 배치 (예: 닉네임 입력 + 중복확인 버튼) */
 .input-with-btn {
   display: flex;
   gap: 8px;
 }
+
+/* 입력창이 나머지 너비를 전부 차지 */
 .input-with-btn .input { flex: 1; }
+
+/* 버튼이 입력창에 눌리지 않도록 크기 고정 */
 .btn-shrink { flex-shrink: 0; }
-.btn-full   { width: 100%; }
-.btn-flex   { flex: 1; }
+
+/* 전체 너비 버튼 */
+.btn-full { width: 100%; }
+
+/* flex 컨테이너 안에서 남은 너비를 채우는 버튼 */
+.btn-flex { flex: 1; }
+
+/* 폼 필드 라벨 (작은 텍스트) */
 .form-label {
   font-size: 13px;
   display: block;
   margin-bottom: 6px;
   font-weight: 500;
 }
+
+/* 입력 상태 힌트 텍스트 (닉네임 중복 확인 결과 등) */
 .status-hint {
   display: block;
   margin-top: 5px;
 }
+
+/* 알림 박스 하단 여백 */
 .notice--mb { margin-bottom: 12px; }
+
+/* 알림 박스 상단 여백 */
 .notice--mt { margin-top: 14px; }
+
+/* 파일 선택 input (시각적으로 숨김, JS로 .click() 트리거) */
 .hidden-file { display: none; }
 
 /* ── 로그인 모달 하단 링크 영역 ──────────── */
+
+/* 모달 하단 "회원가입 | 비밀번호 찾기" 링크 행 */
 .auth-footer {
   margin-top: 16px;
   text-align: center;
 }
+
+/* 링크 사이 구분 바 (|) */
 .auth-sep {
   margin: 0 8px;
   opacity: 0.35;
 }
 
 /* ── 아바타 크기 변형 ─────────────────────── */
-.avatar-sm { width: 18px !important; height: 18px !important; font-size: 8px !important; }  /* 피드 카드 작성자 아바타 */
-.avatar-md { width: 20px !important; height: 20px !important; font-size: 9px !important; }  /* 댓글 아바타 */
-.avatar-lg { width: 32px !important; height: 32px !important; font-size: 13px !important; } /* 댓글 입력폼 내 아바타 */
+
+/* 피드 카드 작성자 아바타 (18px) */
+.avatar-sm { width: 18px !important; height: 18px !important; font-size: 8px !important; }
+
+/* 댓글 아바타 (20px) */
+.avatar-md { width: 20px !important; height: 20px !important; font-size: 9px !important; }
+
+/* 댓글 입력폼 내 아바타 (32px) */
+.avatar-lg { width: 32px !important; height: 32px !important; font-size: 13px !important; }
 
 /* ── 피드 카드 + ⋮ 메뉴 겹침 래퍼 ─────────── */
+
+/* 피드 카드 위에 ⋮ 메뉴를 절대 위치로 겹치게 하는 래퍼 */
 .feed-card-wrap { position: relative; }
+
+/* 피드 카드 우측 상단에 겹치는 ⋮ 메뉴 버튼 */
 .feed-card-more { position: absolute; top: 20px; right: 0; z-index: 2; }
 
 /* ── 내 피드 카드의 수정·삭제 액션 영역 ────── */
+
+/* 마이페이지 피드 카드 우측 액션 버튼들 */
 .feed-meta-actions {
   margin-left: auto;
   display: flex;
@@ -482,24 +608,36 @@ textarea.input {
   gap: 5px;
   flex-shrink: 0;
 }
+
+/* 피드 카드 내 작게 표시되는 통계 액션 버튼 */
 .feed-action-stat {
   font-size: 11px !important;
   padding: 2px 5px !important;
   gap: 3px !important;
 }
+
+/* 피드 카드 내 작게 표시되는 칩 */
 .feed-chip {
   font-size: 11px !important;
   padding: 2px 8px !important;
   line-height: 1.3 !important;
 }
+
+/* 클릭 불가 커서 (비로그인 작성자 표시 등) */
 .cursor-default { cursor: default; }
+
+/* margin-left: auto 단축 유틸리티 */
 .ml-auto { margin-left: auto; }
+
+/* 탭 콘텐츠 빈 상태 안내 텍스트 (중앙 정렬) */
 .empty-msg {
   text-align: center;
   padding: 40px 0;
 }
 
 /* ── 아바타 안에 들어가는 프로필 사진 ──────── */
+
+/* 아바타 원형 안을 꽉 채우는 프로필 사진 이미지 */
 .avatar-img {
   width: 100%;
   height: 100%;
@@ -509,9 +647,13 @@ textarea.input {
 }
 
 /* ── 메인 피드 검색 결과 건수 표시 바 ──────── */
+
+/* 메인 피드 검색 결과 건수 바 (예: "아이유" 검색 결과 12건) */
 .search-meta-bar { margin-bottom: 14px; }
 
 /* ── 마이페이지 댓글 인라인 수정 입력창 ────── */
+
+/* 마이페이지 댓글 탭에서 댓글 수정 시 나타나는 textarea */
 .comment-edit-textarea {
   width: 100%;
   min-height: 64px;
@@ -520,11 +662,15 @@ textarea.input {
   padding: 8px 10px;
   font-family: inherit;
 }
+
+/* 댓글 수정 저장/취소 버튼 묶음 */
 .comment-edit-btns {
   display: flex;
   gap: 6px;
   margin-top: 6px;
 }
+
+/* 댓글 수정 저장/취소 버튼 크기 */
 .comment-edit-btn {
   font-size: 12px;
   padding: 5px 12px;

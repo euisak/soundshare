@@ -2,8 +2,10 @@
 /* 상단 헤더(탑바), 검색창, 알림 패널, 프로필 팝오버, 인증 모달 */
 
 /* ── 상단 고정 헤더 바 ───────────────────── */
+
+/* 스크롤해도 상단에 고정되는 헤더 바 (유리 효과 배경) */
 .topbar {
-  position: sticky;           /* 스크롤해도 상단 고정 */
+  position: sticky;
   top: 0;
   z-index: 20;
   background: rgba(250, 250, 250, 0.9);
@@ -12,17 +14,20 @@
   border-bottom: 1px solid var(--line);
 }
 
+/* 헤더 내부 3열 그리드: 로고(좌) | 검색창(중앙) | 버튼묶음(우) */
 .topbar-inner {
-  width: min(960px, calc(100% - 32px)); /* 최대 960px, 좁은 화면에선 양쪽 16px 여백 유지 */
-  margin: 0 auto;                        /* 가운데 정렬 */
+  width: min(960px, calc(100% - 32px)); /* 최대 960px, 좁은 화면에서 양쪽 16px 여백 */
+  margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr auto 1fr;  /* 로고(좌) | 검색창(정중앙) | nav(우) */
-  align-items: center;                   /* 세 열 수직 가운데 정렬 */
-  gap: 16px;                             /* 열 사이 간격 */
-  padding: 14px 0;                       /* 헤더 위아래 여백 (좌우는 width 에서 처리) */
+  grid-template-columns: 1fr auto 1fr; /* 로고·검색창·버튼을 균등 배치 */
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0;
 }
 
-/* ── 헤더 좌측 로고 (SoundShare) ───────── */
+/* ── 헤더 좌측 로고 (SoundShare) */
+
+/* "SoundShare" 로고 텍스트 링크 */
 .brand {
   font-size: 15px;
   font-weight: 600;
@@ -32,13 +37,17 @@
   justify-self: start;
 }
 
-/* ── 헤더 가운데 검색창 ──────────────────── */
+/* ── 헤더 가운데 검색창 */
+
+/* 검색창 전체 래퍼 (반응형 너비: 최소 160px ~ 최대 400px) */
 .topbar-search {
-  width: clamp(160px, 32vw, 400px); /* 최소 160px, 최대 400px (뷰포트 따라 반응) */
+  width: clamp(160px, 32vw, 400px);
   position: relative;
   display: flex;
   align-items: center;
 }
+
+/* 검색창 왼쪽 돋보기 아이콘 (클릭 불가, 시각 장식) */
 .topbar-search-icon {
   position: absolute;
   left: 11px;
@@ -49,12 +58,14 @@
   display: flex;
   align-items: center;
 }
+
+/* 헤더 검색 텍스트 입력창 */
 .topbar-search-input {
   width: 100%;
   height: 34px;
   border: 1px solid var(--line);
   border-radius: 17px;
-  padding: 0 14px 0 32px;
+  padding: 0 14px 0 32px; /* 왼쪽 아이콘 공간 확보 */
   font-size: 13px;
   font-family: inherit;
   background: var(--bg-sub);
@@ -63,13 +74,19 @@
   transition: border-color 0.15s, background 0.15s;
   appearance: none;
 }
+
+/* 검색창 포커스 시 흰 배경 + 테두리 어둡게 */
 .topbar-search-input:focus {
   background: #fff;
   border-color: #bbb;
 }
+
+/* 검색창 플레이스홀더 색 */
 .topbar-search-input::placeholder { color: var(--muted); }
 
-/* ── 헤더 우측 글쓰기 버튼 ──────────────── */
+/* ── 헤더 우측 글쓰기 버튼 */
+
+/* "글쓰기" 버튼 (로그인 상태에서만 표시) */
 .topbar-write-btn {
   font-size: 13px;
   font-weight: 600;
@@ -84,12 +101,16 @@
   transition: background 0.15s, border-color 0.15s;
   white-space: nowrap;
 }
+
+/* 글쓰기 버튼 호버 */
 .topbar-write-btn:hover {
   background: #f0f0f0;
   border-color: #ccc;
 }
 
 /* ── 헤더 우측 버튼 묶음 (글쓰기·알림·프로필) */
+
+/* 헤더 우측 버튼들을 가로로 나열하는 컨테이너 */
 .nav {
   display: flex;
   align-items: center;
@@ -98,11 +119,15 @@
 }
 
 /* ── 알림 종 버튼 + 읽지 않은 알림 빨간 뱃지 */
+
+/* 알림 종 버튼과 빨간 뱃지를 함께 포지셔닝하는 래퍼 */
 .notify-bell {
   position: relative;
   display: flex;
   align-items: center;
 }
+
+/* 알림 종 아이콘 버튼 */
 .notify-btn {
   position: relative;
   width: 34px;
@@ -117,7 +142,11 @@
   justify-content: center;
   transition: background 0.15s;
 }
+
+/* 알림 버튼 호버 */
 .notify-btn:hover { background: #f0f0f0; }
+
+/* 읽지 않은 알림이 있을 때 표시되는 빨간 점 뱃지 */
 .notify-dot {
   position: absolute;
   top: 5px;
@@ -125,10 +154,12 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #e03131;         /* 빨간 알림 뱃지 */
-  border: 2px solid #fafafa;   /* 헤더 배경색과 맞춰 분리감 */
+  background: #e03131;
+  border: 2px solid #fafafa; /* 헤더 배경색과 맞춰 종 버튼과 분리되어 보이게 */
   pointer-events: none;
 }
+
+/* 알림 목록 패널 (종 버튼 클릭 시 드롭다운) */
 .notify-panel {
   position: absolute;
   right: 0;
@@ -144,6 +175,8 @@
   z-index: 35;
   overflow: hidden;
 }
+
+/* 알림 패널 상단: "알림" 타이틀 + 모두 읽음 버튼 */
 .notify-panel-head {
   display: flex;
   align-items: center;
@@ -152,21 +185,29 @@
   border-bottom: 1px solid #f0f0f0;
   flex-shrink: 0;
 }
+
+/* 알림 패널 "알림" 타이틀 텍스트 */
 .notify-panel-title {
   font-size: 14px;
   font-weight: 600;
   color: var(--text);
 }
+
+/* 알림 항목 목록 (세로 스크롤 가능) */
 .notify-panel-list {
   overflow-y: auto;
   flex: 1;
 }
+
+/* 알림이 없을 때 패널 중앙 안내 문구 */
 .notify-empty {
   padding: 32px 16px;
   text-align: center;
   font-size: 13px;
   color: var(--faint);
 }
+
+/* 알림 항목 하나 (아이콘 + 내용 텍스트 가로 배치) */
 .notify-item {
   display: flex;
   align-items: flex-start;
@@ -181,8 +222,14 @@
   font: inherit;
   transition: background 0.12s;
 }
+
+/* 마지막 알림 항목 하단 구분선 제거 */
 .notify-item:last-child { border-bottom: 0; }
+
+/* 알림 항목 호버 */
 .notify-item:hover { background: #f8f8f8; }
+
+/* 알림 종류 아이콘 원형 (좋아요 / 댓글) */
 .notify-item-icon {
   flex-shrink: 0;
   width: 28px;
@@ -194,25 +241,35 @@
   font-size: 13px;
   margin-top: 1px;
 }
+
+/* 좋아요 알림 아이콘 (빨간 하트 배경) */
 .notify-icon-like {
   background: #fff0f3;
   color: #e03131;
 }
+
+/* 댓글 알림 아이콘 (회색 말풍선 배경) */
 .notify-icon-cmt {
   background: #f0f0f0;
   color: #555;
 }
+
+/* 알림 내용 + 게시글 제목 + 시간을 세로로 쌓는 영역 */
 .notify-item-body {
   display: flex;
   flex-direction: column;
   gap: 3px;
   min-width: 0;
 }
+
+/* 알림 내용 텍스트 (예: "홍길동님이 좋아요를 눌렀습니다") */
 .notify-item-text {
   font-size: 13px;
   color: #222;
   line-height: 1.4;
 }
+
+/* 알림 관련 게시글 제목 (한 줄 말줄임) */
 .notify-item-title {
   font-size: 12px;
   color: var(--muted);
@@ -222,19 +279,27 @@
   max-width: 240px;
   display: block;
 }
+
+/* 댓글 미리보기 텍스트 (이탤릭 제거) */
 .notify-comment-preview { font-style: normal; }
+
+/* 알림 시간 (예: 3분 전) */
 .notify-item-time {
   font-size: 11px;
   color: var(--faint);
 }
 
 /* ── 비로그인: 로그인·회원가입 버튼 / 로그인: 프로필 아바타 + 팝오버 메뉴 */
+
+/* 비로그인 상태 "로그인" "회원가입" 버튼 묶음 */
 .auth-topbar {
   display: flex;
   align-items: center;
   gap: 9px;
   margin-left: 4px;
 }
+
+/* 비로그인 상태 로그인/회원가입 버튼 */
 .auth-topbar-btn {
   appearance: none;
   border: 1px solid var(--line);
@@ -248,11 +313,17 @@
   padding: 7px 13px;
   transition: background 0.15s, border-color 0.15s;
 }
+
+/* 로그인/회원가입 버튼 호버 */
 .auth-topbar-btn:hover {
   background: #f0f0f0;
   border-color: #ccc;
 }
+
+/* 로그인 상태 프로필 아바타 버튼 기준점 (팝오버가 아래에 붙음) */
 .auth-profile-menu { position: relative; }
+
+/* 로그인 상태 헤더 우측 프로필 아바타 원형 버튼 */
 .auth-profile-btn {
   width: 34px;
   height: 34px;
@@ -271,6 +342,8 @@
   padding: 0;
   flex-shrink: 0;
 }
+
+/* 프로필 아바타 클릭 시 나타나는 팝오버 메뉴 */
 .auth-profile-popover {
   position: absolute;
   right: 0;
@@ -283,6 +356,8 @@
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
   z-index: 35;
 }
+
+/* 팝오버 메뉴 항목 (내 페이지 / 설정 / 로그아웃) */
 .auth-profile-popover a,
 .auth-profile-popover button {
   width: 100%;
@@ -300,23 +375,28 @@
   text-align: left;
   text-decoration: none;
 }
+
+/* 팝오버 메뉴 항목 호버 */
 .auth-profile-popover a:hover,
 .auth-profile-popover button:hover { background: #f3f3f3; }
 
 /* ── 로그인·회원가입·비밀번호 찾기 모달 ──── */
+
+/* 모달 전체를 덮는 반투명 배경 (클릭 시 모달 닫힘) */
 .auth-modal-backdrop {
   position: fixed;
-  inset: 0;                     /* top/right/bottom/left 0 단축 */
+  inset: 0;                    /* top/right/bottom/left 0 단축 */
   background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(8px);   /* 배경 블러 */
+  backdrop-filter: blur(8px);  /* 배경 블러 */
   -webkit-backdrop-filter: blur(8px);
-  z-index: 200;                 /* 헤더(20)·알림패널(35)보다 위 */
+  z-index: 200;                /* 헤더(20)·알림패널(35)보다 위 */
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 16px;
 }
 
+/* 모달 흰색 박스 (로그인 / 회원가입 / 비밀번호 찾기 폼 포함) */
 .auth-modal-box {
   background: var(--card);
   border: 1px solid var(--line);
@@ -328,6 +408,7 @@
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
 }
 
+/* 모달 우측 상단 닫기(×) 버튼 */
 .auth-modal-close {
   position: absolute;
   top: 14px;
@@ -345,11 +426,14 @@
   justify-content: center;
   transition: background 0.15s, color 0.15s;
 }
+
+/* 닫기 버튼 호버 */
 .auth-modal-close:hover {
   background: #e8e8e8;
   color: var(--text);
 }
 
+/* 모달 타이틀 ("로그인" / "회원가입" / "비밀번호 찾기") */
 .auth-modal-title {
   font-size: 22px;
   font-weight: 600;
@@ -357,6 +441,7 @@
   letter-spacing: -0.02em;
 }
 
+/* 모달 하단 뷰 전환 링크 버튼 ("회원가입" / "로그인으로 돌아가기" 등) */
 .auth-view-btn {
   appearance: none;
   background: none;
@@ -367,4 +452,6 @@
   font-family: inherit;
   padding: 0;
 }
+
+/* 뷰 전환 링크 호버 시 밑줄 */
 .auth-view-btn:hover { text-decoration: underline; }
