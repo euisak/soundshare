@@ -1,10 +1,13 @@
+// 공통 UI 렌더 함수 모음
+// 아바타·피드카드·댓글·페이지네이션 렌더, 토스트, 시간 포맷 등
+
 import { db, getDoc, doc } from "./firebase.js";
 
 // ── 유저 포토 캐시 (페이지 로드당 유지) ──────────────────────────
-const _userPhotoCache = new Map();
+const _userPhotoCache = new Map(); // uid → photoURL 캐시 (Firestore 중복 요청 방지)
 
 async function _fetchUserPhoto(uid) {
-  if (_userPhotoCache.has(uid)) return _userPhotoCache.get(uid);
+  if (_userPhotoCache.has(uid)) return _userPhotoCache.get(uid); // 캐시 히트
   try {
     const snap = await getDoc(doc(db, "users", uid));
     const url = snap.data()?.photoURL || null;
@@ -34,10 +37,11 @@ export async function resolveAvatars(container = document) {
   });
 }
 
+// Firestore Timestamp → "n분 전" 형태로 변환
 export function timeAgo(ts) {
   if (!ts) return "";
   const date = ts.toDate ? ts.toDate() : new Date(ts);
-  const diff = (Date.now() - date.getTime()) / 1000;
+  const diff = (Date.now() - date.getTime()) / 1000; // 초 단위 경과 시간
   if (diff < 60) return "방금 전";
   if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
@@ -45,63 +49,18 @@ export function timeAgo(ts) {
   return date.toLocaleDateString("ko-KR");
 }
 
+// XSS 방지: HTML 특수문자 이스케이프
 export function escHtml(str) {
   return String(str ?? "")
     .replace(/&/g, "&amp;").replace(/</g, "&lt;")
     .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
+// 이름의 첫 글자 대문자 (아바타 이니셜)
 export function avatarLetter(name) {
   return (name || "?")[0].toUpperCase();
 }
 
-export function renderPostCard(post) {
-  // 첫 번째 트랙 썸네일 (없으면 ♪ 플레이스홀더)
-  const trackList = post.tracks?.length ? post.tracks : (post.track ? [post.track] : []);
-  const firstTrack = trackList[0] || null;
-  const thumbHtml = firstTrack?.albumArt
-    ? `<img src="${escHtml(firstTrack.albumArt)}" alt="" />`
-    : `<span class="feed-thumb-empty">♪</span>`;
-
-  const displayTags = post.tags || [];
-  const tagsHtml = displayTags.length
-    ? `<div class="feed-tags">${displayTags.slice(0, 2).map((t) =>
-        `<span class="chip feed-chip">${escHtml(t)}</span>`
-      ).join("")}</div>`
-    : "";
-
-  return `
-  <a class="card feed-card" href="post.html#${escHtml(post.id)}" data-id="${escHtml(post.id)}">
-    <div class="feed-thumb">${thumbHtml}</div>
-    <div class="feed-content">
-      <div class="post-meta feed-meta">
-        ${post.authorId
-          ? `<button class="post-author-link" type="button" onclick="event.stopPropagation();window.location.href='profile.html#${escHtml(post.authorId)}'">
-               <span class="post-author-avatar avatar-sm" data-uid="${escHtml(post.authorId)}">${avatarLetter(post.authorName)}</span>
-               <span>${escHtml(post.authorName)}</span>
-             </button>`
-          : `<span class="post-author-link cursor-default">
-               <span class="post-author-avatar avatar-sm">${avatarLetter(post.authorName)}</span>
-               <span>${escHtml(post.authorName)}</span>
-             </span>`}
-        <span class="muted">·</span>
-        <span class="muted">${timeAgo(post.createdAt)}</span>
-        <div class="feed-meta-actions">
-          <span class="action-btn like-count feed-action-stat">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-            ${post.likeCount || 0}
-          </span>
-          <span class="action-btn feed-action-stat">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            ${post.commentCount || 0}
-          </span>
-        </div>
-      </div>
-      <h2 class="post-title feed-title">${escHtml(post.title)}</h2>
-      ${tagsHtml}
-    </div>
-  </a>`;
-}
 
 export function renderComment(c, currentUid = null) {
   const isOwner = currentUid && c.authorId === currentUid;
@@ -136,15 +95,16 @@ export function renderComment(c, currentUid = null) {
   </div>`;
 }
 
+// 화면 하단 토스트 메시지 (kind: "ok"|"danger")
 export function showToast(msg, kind = "ok") {
   const el = document.createElement("div");
   el.className = `toast notice ${kind}`;
   el.textContent = msg;
   document.body.appendChild(el);
-  requestAnimationFrame(() => el.classList.add("toast-in"));
+  requestAnimationFrame(() => el.classList.add("toast-in")); // CSS 트랜지션으로 슬라이드 인
   setTimeout(() => {
     el.classList.remove("toast-in");
-    el.addEventListener("transitionend", () => el.remove());
+    el.addEventListener("transitionend", () => el.remove()); // 애니메이션 끝나면 DOM 제거
   }, 2800);
 }
 
@@ -156,9 +116,7 @@ const _SVG = {
   eye:   `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
 };
 
-/**
- * 앨범아트 커버 스택 HTML (최대 5장)
- */
+// 앨범아트 커버 스택 HTML (최대 5장, 겹쳐서 표시)
 function buildCoverStack(tracks) {
   const items = (tracks || []).slice(0, 5);
   let html = '<div class="post-cover-stack">';
@@ -171,13 +129,8 @@ function buildCoverStack(tracks) {
   return html + '</div>';
 }
 
-/**
- * 피드 카드 (post-feed-card) HTML
- * @param {object} post
- * @param {object} [opts]
- * @param {boolean} [opts.showAuthor=false]  작성자 아바타/이름 표시
- * @param {string}  [opts.dropdownHtml=""]   ⋮ 드롭다운 내부 버튼 HTML (없으면 미표시)
- */
+// 피드 카드 HTML 생성
+// showAuthor: 작성자 표시 여부, dropdownHtml: ⋮ 메뉴 내용 (없으면 메뉴 자체 미표시)
 export function renderFeedCard(post, { showAuthor = false, dropdownHtml = "" } = {}) {
   const pid    = escHtml(post.id);
   const tracks = Array.isArray(post.tracks) ? post.tracks : (post.track ? [post.track] : []);
@@ -230,13 +183,8 @@ export function renderFeedCard(post, { showAuthor = false, dropdownHtml = "" } =
   </div>`;
 }
 
-/**
- * 페이지네이션 버튼 HTML
- * @param {number} total    전체 항목 수
- * @param {number} page     현재 페이지 (1-based)
- * @param {number} perPage  페이지당 항목 수
- * @param {string} [tab]    data-tab 속성값 (탭 기반 페이지에서 사용)
- */
+// 페이지네이션 HTML 생성 (이전/다음/번호 버튼, 생략부호 포함)
+// tab: 탭 기반 페이지에서 data-tab 속성으로 어느 탭의 버튼인지 구분
 export function renderPagination(total, page, perPage, tab = null) {
   const totalPages = Math.ceil(total / perPage);
   if (totalPages <= 1) return "";
@@ -254,9 +202,7 @@ export function renderPagination(total, page, perPage, tab = null) {
   return `<div class="rd-pagination">${prev}${nums}${next}</div>`;
 }
 
-/**
- * 댓글 단 글 목록 아이템 — 읽기 전용 (profile.html용)
- */
+// 댓글 단 글 아이템 HTML — 읽기 전용 (profile.html 댓글 탭용)
 export function renderCommentedItem({ post, comment }) {
   const pid = escHtml(post.id);
   return `

@@ -7,3 +7,9 @@ node_modules/
 # 시스템 파일
 .DS_Store
 *.log
+
+# 에디터/도구
+.claude/
+.firebase/
+*.docx
+make_docs.js

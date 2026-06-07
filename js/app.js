@@ -1,17 +1,20 @@
+// 공통 앱 로직
+// 헤더 로드, 로그인 상태별 UI 토글, 알림, 인증 모달, 로그인 필수 가드
+
 import { auth, onAuthStateChanged, signOut, db, getDoc, doc } from "./firebase.js";
 import { signInModal, signUpModal, sendResetEmail, isNicknameTaken } from "./auth.js";
 import { listenNotifications, deleteNotification } from "./notify.js";
 import { timeAgo, escHtml } from "./ui.js";
 
-export function qs(sel, parent = document) {
+export function qs(sel, parent = document) {  // querySelector 단축
   return parent.querySelector(sel);
 }
 
-export function qsa(sel, parent = document) {
+export function qsa(sel, parent = document) { // querySelectorAll → 배열로 반환
   return [...parent.querySelectorAll(sel)];
 }
 
-export function setNotice(kind, msg) {
+export function setNotice(kind, msg) { // #notice 요소에 메시지 표시 (kind: "ok"|"danger")
   const el = qs("#notice");
   if (!el) return;
   el.className = `notice ${kind || ""}`.trim();
@@ -20,10 +23,10 @@ export function setNotice(kind, msg) {
 }
 
 export async function loadHeader() {
-  if (window.__headerReady) await window.__headerReady;
+  if (window.__headerReady) await window.__headerReady; // header-loader.js 가 fetch 완료될 때까지 대기
 }
 
-export function initTopbar() {
+export function initTopbar() { // 헤더 삽입 후 이벤트 바인딩 (loadHeader 이후 호출)
   const btnLogout = qs("#btnLogout");
   if (btnLogout) {
     btnLogout.addEventListener("click", async () => {
@@ -133,13 +136,13 @@ export function initTopbar() {
   });
 
   onAuthStateChanged(auth, (user) => {
-    authOnly.forEach((el) => (el.hidden = !user));
-    guestOnly.forEach((el) => (el.hidden = !!user));
+    authOnly.forEach((el) => (el.hidden = !user));   // 로그인 전용 요소 토글
+    guestOnly.forEach((el) => (el.hidden = !!user)); // 비로그인 전용 요소 토글
 
     if (avatar) {
       if (user) {
         const displayName = user.displayName || user.email?.split("@")[0] || "U";
-        avatar.textContent = displayName[0].toUpperCase(); // 기본값 먼저 표시
+        avatar.textContent = displayName[0].toUpperCase(); // 이니셜 기본값 먼저 표시
         // Firestore에서 photoURL 읽기 (Auth photoURL은 base64 저장 불가)
         getDoc(doc(db, "users", user.uid)).then((snap) => {
           const photoURL = snap.data()?.photoURL;
@@ -148,15 +151,15 @@ export function initTopbar() {
           }
         }).catch(() => {});
       } else {
-        avatar.textContent = "?";
+        avatar.textContent = "?"; // 비로그인 시 ?
       }
     }
 
-    // 알림 리스너 관리
+    // 알림 리스너 관리 (로그아웃 시 기존 리스너 해제)
     if (notifUnsub) { notifUnsub(); notifUnsub = null; }
     if (user) {
       notifUnsub = listenNotifications(user.uid, (notifs) => {
-        if (notifDot) notifDot.hidden = notifs.length === 0;
+        if (notifDot) notifDot.hidden = notifs.length === 0; // 알림 뱃지 표시/숨김
         renderNotifList(notifs);
       });
     } else {
@@ -400,6 +403,7 @@ export function initAuthModal() {
   window.__openAuthModal = openModal;
 }
 
+// 로그인 필수 가드: 비로그인 시 index.html 로그인 모달로 리다이렉트
 export function requireAuth() {
   return new Promise((resolve) => {
     onAuthStateChanged(auth, (user) => {
@@ -407,11 +411,11 @@ export function requireAuth() {
         window.location.href = "index.html?openAuth=login";
         return;
       }
-      resolve(user);
+      resolve(user); // 로그인 상태면 user 객체 반환
     });
   });
 }
 
-export function getUrlParam(name) {
+export function getUrlParam(name) { // URL 쿼리 파라미터 가져오기
   return new URLSearchParams(window.location.search).get(name);
 }

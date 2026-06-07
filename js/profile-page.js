@@ -1,3 +1,6 @@
+// profile.html 전용 로직
+// URL hash(#uid)로 다른 유저 프로필 표시, 공개 범위 설정에 따라 게시글/댓글 탭 접근 제한
+
 import { loadHeader, initTopbar } from "./app.js";
 import { auth, onAuthStateChanged, db, getDoc, doc } from "./firebase.js";
 import { getUserPosts, getCommentedPosts } from "./post.js";
@@ -6,22 +9,22 @@ import { avatarLetter, escHtml, resolveAvatars, renderFeedCard, renderPagination
 await loadHeader();
 initTopbar();
 
-const uid = window.location.hash.slice(1);
+const uid = window.location.hash.slice(1); // URL #uid → 조회할 유저 ID
 const tabContent = document.querySelector("#tabContent");
 
 if (!uid || uid === "undefined" || uid === "null") {
   tabContent.innerHTML = '<div class="muted small empty-msg">사용자를 찾을 수 없습니다.</div>';
 } else {
-  const currentUser = await new Promise((resolve) => {
+  const currentUser = await new Promise((resolve) => { // 로그인 상태 1회 확인
     const unsub = onAuthStateChanged(auth, (u) => { unsub(); resolve(u); });
   });
-  const isOwn = currentUser && currentUser.uid === uid;
+  const isOwn = currentUser && currentUser.uid === uid; // 본인 프로필 여부
 
   if (isOwn) document.querySelector("#btnSettings").hidden = false;
 
   const userSnap = await getDoc(doc(db, "users", uid)).catch(() => null);
   const userData       = userSnap?.exists() ? userSnap.data() : {};
-  const postsPublic    = userData.postsPublic    !== false;
+  const postsPublic    = userData.postsPublic    !== false; // 기본값 true (미설정 시 공개)
   const commentsPublic = userData.commentsPublic !== false;
 
   let displayName = userData.nickname || userData.email?.split("@")[0] || "";
@@ -60,7 +63,7 @@ if (!uid || uid === "undefined" || uid === "null") {
 
   async function loadTab(tab) {
     activeTab = tab;
-    if (tab === "posts" && !postsPublic && !isOwn) {
+    if (tab === "posts" && !postsPublic && !isOwn) { // 비공개 설정 시 차단
       tabContent.innerHTML = '<div class="muted small empty-msg">사용자가 비공개로 설정했습니다.</div>';
       return;
     }
@@ -68,12 +71,12 @@ if (!uid || uid === "undefined" || uid === "null") {
       tabContent.innerHTML = '<div class="muted small empty-msg">사용자가 비공개로 설정했습니다.</div>';
       return;
     }
-    tabContent.innerHTML = '<div class="skeleton skeleton-tab"></div>';
+    tabContent.innerHTML = '<div class="skeleton skeleton-tab"></div>'; // 로딩 스켈레톤
     try {
       if (!(tab in cache)) {
         if (tab === "posts") {
           const posts = await getUserPosts(uid);
-          cache[tab] = isOwn ? posts : posts.filter(p => p.visibility !== "private");
+          cache[tab] = isOwn ? posts : posts.filter(p => p.visibility !== "private"); // 타인 비공개 글 제외
         } else {
           const commented = await getCommentedPosts(uid);
           cache[tab] = isOwn ? commented : commented.filter(({ post }) => post.visibility !== "private");

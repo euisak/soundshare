@@ -1,3 +1,6 @@
+/* ── post.css ────────────────────────────────────────────────── */
+/* 게시글 상세 (post.html) — 댓글, 트랙 목록, 좋아요, 메모, 미리듣기 버튼 */
+
 /* ── Comments ───────────────────────────── */
 .comment-list {
   display: flex;
@@ -27,7 +30,7 @@
 
 /* ── Post Detail ─────────────────────────────────────────────────────── */
 .pd-page {
-  width: min(720px, calc(100% - 32px));
+  width: min(720px, calc(100% - 32px)); /* 게시글 본문 최대 720px */
   margin: 0 auto;
   padding: 24px 0 80px;
 }
@@ -120,8 +123,8 @@
   text-decoration: none;
 }
 .pd-track-ext a:hover { filter: brightness(0.8); text-decoration: underline; }
-.link-apple   { color: #f87171; }
-.link-spotify { color: #4ade80; }
+.link-apple   { color: #f87171; } /* Apple Music 링크 색상 */
+.link-spotify { color: #4ade80; } /* Spotify 링크 색상 */
 .pd-play-btn {
   width: 28px;
   height: 28px;
@@ -297,7 +300,7 @@
   white-space: pre-wrap;
   margin-top: 6px;
   padding: 8px 12px;
-  border-left: 2px solid var(--line);
+  border-left: 2px solid var(--line); /* 왼쪽 인용 스타일 구분선 */
   background: #fafafa;
   border-radius: 0 6px 6px 0;
 }

@@ -1,3 +1,6 @@
+// settings.html 전용 로직
+// 닉네임 변경, 비밀번호 변경, 프로필 사진 업로드, 공개 범위 설정, 회원 탈퇴
+
 import { loadHeader, initTopbar, requireAuth } from "./app.js";
 import { isNicknameTaken, changeNickname, changePassword, deleteAccount, updateProfilePhoto } from "./auth.js";
 import { db, getDoc, setDoc, doc } from "./firebase.js";
@@ -5,9 +8,9 @@ import { avatarLetter, showToast } from "./ui.js";
 
 await loadHeader();
 initTopbar();
-const user = await requireAuth();
+const user = await requireAuth(); // 비로그인 차단
 
-const name = user.displayName || user.email.split("@")[0];
+const name = user.displayName || user.email.split("@")[0]; // 표시 이름
 const profileAvatarEl = document.querySelector("#profileAvatar");
 
 const userSnap = await getDoc(doc(db, "users", user.uid));
@@ -25,7 +28,7 @@ document.querySelector("#profileName").textContent  = name;
 document.querySelector("#profileEmail").textContent = user.email;
 
 // ── 공통 유틸 ────────────────────────────────────────────
-function setNotice(id, kind, msg) {
+function setNotice(id, kind, msg) { // id: CSS selector, kind: "ok"|"danger"|""
   const el = document.querySelector(id);
   if (!el) return;
   el.className = `notice ${kind || ""}`.trim();
@@ -33,18 +36,18 @@ function setNotice(id, kind, msg) {
   el.hidden = !msg;
 }
 
-function setLoading(btn, on, label) {
+function setLoading(btn, on, label) { // 버튼 로딩 상태 토글 (disabled + 텍스트 변경)
   btn.disabled = on;
-  if (!btn.dataset.label) btn.dataset.label = btn.textContent;
+  if (!btn.dataset.label) btn.dataset.label = btn.textContent; // 원본 텍스트 보존
   btn.textContent = on ? "처리 중…" : (label || btn.dataset.label);
 }
 
 // ── 프로필 사진 업로드 ──────────────────────────────────────
-const photoFileInput  = document.querySelector("#photoFileInput");
-const photoSaveRow    = document.querySelector("#photoSaveRow");
+const photoFileInput  = document.querySelector("#photoFileInput");  // 숨겨진 파일 input
+const photoSaveRow    = document.querySelector("#photoSaveRow");    // 저장/취소 버튼 행
 const btnSavePhoto    = document.querySelector("#btnSavePhoto");
 const btnCancelPhoto  = document.querySelector("#btnCancelPhoto");
-let   pendingPhotoUrl = null;
+let   pendingPhotoUrl = null; // Canvas로 리사이즈된 base64 이미지 (저장 전 임시)
 
 document.querySelector("#photoUploadWrap").addEventListener("click", () => {
   photoFileInput.click();
@@ -65,15 +68,15 @@ photoFileInput.addEventListener("change", () => {
   reader.onload = (ev) => {
     const img = new Image();
     img.onload = () => {
-      const SIZE = 200;
+      const SIZE = 200; // 200×200 픽셀로 리사이즈
       const canvas = document.createElement("canvas");
       canvas.width = SIZE; canvas.height = SIZE;
       const ctx = canvas.getContext("2d");
-      const side = Math.min(img.width, img.height);
+      const side = Math.min(img.width, img.height); // 정사각형 크롭 (짧은 쪽 기준)
       const sx = (img.width - side) / 2, sy = (img.height - side) / 2;
       ctx.drawImage(img, sx, sy, side, side, 0, 0, SIZE, SIZE);
-      pendingPhotoUrl = canvas.toDataURL("image/jpeg", 0.75);
-      profileAvatarEl.innerHTML = `<img src="${pendingPhotoUrl}" alt="미리보기" />`;
+      pendingPhotoUrl = canvas.toDataURL("image/jpeg", 0.75); // JPEG 75% 품질로 변환
+      profileAvatarEl.innerHTML = `<img src="${pendingPhotoUrl}" alt="미리보기" />`; // 미리보기
       photoSaveRow.hidden = false;
       setNotice("#noticePhoto", "", "");
     };
@@ -109,11 +112,11 @@ btnSavePhoto.addEventListener("click", async () => {
 });
 
 // ── 닉네임 변경 ──────────────────────────────────────────
-let nickState = null;
+let nickState = null; // null=미확인, true=사용가능, false=중복
 const nickInput    = document.querySelector("#newNickname");
-const nickStatus   = document.querySelector("#nickStatus");
-const btnCheckNick = document.querySelector("#btnCheckNick");
-const btnSaveNick  = document.querySelector("#btnSaveNick");
+const nickStatus   = document.querySelector("#nickStatus");    // 중복 확인 결과 표시
+const btnCheckNick = document.querySelector("#btnCheckNick");  // 중복 확인 버튼
+const btnSaveNick  = document.querySelector("#btnSaveNick");   // 저장 버튼
 
 nickInput.value = "";
 
@@ -256,9 +259,10 @@ document.querySelector("#formDelete").addEventListener("submit", async (e) => {
 updateNickUI();
 
 // ── 공개 범위 ──────────────────────────────────────────
-const togglePosts    = document.querySelector("#togglePosts");
-const toggleComments = document.querySelector("#toggleComments");
+const togglePosts    = document.querySelector("#togglePosts");    // 게시글 공개 토글
+const toggleComments = document.querySelector("#toggleComments"); // 댓글 공개 토글
 
+// Firestore에 저장된 값으로 초기화 (기본값 true)
 togglePosts.checked    = userSnap.data()?.postsPublic    !== false;
 toggleComments.checked = userSnap.data()?.commentsPublic !== false;
 

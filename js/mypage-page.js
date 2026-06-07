@@ -1,3 +1,6 @@
+// mypage.html 전용 로직
+// 내 게시글 / 댓글 단 글 / 좋아요한 글 탭 전환, 댓글 수정·삭제, 게시글 삭제·좋아요 취소
+
 import { loadHeader, initTopbar, requireAuth } from "./app.js";
 import {
   getUserPosts, getCommentedPosts, getLikedPosts,
@@ -8,7 +11,7 @@ import { avatarLetter, timeAgo, escHtml, showToast, resolveAvatars, renderFeedCa
 
 await loadHeader();
 initTopbar();
-const user = await requireAuth();
+const user = await requireAuth(); // 비로그인 차단
 
 // 프로필
 const name = user.displayName || user.email.split("@")[0];
@@ -26,14 +29,14 @@ getDoc(doc(db, "users", user.uid)).then((snap) => {
 }).catch(() => {});
 
 const PER_PAGE = 10;
-const EMPTY = {
+const EMPTY = { // 탭별 빈 상태 메시지
   my:        "아직 작성한 글이 없습니다.",
   commented: "아직 댓글을 단 글이 없습니다.",
   liked:     "아직 좋아요한 글이 없습니다.",
 };
 
-const cache     = {};
-const pageState = { my: 1, commented: 1, liked: 1 };
+const cache     = {};                              // 탭별 데이터 캐시 (재요청 방지)
+const pageState = { my: 1, commented: 1, liked: 1 }; // 탭별 현재 페이지
 let   activeTab = "my";
 
 // ── 탭별 ⋮ 드롭다운 아이템 빌더 ──────────────────────────────
@@ -109,9 +112,9 @@ function renderTab(tab) {
 async function loadTab(tab) {
   activeTab = tab;
   const content = document.querySelector("#tabContent");
-  content.innerHTML = '<div class="skeleton skeleton-tab"></div>';
+  content.innerHTML = '<div class="skeleton skeleton-tab"></div>'; // 로딩 스켈레톤
   try {
-    if (!cache[tab]) {
+    if (!cache[tab]) { // 캐시 없을 때만 Firestore 요청
       if (tab === "my")             cache[tab] = await getUserPosts(user.uid);
       else if (tab === "commented") cache[tab] = await getCommentedPosts(user.uid);
       else                          cache[tab] = await getLikedPosts(user.uid);

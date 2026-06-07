@@ -7,6 +7,7 @@
     <!-- 검색창 -->
     <form class="topbar-search" action="search.html" role="search">
       <span class="topbar-search-icon" aria-hidden="true">
+        <!-- 돋보기 아이콘 -->
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="8"/>
@@ -19,32 +20,38 @@
 
     <nav class="nav">
 
-      <!-- 로그인 시 -->
+      <!-- 글쓰기 버튼 (로그인 시) -->
       <a class="topbar-write-btn" data-auth="in" href="write.html" hidden>글쓰기</a>
 
-      <!-- 알림 벨 -->
+      <!-- 알림 벨 (로그인 시) -->
       <div class="notify-bell" data-auth="in" hidden>
         <button class="notify-btn" id="btnNotif" type="button" aria-label="알림" aria-expanded="false">
+          <!-- 벨 아이콘 -->
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
             <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
           </svg>
+          <!-- 읽지 않은 알림 표시 점 -->
           <span class="notify-dot" id="notifDot" hidden></span>
         </button>
+
+        <!-- 알림 드롭다운 -->
         <div class="notify-panel" id="notifPanel" hidden>
           <div class="notify-panel-head">
             <span class="notify-panel-title">알림</span>
           </div>
+          <!-- 알림 목록 -->
           <div class="notify-panel-list" id="notifList">
             <div class="notify-empty">새 알림이 없습니다</div>
           </div>
         </div>
       </div>
 
-      <!-- 프로필 -->
+      <!-- 프로필 아바타 (로그인 시) -->
       <div class="auth-profile-menu" data-auth="in" hidden>
         <button class="auth-profile-btn" id="userAvatar" type="button" aria-label="프로필 메뉴">?</button>
+        <!-- 프로필 팝오버 -->
         <div class="auth-profile-popover" id="profilePopover" hidden>
           <a href="mypage.html">마이페이지</a>
           <a href="settings.html">설정</a>
@@ -52,7 +59,7 @@
         </div>
       </div>
 
-      <!-- 비로그인 시 -->
+      <!-- 로그인 버튼 (비로그인 시) -->
       <div class="auth-topbar" data-auth="out" hidden>
         <button class="auth-topbar-btn" id="btnOpenLogin" type="button">로그인</button>
       </div>

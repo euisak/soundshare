@@ -12,18 +12,18 @@
     <link rel="stylesheet" href="css/index.css" />
   </head>
   <body>
-    <script src="js/header-loader.js"></script>
+    <script src="js/header-loader.js"></script> <!-- 공통 헤더 + 로그인 모달 삽입 -->
 
     <main class="container">
 
-      <!-- 페이지 헤더 -->
+      <!-- 피드 헤더 (정렬 드롭다운) — 검색 시 hidden -->
       <div class="feed-page-header" id="feedHeader">
-        <h1 class="feed-page-title">게시글</h1>
+        <h1 class="feed-page-title">게시글</h1> <!-- 제목 -->
         <div class="feed-sort-wrap">
-          <button class="feed-sort-btn" id="sortBtn" type="button">
+          <button class="feed-sort-btn" id="sortBtn" type="button"> <!-- 정렬 버튼 -->
             <strong id="sortLabel">최신순</strong> ⌄
           </button>
-          <div class="feed-sort-menu" id="sortMenu" hidden>
+          <div class="feed-sort-menu" id="sortMenu" hidden> <!-- 정렬 드롭다운 -->
             <button type="button" data-sort="recent">최신순</button>
             <button type="button" data-sort="popular">인기순</button>
             <button type="button" data-sort="oldest">오래된순</button>
@@ -31,13 +31,14 @@
         </div>
       </div>
 
-      <!-- 검색 모드 메타 -->
+      <!-- 검색 결과 건수 — 검색 시 표시 -->
       <div id="searchBar" hidden>
         <div id="searchMeta" class="muted small search-meta-bar"></div>
       </div>
 
-      <!-- 포스트 목록 -->
+      <!-- 포스트 목록 (JS가 renderFeedCard 로 채움) -->
       <div id="postList"></div>
+      <!-- 페이지네이션 -->
       <div id="feedPagination"></div>
 
     </main>

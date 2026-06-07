@@ -1,21 +1,24 @@
+/* ── base.css ────────────────────────────────────────────────── */
+/* 전역 CSS 변수, 공통 컴포넌트 (버튼·카드·입력·토스트·아바타 등) */
+
 :root {
-  --bg: #fff;
-  --bg-sub: #f4f4f4;
-  --card: #fff;
-  --text: #111;
-  --muted: #999;
-  --faint: #bbb;
-  --line: #e8e8e8;
-  --danger: #ff4d6d;
-  --ok: #2de2a6;
-  --avatar-grad: linear-gradient(135deg, #444, #111);
+  --bg: #fff;              /* 기본 배경 */
+  --bg-sub: #f4f4f4;       /* 서브 배경 (입력창·칩 등) */
+  --card: #fff;            /* 카드 배경 */
+  --text: #111;            /* 기본 텍스트 */
+  --muted: #999;           /* 흐린 텍스트 */
+  --faint: #bbb;           /* 더 흐린 텍스트 (날짜·보조) */
+  --line: #e8e8e8;         /* 구분선 */
+  --danger: #ff4d6d;       /* 위험/삭제 색상 */
+  --ok: #2de2a6;           /* 성공 색상 */
+  --avatar-grad: linear-gradient(135deg, #444, #111); /* 아바타 기본 그라디언트 */
 }
 
 * {
   box-sizing: border-box;
 }
 
-[hidden] { display: none !important; }
+[hidden] { display: none !important; } /* hidden 속성 강제 숨김 */
 
 html,
 body {
@@ -37,7 +40,7 @@ a {
 }
 
 .container {
-  width: min(960px, calc(100% - 32px));
+  width: min(960px, calc(100% - 32px)); /* 최대 960px, 좁은 화면에서 양쪽 16px 여백 */
   margin: 0 auto;
   padding: 24px 0 48px;
 }
@@ -341,13 +344,13 @@ label {
 }
 .skeleton {
   background: linear-gradient(90deg, #f0f0f0 25%, #e4e4e4 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
+  background-size: 200% 100%;     /* shimmer 그라디언트 너비 (슬라이드 효과용) */
   animation: shimmer 1.5s infinite;
   border-radius: 16px;
 }
 @keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% { background-position: 200% 0; }   /* 오른쪽에서 시작 */
+  100% { background-position: -200% 0; } /* 왼쪽으로 이동 */
 }
 
 /* ── rd-pagination wrapper ──────────────── */
@@ -394,19 +397,19 @@ label {
   position: fixed;
   bottom: 24px;
   left: 50%;
-  transform: translateX(-50%) translateY(20px);
+  transform: translateX(-50%) translateY(20px); /* 초기엔 20px 아래 (슬라이드 인 시작점) */
   z-index: 100;
   min-width: 200px;
   text-align: center;
   padding: 12px 20px;
   border-radius: 12px;
-  opacity: 0;
+  opacity: 0;                                   /* 초기엔 투명 */
   transition: opacity 0.25s, transform 0.25s;
-  pointer-events: none;
+  pointer-events: none;                         /* 클릭 이벤트 무시 */
 }
 .toast.toast-in {
   opacity: 1;
-  transform: translateX(-50%) translateY(0);
+  transform: translateX(-50%) translateY(0);    /* 제자리로 슬라이드 인 */
 }
 
 /* ── Input focus ────────────────────────── */
@@ -463,9 +466,9 @@ textarea.input {
 }
 
 /* ── Avatar size variants ───────────────── */
-.avatar-sm { width: 18px !important; height: 18px !important; font-size: 8px !important; }
-.avatar-md { width: 20px !important; height: 20px !important; font-size: 9px !important; }
-.avatar-lg { width: 32px !important; height: 32px !important; font-size: 13px !important; }
+.avatar-sm { width: 18px !important; height: 18px !important; font-size: 8px !important; }  /* 피드 작성자 */
+.avatar-md { width: 20px !important; height: 20px !important; font-size: 9px !important; }  /* 댓글 */
+.avatar-lg { width: 32px !important; height: 32px !important; font-size: 13px !important; } /* 댓글 입력폼 */
 
 /* ── Feed card wrapper (dropdown overlay) ── */
 .feed-card-wrap { position: relative; }

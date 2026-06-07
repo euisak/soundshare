@@ -11,16 +11,18 @@
     <link rel="stylesheet" href="css/post.css" />
   </head>
   <body>
-    <script src="js/header-loader.js"></script>
+    <script src="js/header-loader.js"></script> <!-- 공통 헤더 + 로그인 모달 삽입 -->
 
     <main class="pd-page">
-      <div id="notice" class="notice" hidden></div>
+      <div id="notice" class="notice" hidden></div> <!-- 에러 메시지 -->
+      <!-- 뒤로가기 버튼 -->
       <button class="back-btn" id="btnBack">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="M19 12H5M12 5l-7 7 7 7"/>
         </svg>
         뒤로
       </button>
+      <!-- 게시글 본문 + 댓글 (JS가 동적으로 채움) -->
       <div id="postArea"></div>
     </main>
 

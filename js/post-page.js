@@ -1,3 +1,6 @@
+// post.html 전용 로직
+// 게시글 상세: 트랙 목록, 오디오 미리듣기, 좋아요, 댓글 CRUD
+
 import { loadHeader, initTopbar, getUrlParam } from "./app.js";
 import { auth, onAuthStateChanged } from "./firebase.js";
 import { getPost, toggleLike, addComment, listenComments, deletePost, incrementViewCount, updateComment, deleteComment } from "./post.js";
@@ -7,16 +10,16 @@ await loadHeader();
 initTopbar();
 
 // ── 뒤로가기 ──────────────────────────────────────────────────────────────
-const fromEdit = new URLSearchParams(location.search).has("edited");
+const fromEdit = new URLSearchParams(location.search).has("edited"); // write → post 이동 시
 document.querySelector("#btnBack").addEventListener("click", () => {
   if (fromEdit) {
-    history.length > 2 ? history.go(-2) : location.replace("index.html");
+    history.length > 2 ? history.go(-2) : location.replace("index.html"); // 수정 후엔 2단계 뒤로
   } else {
     history.length > 1 ? history.back() : location.replace("index.html");
   }
 });
 
-const postId = getUrlParam("id") || window.location.hash.slice(1);
+const postId = getUrlParam("id") || window.location.hash.slice(1); // URL ?id= 또는 #id
 if (!postId) {
   document.querySelector("#postArea").innerHTML = '<div class="card empty-state">게시글 ID가 없습니다.</div>';
   throw new Error("no postId");
@@ -28,12 +31,12 @@ if (!post) {
   throw new Error("post not found");
 }
 
-const user = await new Promise((resolve) => {
+const user = await new Promise((resolve) => { // 로그인 상태 1회 확인
   const unsub = onAuthStateChanged(auth, (u) => { unsub(); resolve(u); });
 });
 
-const isOwner = user?.uid === post.authorId;
-const liked   = user ? (post.likedBy || []).includes(user.uid) : false;
+const isOwner = user?.uid === post.authorId;                         // 본인 글 여부
+const liked   = user ? (post.likedBy || []).includes(user.uid) : false; // 좋아요 눌렀는지
 
 // ── 비공개 글 접근 차단 ───────────────────────────────────────────────────
 if (post.visibility === "private" && !isOwner) {
@@ -44,11 +47,11 @@ if (post.visibility === "private" && !isOwner) {
 incrementViewCount(postId);
 document.title = `${post.title} — SoundShare`;
 
-// ── 아이콘 ────────────────────────────────────────────────────────────────
-const playIcon  = `<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
-const pauseIcon = `<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
-const spotifyIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>`;
-const appleIcon  = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>`;
+// ── 아이콘 SVG 상수 ───────────────────────────────────────────────────────
+const playIcon  = `<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`; // 재생
+const pauseIcon = `<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`; // 일시정지
+const spotifyIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>`; // Spotify
+const appleIcon  = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>`; // Apple Music
 
 // ── 트랙 렌더 ─────────────────────────────────────────────────────────────
 function renderTracks(tracks) {
@@ -178,8 +181,8 @@ document.querySelector("#postArea").innerHTML = `
 resolveAvatars(document.querySelector("#postArea"));
 
 // ── 오디오 미리듣기 ───────────────────────────────────────────────────────
-const sharedAudio = new Audio();
-let activePlayBtn = null;
+const sharedAudio = new Audio(); // 전역 Audio 인스턴스 (한 번에 하나만 재생)
+let activePlayBtn = null;        // 현재 재생 중인 버튼 참조
 
 document.querySelector("#postArea").addEventListener("click", (e) => {
   const noteBtn = e.target.closest(".pd-note-btn");
@@ -246,8 +249,8 @@ document.querySelector("#btnDelete")?.addEventListener("click", async () => {
   } catch (err) { showToast(err.message, "danger"); }
 });
 
-// ── 댓글 실시간 ───────────────────────────────────────────────────────────
-listenComments(postId, (comments) => {
+// ── 댓글 실시간 리스너 ────────────────────────────────────────────────────
+listenComments(postId, (comments) => { // Firestore onSnapshot → 댓글 추가/삭제 시 자동 갱신
   const list = document.querySelector("#commentList");
   const cnt  = document.querySelector("#commentCount");
   if (cnt) cnt.textContent = comments.length;

@@ -1,3 +1,6 @@
+// 게시글 CRUD, 좋아요, 댓글, 검색
+// Firestore posts 컬렉션과 posts/{id}/comments 서브컬렉션 다룸
+
 import {
   db, auth, serverTimestamp,
   collection, doc, addDoc, setDoc, getDoc, getDocs, updateDoc, deleteDoc,
@@ -5,6 +8,7 @@ import {
 } from "./firebase.js";
 import { addNotification } from "./notify.js";
 
+// 게시글 생성
 export async function createPost({ title, body, tags, tracks }) {
   const user = auth.currentUser;
   if (!user) throw new Error("로그인이 필요합니다.");
@@ -16,7 +20,7 @@ export async function createPost({ title, body, tags, tracks }) {
     tags: tags || [],
     tracks: tracks || [],
     likeCount: 0,
-    likedBy: [],
+    likedBy: [],     // 좋아요 누른 유저 uid 배열
     savedBy: [],
     commentCount: 0,
     viewCount: 0,
@@ -25,6 +29,7 @@ export async function createPost({ title, body, tags, tracks }) {
   return ref.id;
 }
 
+// 게시글 수정 (본인만 가능)
 export async function updatePost(id, { title, body, tags, tracks, visibility }) {
   const user = auth.currentUser;
   if (!user) throw new Error("로그인이 필요합니다.");
@@ -40,12 +45,14 @@ export async function updatePost(id, { title, body, tags, tracks, visibility }) 
   });
 }
 
+// 조회수 증가 (게시글 상세 진입 시)
 export async function incrementViewCount(postId) {
   try {
     await updateDoc(doc(db, "posts", postId), { viewCount: increment(1) });
   } catch { /* 조용히 무시 */ }
 }
 
+// 게시글 목록 (정렬: recent | popular | oldest)
 export async function getPosts({ sort = "recent", limitN = 30 } = {}) {
   const q = sort === "popular"
     ? query(collection(db, "posts"), orderBy("likeCount", "desc"), limit(limitN))
@@ -54,13 +61,12 @@ export async function getPosts({ sort = "recent", limitN = 30 } = {}) {
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
+// 게시글 검색 (Firestore full-text 미지원 → 최신 50개 클라이언트 필터링)
 export async function searchPosts(keyword, fields = ["title", "artist", "song"]) {
-  // Firestore full-text search 미지원 → 최신 50개 클라이언트 필터링
   const q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(50));
   const snap = await getDocs(q);
 
-  // 소문자 + 공백 제거로 정규화 (대소문자·띄어쓰기 무관하게 비교)
-  const normalize = (str) => (str || "").toLowerCase().replace(/\s+/g, "");
+  const normalize = (str) => (str || "").toLowerCase().replace(/\s+/g, ""); // 대소문자·띄어쓰기 무시
   const kw = normalize(keyword);
   if (!kw) return [];
 
@@ -79,12 +85,14 @@ export async function searchPosts(keyword, fields = ["title", "artist", "song"])
     });
 }
 
+// 단일 게시글 조회
 export async function getPost(id) {
   const snap = await getDoc(doc(db, "posts", id));
   if (!snap.exists()) return null;
   return { id: snap.id, ...snap.data() };
 }
 
+// 게시글 삭제 (본인만 가능)
 export async function deletePost(id) {
   const user = auth.currentUser;
   if (!user) throw new Error("로그인이 필요합니다.");
@@ -93,19 +101,19 @@ export async function deletePost(id) {
   await deleteDoc(doc(db, "posts", id));
 }
 
+// 좋아요 토글 (좋아요 시 알림 생성, 취소 시 알림 없음)
 export async function toggleLike(postId) {
   const user = auth.currentUser;
   if (!user) throw new Error("로그인이 필요합니다.");
   const ref = doc(db, "posts", postId);
   const snap = await getDoc(ref);
   const data = snap.data() || {};
-  const liked = (data.likedBy || []).includes(user.uid);
+  const liked = (data.likedBy || []).includes(user.uid); // 이미 좋아요 눌렀는지 확인
   await updateDoc(ref, {
-    likedBy: liked ? arrayRemove(user.uid) : arrayUnion(user.uid),
+    likedBy: liked ? arrayRemove(user.uid) : arrayUnion(user.uid), // 토글
     likeCount: increment(liked ? -1 : 1),
   });
-  // 좋아요 누를 때만 알림 (취소 시엔 생성 안 함)
-  if (!liked) {
+  if (!liked) { // 좋아요 누를 때만 알림 생성
     addNotification({
       toUid: data.authorId,
       type: "like",
@@ -114,9 +122,10 @@ export async function toggleLike(postId) {
       fromName: user.displayName || user.email.split("@")[0],
     });
   }
-  return !liked;
+  return !liked; // 변경된 좋아요 상태 반환
 }
 
+// 댓글 작성 (댓글 수 증가 + 유저 문서에 게시글 ID 기록 + 알림 생성)
 export async function addComment(postId, text) {
   const user = auth.currentUser;
   if (!user) throw new Error("로그인이 필요합니다.");
@@ -127,9 +136,9 @@ export async function addComment(postId, text) {
     createdAt: serverTimestamp(),
   });
   await updateDoc(doc(db, "posts", postId), { commentCount: increment(1) });
-  // 유저 문서에 댓글 단 게시글 ID 기록 (마이페이지 탭용)
+  // 유저 문서에 댓글 단 게시글 ID 기록 (마이페이지 댓글 탭에서 사용)
   await setDoc(doc(db, "users", user.uid), { commentedPostIds: arrayUnion(postId) }, { merge: true });
-  // 댓글 알림 — 글 작성자에게
+  // 글 작성자에게 댓글 알림
   const postSnap = await getDoc(doc(db, "posts", postId));
   const postData = postSnap.data();
   if (postData) {
@@ -144,6 +153,7 @@ export async function addComment(postId, text) {
   }
 }
 
+// 댓글 실시간 리스너 (작성 시간순)
 export function listenComments(postId, callback) {
   return onSnapshot(
     query(collection(db, "posts", postId, "comments"), orderBy("createdAt", "asc")),
@@ -151,22 +161,26 @@ export function listenComments(postId, callback) {
   );
 }
 
+// 작성 시간 내림차순 정렬
 function sortByCreatedAt(posts) {
   return posts.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
 }
 
+// 내가 작성한 게시글 목록
 export async function getUserPosts(uid) {
   const q = query(collection(db, "posts"), where("authorId", "==", uid));
   const snap = await getDocs(q);
   return sortByCreatedAt(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
 }
 
+// 내가 좋아요한 게시글 목록
 export async function getLikedPosts(uid) {
   const q = query(collection(db, "posts"), where("likedBy", "array-contains", uid));
   const snap = await getDocs(q);
   return sortByCreatedAt(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
 }
 
+// 내가 댓글 단 게시글 목록 (유저 문서의 commentedPostIds 기반)
 export async function getCommentedPosts(uid) {
   const userSnap = await getDoc(doc(db, "users", uid));
   const postIds = userSnap.data()?.commentedPostIds || [];
@@ -178,13 +192,13 @@ export async function getCommentedPosts(uid) {
       if (!postSnap.exists()) return null;
       const post = { id: postSnap.id, ...postSnap.data() };
 
-      // 해당 포스트에 내가 쓴 댓글 조회 (단일 필드 equality → 인덱스 불필요)
+      // 해당 게시글에서 내가 쓴 댓글 조회
       const commSnap = await getDocs(
         query(collection(db, "posts", postId, "comments"), where("authorId", "==", uid))
       );
       if (commSnap.empty) return null; // 댓글 삭제된 경우 제외
 
-      // 가장 최신 댓글 하나
+      // 가장 최신 댓글 하나만 표시
       const comment = commSnap.docs
         .map((d) => ({ id: d.id, ...d.data() }))
         .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))[0];
@@ -198,6 +212,7 @@ export async function getCommentedPosts(uid) {
     .sort((a, b) => (b.post.createdAt?.seconds || 0) - (a.post.createdAt?.seconds || 0));
 }
 
+// 댓글 수정 (본인만 가능)
 export async function updateComment(postId, commentId, text) {
   const user = auth.currentUser;
   if (!user) throw new Error("로그인이 필요합니다.");
@@ -208,6 +223,7 @@ export async function updateComment(postId, commentId, text) {
   await updateDoc(ref, { text: text.trim() });
 }
 
+// 댓글 삭제 (본인만 가능, 댓글 수 감소)
 export async function deleteComment(postId, commentId) {
   const user = auth.currentUser;
   if (!user) throw new Error("로그인이 필요합니다.");

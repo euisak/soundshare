@@ -11,10 +11,11 @@
     <link rel="stylesheet" href="css/settings.css" />
   </head>
   <body>
-    <script src="js/header-loader.js"></script>
+    <script src="js/header-loader.js"></script> <!-- 공통 헤더 + 로그인 모달 삽입 -->
 
     <main class="settings-main">
 
+      <!-- 뒤로가기 -->
       <button class="back-btn" onclick="history.length > 1 ? history.back() : location.href='mypage.html'">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="M19 12H5M12 5l-7 7 7 7"/>
@@ -24,21 +25,21 @@
 
       <h1 class="settings-title">설정</h1>
 
-      <!-- ── 프로필 ──────────────────────────────────────────── -->
+      <!-- ── 프로필 사진 ─────────────────────────────────────── -->
       <div class="settings-section">
         <div class="settings-profile-row">
           <div class="photo-upload-wrap" id="photoUploadWrap" title="프로필 사진 변경">
-            <div class="photo-upload-avatar" id="profileAvatar">?</div>
-            <div class="photo-upload-overlay">사진<br>변경</div>
-            <input type="file" id="photoFileInput" accept=".jpg,.jpeg,.png" class="hidden-file" />
+            <div class="photo-upload-avatar" id="profileAvatar">?</div> <!-- 아바타 -->
+            <div class="photo-upload-overlay">사진<br>변경</div>         <!-- 호버 오버레이 -->
+            <input type="file" id="photoFileInput" accept=".jpg,.jpeg,.png" class="hidden-file" /> <!-- 숨겨진 파일 선택 -->
           </div>
           <div class="settings-profile-info">
             <div id="profileName" class="settings-profile-name">-</div>
             <div id="profileEmail" class="muted small settings-profile-email">-</div>
           </div>
         </div>
-        <div id="photoSaveRow" hidden class="settings-photo-save-row">
-          <div id="noticePhoto" class="notice notice-flex" hidden></div>
+        <div id="photoSaveRow" hidden class="settings-photo-save-row"> <!-- 사진 선택 후 표시 -->
+          <div id="noticePhoto" class="notice notice-flex" hidden></div> <!-- 업로드 오류 -->
           <button class="btn primary btn-shrink" id="btnSavePhoto">사진 저장</button>
           <button class="btn btn-shrink" id="btnCancelPhoto">취소</button>
         </div>
@@ -91,6 +92,7 @@
       <div class="settings-section">
         <div class="settings-section-title">공개 범위</div>
         <div>
+          <!-- 게시글 공개 토글 -->
           <div class="settings-privacy-row">
             <div>
               <div class="settings-privacy-name">작성한 게시글</div>
@@ -101,6 +103,7 @@
               <span class="toggle-slider"></span>
             </label>
           </div>
+          <!-- 댓글 공개 토글 -->
           <div class="settings-privacy-row">
             <div>
               <div class="settings-privacy-name">작성한 댓글</div>
@@ -112,7 +115,7 @@
             </label>
           </div>
         </div>
-        <div id="noticePrivacy" class="notice notice--mt" hidden></div>
+        <div id="noticePrivacy" class="notice notice--mt" hidden></div> <!-- 저장 결과 메시지 -->
       </div>
 
       <!-- ── 회원탈퇴 ──────────────────────────────────────── -->

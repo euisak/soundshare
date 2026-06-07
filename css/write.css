@@ -1,3 +1,6 @@
+/* ── write.css ───────────────────────────────────────────────── */
+/* 게시글 작성/수정 페이지 (write.html) — 2열 레이아웃, 태그, 트랙 목록, 검색 */
+
 /* ── Write 페이지 (le-*) ────────────────────── */
 .title-counter {
   font-size: 11px;
@@ -76,7 +79,7 @@
   flex: 1;
   display: flex;
   overflow: hidden;
-  height: calc(100vh - 61px);
+  height: calc(100vh - 61px); /* 헤더 높이(61px) 제외한 나머지 전체 */
 }
 
 /* 왼쪽 패널 */
@@ -334,10 +337,10 @@
   min-height: 16px;
   line-height: 1.5;
   margin-top: 4px;
-  border-bottom: 1px dashed transparent;
+  border-bottom: 1px dashed transparent; /* 포커스 시 점선 밑줄 나타남 */
   transition: border-color 0.15s, color 0.15s;
   font-family: inherit;
-  -webkit-user-modify: read-write;
+  -webkit-user-modify: read-write;       /* contenteditable 대체 (Safari) */
 }
 .le-release-note:focus {
   color: #555;
@@ -373,7 +376,7 @@
 }
 .le-release-drag { cursor: grab; }
 .le-release-drag:active { cursor: grabbing; }
-.le-release-item.le-dragging { opacity: 0.35; }
+.le-release-item.le-dragging { opacity: 0.35; } /* 드래그 중인 아이템 반투명 */
 
 /* 검색 바 */
 .le-search-bar {

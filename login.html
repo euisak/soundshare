@@ -8,15 +8,16 @@
 <body>
 
 <!-- ── Auth Modal ──────────────────────────────────────────────── -->
+<!-- header-loader.js 가 이 파일을 fetch 해서 #authModal 만 body에 삽입 -->
 <div id="authModal" class="auth-modal-backdrop" hidden>
   <div class="auth-modal-box">
-    <button class="auth-modal-close" id="btnCloseAuth" aria-label="닫기">
+    <button class="auth-modal-close" id="btnCloseAuth" aria-label="닫기"> <!-- 닫기 버튼 -->
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
         <path d="M18 6 6 18M6 6l12 12"/>
       </svg>
     </button>
 
-    <div id="authNotice" class="notice notice--mb" hidden></div>
+    <div id="authNotice" class="notice notice--mb" hidden></div> <!-- 로그인/가입 에러 -->
 
     <!-- 로그인 뷰 -->
     <div id="authViewLogin">
@@ -41,7 +42,7 @@
       </p>
     </div>
 
-    <!-- 회원가입 뷰 -->
+    <!-- 회원가입 뷰 (data-to="register" 클릭 시 표시) -->
     <div id="authViewRegister" hidden>
       <h2 class="auth-modal-title">회원가입</h2>
       <form id="formRegister" class="stack" novalidate>
@@ -79,7 +80,7 @@
       </p>
     </div>
 
-    <!-- 비밀번호 찾기 뷰 -->
+    <!-- 비밀번호 찾기 뷰 (data-to="forgot" 클릭 시 표시) -->
     <div id="authViewForgot" hidden>
       <h2 class="auth-modal-title">비밀번호 찾기</h2>
       <p class="muted small notice--mb">가입한 이메일로 재설정 링크를 보내드립니다.</p>

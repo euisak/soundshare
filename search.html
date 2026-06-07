@@ -8,22 +8,24 @@
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
     <link rel="stylesheet" href="css/base.css" />
     <link rel="stylesheet" href="css/header.css" />
+    <link rel="stylesheet" href="css/feed.css" />
     <link rel="stylesheet" href="css/search.css" />
   </head>
   <body>
-    <script src="js/header-loader.js"></script>
+    <script src="js/header-loader.js"></script> <!-- 공통 헤더 + 로그인 모달 삽입 -->
 
     <main class="container">
-      <div id="notice" class="notice" hidden></div>
+      <div id="notice" class="notice" hidden></div> <!-- 에러 메시지 -->
 
       <div class="search-form-wrap">
+        <!-- 검색 입력폼 -->
         <form id="formSearch" class="search-form">
           <input id="searchInput" class="input" type="search"
             placeholder="게시글 제목, 가수, 노래 제목 검색…" />
           <button class="btn primary" type="submit">검색</button>
         </form>
 
-        <!-- 검색 조건 필터 (검색 결과 표시 시) -->
+        <!-- 검색 조건 필터 칩 (검색 결과 있을 때 표시) -->
         <div id="searchFieldWrap" hidden>
           <div class="chips search-field-chips" id="searchFieldChips">
             <span class="muted small search-field-label">검색 조건</span>
@@ -33,10 +35,12 @@
           </div>
         </div>
 
+        <!-- 검색 결과 건수 -->
         <div id="searchMeta" class="muted small search-meta"></div>
       </div>
 
-      <div class="grid" id="results"></div>
+      <!-- 검색 결과 목록 -->
+      <div id="results"></div>
     </main>
 
     <script src="config.js"></script>

@@ -1,11 +1,15 @@
+// write.html 전용 로직
+// 게시글 작성 / 수정 (URL hash에 id 있으면 수정 모드)
+// 음악 검색(iTunes), 태그 관리, 트랙 드래그앤드롭 순서 변경
+
 import { requireAuth } from "./app.js";
 import { createPost, updatePost, getPost } from "./post.js";
 import { searchTracksItunes }              from "./music.js";
 import { escHtml, showToast }              from "./ui.js";
 
-await requireAuth();
+await requireAuth(); // 비로그인 시 index.html?openAuth=login 으로 리다이렉트
 
-const editId = window.location.hash.slice(1) || null;
+const editId = window.location.hash.slice(1) || null; // URL hash = 수정할 게시글 id
 if (editId) {
   document.getElementById("pageHeading").textContent = "게시글 수정";
   document.getElementById("btnPublish").textContent  = "수정하기";
@@ -16,15 +20,15 @@ if (editId) {
 
 // ── 제목 카운터 ──────────────────────────────────────
 const titleInput  = document.getElementById("postTitle");
-const titleCount  = document.getElementById("titleCount");
+const titleCount  = document.getElementById("titleCount"); // 글자 수 표시 span
 titleInput.addEventListener("input", () => {
-  titleCount.textContent = titleInput.value.length;
-  titleInput.classList.remove("le-input--error");
+  titleCount.textContent = titleInput.value.length; // 실시간 글자 수 갱신
+  titleInput.classList.remove("le-input--error");   // 에러 테두리 해제
 });
 
 // ── 태그 ─────────────────────────────────────────────
-const MAX_TAGS = 5;
-const tags = [];
+const MAX_TAGS = 5;    // 최대 태그 수
+const tags = [];       // 현재 태그 배열
 const tagsWrapEl = document.getElementById("tagsWrap");
 
 function renderTags() {
@@ -34,13 +38,13 @@ function renderTags() {
       ${escHtml(t)}
       <button type="button" class="le-tag-remove" data-tag="${escHtml(t)}">×</button>
     </span>`).join("");
-  tagsWrapEl.innerHTML = chips + (atLimit ? "" :
+  tagsWrapEl.innerHTML = chips + (atLimit ? "" : // 5개 도달 시 입력창 숨김
     `<input class="le-tags-input" id="tagsInput" type="text"
             placeholder="태그 추가 (Enter)..." autocomplete="off" maxlength="10" />`);
   if (!atLimit) {
     document.getElementById("tagsInput").addEventListener("keydown", onTagKey);
   }
-  document.getElementById("tagsCount").textContent = `(${tags.length}/5)`;
+  document.getElementById("tagsCount").textContent = `(${tags.length}/5)`; // (n/5) 카운터
   document.getElementById("tagsCount").className = atLimit ? "at-limit" : "";
 }
 
@@ -52,11 +56,11 @@ function addTag(val) {
 }
 
 function onTagKey(e) {
-  if (e.key === "Enter" || e.key === ",") {
+  if (e.key === "Enter" || e.key === ",") { // Enter 또는 쉼표 → 태그 추가
     e.preventDefault();
     addTag(e.target.value);
     e.target.value = "";
-  } else if (e.key === "Backspace" && !e.target.value && tags.length) {
+  } else if (e.key === "Backspace" && !e.target.value && tags.length) { // 빈 칸에서 백스페이스 → 마지막 태그 삭제
     tags.pop();
     renderTags();
   }
@@ -73,10 +77,10 @@ tagsWrapEl.addEventListener("click", (e) => {
 // ── 장르 (저장용으로만 유지) ─────────────────────────
 
 // ── 트랙 목록 ────────────────────────────────────────
-const tracks = [];
-const releasesListEl  = document.getElementById("releasesList");
-const releasesCountEl = document.getElementById("releasesCount");
-const emptyStateEl    = document.getElementById("emptyState");
+const tracks = [];                                                   // 추가된 트랙 배열
+const releasesListEl  = document.getElementById("releasesList");    // 트랙 목록 컨테이너
+const releasesCountEl = document.getElementById("releasesCount");   // 트랙 수 표시
+const emptyStateEl    = document.getElementById("emptyState");      // 빈 상태 안내
 
 function renderTracks() {
   releasesCountEl.textContent = tracks.length;
@@ -129,12 +133,12 @@ releasesListEl.addEventListener("input", (e) => {
 });
 
 // ── Drag & Drop ──────────────────────────────────────
-let dragIdx = null;
+let dragIdx = null; // 드래그 시작한 트랙 인덱스
 
 function setupDnd() {
   releasesListEl.querySelectorAll(".le-release-item").forEach((item) => {
     item.addEventListener("dragstart", (e) => {
-      dragIdx = Number(item.dataset.idx);
+      dragIdx = Number(item.dataset.idx); // 드래그 시작 위치 기억
       item.classList.add("le-dragging");
       e.dataTransfer.effectAllowed = "move";
     });
@@ -144,8 +148,8 @@ function setupDnd() {
       e.preventDefault();
       const to = Number(item.dataset.idx);
       if (dragIdx === null || dragIdx === to) return;
-      const [moved] = tracks.splice(dragIdx, 1);
-      tracks.splice(to, 0, moved);
+      const [moved] = tracks.splice(dragIdx, 1); // 원래 위치에서 제거
+      tracks.splice(to, 0, moved);               // 드롭 위치에 삽입
       renderTracks();
       dragIdx = null;
     });
@@ -155,8 +159,8 @@ function setupDnd() {
 // ── 검색 ─────────────────────────────────────────────
 const searchInputEl   = document.getElementById("searchInput");
 const searchResultsEl = document.getElementById("searchResults");
-let searchTimer = null;
-let searchSeq = 0;
+let searchTimer = null; // 디바운스 타이머
+let searchSeq = 0;      // 응답 순서 추적 (오래된 응답 무시용)
 
 searchInputEl.addEventListener("input", (e) => {
   clearTimeout(searchTimer);
@@ -169,13 +173,13 @@ searchInputEl.addEventListener("input", (e) => {
   }
   searchResultsEl.hidden = false;
   searchResultsEl.innerHTML = '<div class="le-search-msg">검색 중...</div>';
-  searchTimer = setTimeout(() => doSearch(q, ++searchSeq), 350);
+  searchTimer = setTimeout(() => doSearch(q, ++searchSeq), 350); // 350ms 디바운스
 });
 
 async function doSearch(q, seq) {
   try {
-    const results = await searchTracksItunes(q, 25);
-    if (seq !== searchSeq) return; // 오래된 응답 무시
+    const results = await searchTracksItunes(q, 25);  // iTunes API로 검색
+    if (seq !== searchSeq) return; // 오래된 응답 무시 (새 검색어가 들어온 경우)
     if (!results.length) {
       searchResultsEl.innerHTML = '<div class="le-search-msg">결과가 없습니다.</div>';
       return;
@@ -194,7 +198,7 @@ async function doSearch(q, seq) {
     searchResultsEl.querySelectorAll(".le-search-result").forEach((el) => {
       el.addEventListener("click", () => {
         const r = results[Number(el.dataset.idx)];
-        if (!tracks.find((x) => x.id === r.id)) {
+        if (!tracks.find((x) => x.id === r.id)) { // 중복 추가 방지
           tracks.push(r);
           renderTracks();
         }
@@ -224,14 +228,14 @@ document.addEventListener("click", (e) => {
 // ── 게시 / 수정 ───────────────────────────────────────
 document.getElementById("btnPublish").addEventListener("click", async () => {
   const title = titleInput.value.trim();
-  if (!title) {
+  if (!title) { // 제목 필수 검증
     titleInput.classList.add("le-input--error");
     titleInput.focus();
     return;
   }
   const btn = document.getElementById("btnPublish");
   btn.disabled = true;
-  btn.textContent = editId ? "수정 중…" : "게시 중…";
+  btn.textContent = editId ? "수정 중…" : "게시 중…"; // 중복 제출 방지
 
   try {
     const payload = {

@@ -12,9 +12,10 @@
     <link rel="stylesheet" href="css/profile.css" />
   </head>
   <body>
-    <script src="js/header-loader.js"></script>
+    <script src="js/header-loader.js"></script> <!-- 공통 헤더 + 로그인 모달 삽입 -->
 
     <main class="container">
+      <!-- 뒤로가기 -->
       <button class="back-btn" onclick="history.length > 1 ? history.back() : location.href='index.html'">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="M19 12H5M12 5l-7 7 7 7"/>
@@ -22,21 +23,22 @@
         뒤로
       </button>
 
-      <!-- 프로필 헤더 -->
+      <!-- 프로필 헤더 (JS가 uid 기반으로 채움) -->
       <div class="profile-header">
-        <div id="profileAvatar" class="post-author-avatar profile-avatar-lg">?</div>
+        <div id="profileAvatar" class="post-author-avatar profile-avatar-lg">?</div> <!-- 아바타 -->
         <div class="profile-info">
-          <div id="profileName" class="profile-name">-</div>
+          <div id="profileName" class="profile-name">-</div> <!-- 닉네임 -->
         </div>
-        <a class="btn" href="settings.html" id="btnSettings" hidden>설정</a>
+        <a class="btn" href="settings.html" id="btnSettings" hidden>설정</a> <!-- 본인 프로필일 때만 표시 -->
       </div>
 
-      <!-- 탭 -->
+      <!-- 탭 (작성한 글 / 댓글) -->
       <div class="tabs" id="tabNav">
         <button class="tab-btn active" data-tab="posts">작성한 글</button>
         <button class="tab-btn" data-tab="comments">작성한 댓글</button>
       </div>
 
+      <!-- 탭 콘텐츠 (JS가 동적으로 채움) -->
       <div id="tabContent"></div>
     </main>
 

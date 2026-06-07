@@ -14,44 +14,48 @@
 
     <!-- ── 헤더 ─────────────────────────────────────────── -->
     <div class="le-header">
-      <h1 class="le-heading" id="pageHeading">새 게시글</h1>
+      <h1 class="le-heading" id="pageHeading">새 게시글</h1> <!-- 제목 (수정 모드에서 JS가 변경) -->
       <div class="le-header-actions">
-        <a href="index.html" class="le-cancel" id="cancelBtn">취소</a>
-        <button class="le-publish" id="btnPublish" type="button">게시하기</button>
+        <a href="index.html" class="le-cancel" id="cancelBtn">취소</a> <!-- 취소 링크 -->
+        <button class="le-publish" id="btnPublish" type="button">게시하기</button> <!-- 게시 버튼 -->
       </div>
     </div>
 
-    <!-- ── 본문 (2열) ────────────────────────────────────── -->
+    <!-- ── 본문 (왼쪽 폼 | 오른쪽 트랙) ─────────────────── -->
     <div class="le-body">
 
-      <!-- 왼쪽: 폼 -->
+      <!-- 왼쪽: 폼 (제목·본문·태그·설정) -->
       <div class="le-left">
 
-        <div id="notice" class="notice write-notice" hidden></div>
+        <div id="notice" class="notice write-notice" hidden></div> <!-- 에러 메시지 -->
 
+        <!-- 제목 -->
         <div class="le-field">
           <label class="le-label">제목 <span class="le-required">*</span></label>
           <input class="le-input" id="postTitle" type="text" maxlength="50"
                  placeholder="어떤 곡을 추천하고 싶으신가요?" autocomplete="off" />
-          <div class="title-counter">
+          <div class="title-counter"> <!-- 글자 수 카운터 -->
             <span id="titleCount">0</span>/50
           </div>
         </div>
 
+        <!-- 추천 이유 -->
         <div class="le-field">
           <label class="le-label">추천 이유</label>
           <textarea class="le-desc-content" id="postBody" rows="5" spellcheck="false" placeholder="이 음악을 추천하는 이유를 적어주세요."></textarea>
         </div>
 
+        <!-- 태그 -->
         <div class="le-field">
           <label class="le-label">태그</label>
-          <div class="le-tags-wrap" id="tagsWrap">
+          <div class="le-tags-wrap" id="tagsWrap"> <!-- 태그 칩 + 입력창 -->
             <input class="le-tags-input" id="tagsInput" type="text"
                    placeholder="태그 추가 (Enter)..." autocomplete="off" maxlength="10" />
           </div>
           <div class="le-tags-hint" id="tagsHint">최대 5개 · 태그당 10자 <span id="tagsCount">(0/5)</span></div>
         </div>
 
+        <!-- 공개 범위 설정 -->
         <div class="le-field">
           <span class="le-settings-label">설정</span>
           <div class="le-setting-row">
@@ -59,7 +63,7 @@
               <div class="le-setting-name">공개 여부</div>
               <div class="le-setting-desc">공개하면 다른 사람도 이 글을 볼 수 있어요.</div>
             </div>
-            <select class="le-select" id="settingVisibility">
+            <select class="le-select" id="settingVisibility"> <!-- 공개/비공개 선택 -->
               <option value="public">공개</option>
               <option value="private">비공개</option>
             </select>
@@ -68,14 +72,14 @@
 
       </div><!-- /le-left -->
 
-      <!-- 오른쪽: 검색 + 트랙 목록 -->
+      <!-- 오른쪽: 노래 검색 + 트랙 목록 -->
       <div class="le-right">
 
-        <!-- 검색 바 -->
+        <!-- iTunes 노래 검색 -->
         <label class="le-label">노래 검색</label>
         <div class="le-search-bar">
           <div class="le-search-inner">
-            <span class="le-search-icon">
+            <span class="le-search-icon"> <!-- 돋보기 -->
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
@@ -84,19 +88,19 @@
             <input class="le-search-input" id="searchInput" type="search"
                    placeholder="가수 이름, 노래 제목, 앨범으로 검색..." autocomplete="off" />
           </div>
-          <div class="le-search-results" id="searchResults" hidden></div>
+          <div class="le-search-results" id="searchResults" hidden></div> <!-- 검색 결과 드롭다운 -->
         </div>
 
-        <!-- 트랙 헤더 -->
+        <!-- 트랙 헤더 (트랙 수 표시) -->
         <div class="le-releases-header">
           <span class="le-releases-title">
             트랙 <span class="le-releases-count" id="releasesCount">0</span>
           </span>
         </div>
 
-        <!-- 트랙 목록 -->
+        <!-- 트랙 목록 (드래그앤드롭) -->
         <div class="le-releases-list" id="releasesList">
-          <div class="le-empty-state" id="emptyState">
+          <div class="le-empty-state" id="emptyState"> <!-- 빈 상태 안내 -->
             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ddd"
                  stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>

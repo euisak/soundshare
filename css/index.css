@@ -1,3 +1,6 @@
+/* ── index.css ───────────────────────────────────────────────── */
+/* 메인 피드 전용 (index.html) — 페이지 헤더, 정렬 드롭다운, 피드 스켈레톤 */
+
 /* ── Feed 페이지 (index.html) ────────────────── */
 .feed-page-header {
   display: flex;
@@ -64,13 +67,13 @@
 }
 .post-feed-skeleton:last-child { border-bottom: none; }
 .post-feed-skeleton-cover {
-  width: 390px;
+  width: 390px;          /* 실제 커버 스택과 동일한 너비 */
   height: 150px;
   flex-shrink: 0;
   border-radius: 10px;
   background: linear-gradient(90deg, #f0f0f0 25%, #e4e4e4 50%, #f0f0f0 75%);
   background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+  animation: shimmer 1.5s infinite; /* base.css @keyframes shimmer 재사용 */
 }
 .post-feed-skeleton-body {
   flex: 1;

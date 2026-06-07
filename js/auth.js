@@ -1,3 +1,6 @@
+// 인증 관련 함수 모음
+// 로그인·회원가입·비밀번호 찾기(모달용), 닉네임·비밀번호·사진 변경, 계정 탈퇴(설정 페이지용)
+
 import {
   auth, db, serverTimestamp, sendPasswordResetEmail,
   collection, doc, query, where, getDocs, getDoc, setDoc, deleteDoc, writeBatch,
@@ -9,6 +12,7 @@ import {
   updateProfile,
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
 
+// Firebase 에러 코드 → 한국어 메시지 매핑
 const ERROR_MAP = {
   "auth/invalid-email": "이메일 형식이 올바르지 않습니다.",
   "auth/user-not-found": "등록되지 않은 이메일입니다.",
@@ -38,6 +42,7 @@ function authError(code) {
   return ERROR_MAP[code] || null; // null 반환 → err.message fallback 가능하게
 }
 
+// 회원가입 후 Firestore users 문서 생성 (이미 있으면 merge)
 async function ensureUserDoc(user, nickname) {
   await setDoc(
     doc(db, "users", user.uid),
@@ -159,7 +164,7 @@ export async function changePassword(currentPassword, newPassword) {
 export async function updateProfilePhoto(dataUrl) {
   const user = auth.currentUser;
   if (!user) throw new Error("로그인이 필요합니다.");
-  // Firebase Auth photoURL은 URL 길이 제한이 있어 base64 저장 불가 → Firestore에만 저장
+  // Firebase Auth photoURL은 URL 길이 제한으로 base64 저장 불가 → Firestore에만 저장
   await setDoc(doc(db, "users", user.uid), { photoURL: dataUrl }, { merge: true });
 }
 
@@ -169,7 +174,7 @@ export async function deleteAccount(currentPassword) {
 
   const credential = EmailAuthProvider.credential(user.email, currentPassword);
   try {
-    await reauthenticateWithCredential(user, credential);
+    await reauthenticateWithCredential(user, credential); // 재인증 (민감한 작업 전 필수)
   } catch (err) {
     throw new Error("비밀번호가 올바르지 않습니다.");
   }
