@@ -155,11 +155,16 @@ export function initTopbar() { // 헤더 삽입 후 이벤트 바인딩 (loadHea
       }
     }
 
-    // 알림 리스너 관리 (로그아웃 시 기존 리스너 해제)
+    // 알림 리스너 관리
+    // 로그인 사용자가 바뀌거나 로그아웃할 때 기존 실시간 리스너 해제
     if (notifUnsub) { notifUnsub(); notifUnsub = null; }
     if (user) {
+      // 현재 로그인한 사용자 uid로 알림 실시간 수신 시작
+      // 새 알림이 생기거나 삭제되면 notifs 배열이 다시 전달됨
       notifUnsub = listenNotifications(user.uid, (notifs) => {
+        // 알림이 1개 이상이면 헤더 벨 아이콘에 점 표시
         if (notifDot) notifDot.hidden = notifs.length === 0; // 알림 뱃지 표시/숨김
+        // 알림 목록 UI 렌더링
         renderNotifList(notifs);
       });
     } else {

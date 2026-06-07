@@ -137,7 +137,12 @@ export async function toggleLike(postId) {
   if (!user) throw new Error("로그인이 필요합니다.");
   const ref = doc(db, "posts", postId);
   const snap = await getDoc(ref);
+  // Firestore에서 가져온 게시글 실제 데이터
+  // 데이터가 없을 경우를 대비해 빈 객체 사용
   const data = snap.data() || {};
+  // likedBy 배열에 현재 사용자 uid가 있는지 확인
+  // true: 이미 좋아요 누른 상태, false: 아직 누르지 않은 상태
+  // likedBy가 없으면 빈 배열로 처리해 오류 방지
   const liked = (data.likedBy || []).includes(user.uid); // 이미 좋아요 눌렀는지 확인
   await updateDoc(ref, {
     likedBy: liked ? arrayRemove(user.uid) : arrayUnion(user.uid), // 토글
@@ -239,7 +244,7 @@ export async function getCommentedPosts(uid) {
 
   return results
     .filter(Boolean)
-    .sort((a, b) => (b.post.createdAt?.seconds || 0) - (a.post.createdAt?.seconds || 0));
+    .sort((a, b) => (b.comment.createdAt?.seconds || 0) - (a.comment.createdAt?.seconds || 0));
 }
 
 // 댓글 수정 (본인만 가능)

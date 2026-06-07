@@ -221,13 +221,24 @@ sharedAudio.addEventListener("ended", () => {
 document.querySelector("#btnLike")?.addEventListener("click", async () => {
   if (!user) { showToast("로그인이 필요합니다.", "danger"); return; }
   const btn = document.querySelector("#btnLike");
+  // 좋아요 처리 중 중복 클릭 방지
+  // Firestore 요청이 끝날 때까지 버튼 비활성화
   btn.disabled = true;
   try {
+    // toggleLike(postId): Firestore likedBy 배열과 likeCount 업데이트
+    // 반환값 nowLiked: 변경 후 좋아요 상태(true=좋아요, false=취소)
     const nowLiked = await toggleLike(postId);
     const countEl = document.querySelector("#likeCount");
+    // 화면에 표시된 좋아요 수 즉시 갱신
+    // 좋아요 추가 시 +1, 취소 시 -1
+    // textContent는 문자열이므로 parseInt()로 숫자 변환 후 계산
     countEl.textContent = parseInt(countEl.textContent) + (nowLiked ? 1 : -1);
+    // 좋아요 상태에 따라 버튼 색상 변경
+    // 좋아요 상태: 빨간색, 취소 상태: 기본 muted 색상
     btn.style.color = nowLiked ? "#e74c3c" : "var(--muted)";
     const svg = btn.querySelector("svg");
+    // 하트 아이콘 상태 변경
+    // 좋아요 상태: 채움, 취소 상태: 비움
     svg.setAttribute("fill", nowLiked ? "currentColor" : "none");
     svg.setAttribute("stroke", nowLiked ? "#e74c3c" : "currentColor");
   } finally { btn.disabled = false; }
@@ -327,8 +338,14 @@ document.addEventListener("click", () => {
 });
 
 document.querySelector("#formComment")?.addEventListener("submit", async (e) => {
+  // form submit 기본 동작 방지
+  // 기본 동작을 막지 않으면 댓글 등록 시 페이지가 새로고침됨
   e.preventDefault();
+  // 댓글 입력창 요소 조회
+  // 사용자가 작성한 댓글 내용을 가져오기 위한 대상
   const input = document.querySelector("#commentInput");
+  // 입력값 앞뒤 공백 제거
+  // 공백만 입력한 댓글은 빈 댓글로 처리
   const text  = input.value.trim();
   if (!text) return;
   const btn = e.target.querySelector("[type=submit]");

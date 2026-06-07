@@ -23,11 +23,14 @@ export async function addNotification({ toUid, type, postId, postTitle, fromName
   } catch { /* 조용히 무시 */ }
 }
 
-// 실시간 알림 리스너 (최신순 정렬)
-// onSnapshot → Firestore 변경 시 자동으로 callback 실행
+// 실시간 알림 수신 로직
+// notifications 컬렉션에서 현재 사용자(toUid)의 알림만 조회
+// onSnapshot으로 알림 추가/삭제 변경을 실시간 감지 후 callback에 전달
 export function listenNotifications(uid, callback) {
   const q = query(collection(db, "notifications"), where("toUid", "==", uid));
   return onSnapshot(q, (snap) => {
+    // Firestore 알림 문서를 화면에서 사용할 객체 배열로 변환
+    // createdAt 기준 최신 알림이 위로 오도록 정렬
     const notifs = snap.docs
       .map((d) => ({ id: d.id, ...d.data() }))
       .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)); // 최신순 정렬
