@@ -64,8 +64,8 @@ function renderTracks(tracks) {
         <div class="pd-track-meta">${escHtml(t.artist)}${t.album ? ` · ${escHtml(t.album)}` : ""}</div>
         ${(t.appleMusicUrl || t.spotifySearchUrl) ? `
         <div class="pd-track-ext">
-          ${t.appleMusicUrl ? `<a href="${escHtml(t.appleMusicUrl)}" target="_blank" rel="noopener" style="color:#f87171">${appleIcon} Apple Music</a>` : ""}
-          ${t.spotifySearchUrl ? `<a href="${escHtml(t.spotifySearchUrl)}" target="_blank" rel="noopener" style="color:#4ade80">${spotifyIcon} Spotify</a>` : ""}
+          ${t.appleMusicUrl ? `<a href="${escHtml(t.appleMusicUrl)}" target="_blank" rel="noopener" class="link-apple">${appleIcon} Apple Music</a>` : ""}
+          ${t.spotifySearchUrl ? `<a href="${escHtml(t.spotifySearchUrl)}" target="_blank" rel="noopener" class="link-spotify">${spotifyIcon} Spotify</a>` : ""}
         </div>` : ""}
         ${t.note ? `<button class="pd-note-btn">메모 보기 ∨</button><div class="pd-note-body" hidden>${escHtml(t.note)}</div>` : ""}
       </div>
@@ -75,7 +75,7 @@ function renderTracks(tracks) {
 
 function renderTags(tags) {
   if (!tags?.length) return "";
-  return `<div style="display:flex;flex-wrap:wrap;gap:6px;margin:12px 0">${tags.map(t =>
+  return `<div class="pd-tags-row">${tags.map(t =>
     `<span class="pd-tag">${escHtml(t)}</span>`).join("")}</div>`;
 }
 
@@ -105,23 +105,23 @@ function renderBody(raw) {
 const tracks = Array.isArray(post.tracks) ? post.tracks : (post.track ? [post.track] : []);
 
 document.querySelector("#postArea").innerHTML = `
-  <article style="margin-bottom:36px">
-    <div class="post-meta" style="margin-bottom:4px">
+  <article class="pd-article">
+    <div class="post-meta pd-meta-row">
       ${post.authorId
         ? `<a class="post-author-link" href="profile.html#${escHtml(post.authorId)}">
              <span class="post-author-avatar" data-uid="${escHtml(post.authorId)}">${avatarLetter(post.authorName)}</span>
-             <strong style="font-size:13px;font-weight:600;color:var(--text)">${escHtml(post.authorName || "익명")}</strong>
+             <strong class="pd-author-name">${escHtml(post.authorName || "익명")}</strong>
            </a>`
-        : `<span class="post-author-link" style="cursor:default">
+        : `<span class="post-author-link cursor-default">
              <span class="post-author-avatar">${avatarLetter(post.authorName)}</span>
-             <strong style="font-size:13px;font-weight:600;color:var(--text)">${escHtml(post.authorName || "익명")}</strong>
+             <strong class="pd-author-name">${escHtml(post.authorName || "익명")}</strong>
            </span>`}
       <span>·</span>
       <span>${timeAgo(post.createdAt)}</span>
-      ${post.visibility === "private" ? `<span>·</span><span style="font-size:12px;color:var(--muted)">비공개</span>` : ""}
+      ${post.visibility === "private" ? `<span>·</span><span class="pd-private-badge">비공개</span>` : ""}
       <span>·</span>
       <span>조회 ${(post.viewCount || 0) + 1}</span>
-      <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+      <div class="pd-meta-actions">
         ${isOwner ? `
         <div class="post-list-more-wrap">
           <button class="post-list-more-btn" id="btnPostMore" aria-label="게시글 메뉴">⋮</button>
@@ -138,7 +138,7 @@ document.querySelector("#postArea").innerHTML = `
     ${renderTracks(tracks)}
     ${renderTags(post.tags)}
 
-    <button id="btnLike" style="display:inline-flex;align-items:center;gap:7px;margin-top:18px;appearance:none;border:none;background:none;padding:0;cursor:pointer;font:inherit;font-size:15px;font-weight:600;color:${liked ? "#e74c3c" : "var(--muted)"}">
+    <button id="btnLike" class="pd-like-btn" style="color:${liked ? "#e74c3c" : "var(--muted)"}">
       <svg width="16" height="16" viewBox="0 0 24 24"
         fill="${liked ? "currentColor" : "none"}" stroke="${liked ? "#e74c3c" : "currentColor"}" stroke-width="2">
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
@@ -148,8 +148,8 @@ document.querySelector("#postArea").innerHTML = `
   </article>
 
   <div>
-    <div style="padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:0">
-      <span class="section-title" style="display:inline-flex;align-items:center;gap:6px;margin:0">
+    <div class="pd-comments-header">
+      <span class="section-title pd-comments-title">
         댓글
         <span class="muted small" id="commentCount">${post.commentCount || 0}</span>
       </span>
@@ -158,29 +158,18 @@ document.querySelector("#postArea").innerHTML = `
       <div class="muted small">댓글을 불러오는 중…</div>
     </div>
     ${user ? `
-    <form id="formComment" style="margin-top:24px">
-      <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">
-        <span class="post-author-avatar" data-uid="${escHtml(user.uid)}"
-          style="width:32px;height:32px;font-size:13px;font-weight:600;flex-shrink:0">
+    <form id="formComment" class="pd-comment-form">
+      <div class="pd-comment-form-user">
+        <span class="post-author-avatar avatar-lg" data-uid="${escHtml(user.uid)}">
           ${avatarLetter(user.displayName || user.email)}
         </span>
-        <strong style="font-size:14px;font-weight:600">${escHtml(user.displayName || user.email?.split("@")[0] || "")}</strong>
+        <strong class="pd-comment-form-name">${escHtml(user.displayName || user.email?.split("@")[0] || "")}</strong>
       </div>
-      <div style="display:flex;gap:12px;align-items:flex-start">
-        <div style="width:32px;flex-shrink:0"></div>
-        <div style="flex:1;display:flex;flex-direction:column;gap:8px">
-          <textarea id="commentInput" placeholder="댓글을 작성하세요..."
-            style="width:100%;height:90px;resize:none;overflow-y:auto;
-                   border:1px solid var(--line);border-radius:12px;
-                   padding:10px 12px;font:14px/1.6 'Pretendard Variable',Pretendard,sans-serif;
-                   background:#fff;color:var(--text);outline:none;
-                   box-sizing:border-box"></textarea>
-          <button type="submit"
-            style="width:100%;background:#111;color:#fff;border:none;
-                   border-radius:10px;font:600 14px/1 inherit;
-                   padding:11px 0;cursor:pointer;transition:background 0.15s">
-            댓글 등록
-          </button>
+      <div class="pd-comment-form-input-row">
+        <div class="pd-comment-form-spacer"></div>
+        <div class="pd-comment-form-fields">
+          <textarea id="commentInput" class="pd-comment-textarea" placeholder="댓글을 작성하세요..."></textarea>
+          <button type="submit" class="pd-comment-submit">댓글 등록</button>
         </div>
       </div>
     </form>` : ""}
@@ -264,7 +253,7 @@ listenComments(postId, (comments) => {
   if (cnt) cnt.textContent = comments.length;
   list.innerHTML = comments.length
     ? comments.map((c) => renderComment(c, user?.uid)).join("")
-    : '<div class="muted small" style="text-align:center;padding:28px 0">아직 댓글이 없습니다.</div>';
+    : '<div class="muted small empty-msg">아직 댓글이 없습니다.</div>';
   resolveAvatars(list);
 });
 
@@ -286,10 +275,10 @@ document.querySelector("#commentList").addEventListener("click", async (e) => {
     const textEl = item.querySelector(".comment-text");
     document.querySelectorAll(".post-list-dropdown:not([hidden])").forEach((d) => d.hidden = true);
     textEl.innerHTML = `
-      <textarea class="input" style="width:100%;min-height:64px;resize:vertical;font-size:13px;padding:8px 10px;font-family:'Pretendard Variable',Pretendard,sans-serif">${escHtml(textEl.dataset.text)}</textarea>
-      <div style="display:flex;gap:6px;margin-top:8px">
-        <button class="btn primary" data-action="save-comment-post" data-comment-id="${escHtml(cid)}" style="font-size:12px;padding:5px 12px">저장</button>
-        <button class="btn" data-action="cancel-edit-comment-post" data-comment-id="${escHtml(cid)}" style="font-size:12px;padding:5px 12px">취소</button>
+      <textarea class="input pd-edit-textarea">${escHtml(textEl.dataset.text)}</textarea>
+      <div class="pd-edit-actions">
+        <button class="btn primary pd-edit-btn" data-action="save-comment-post" data-comment-id="${escHtml(cid)}">저장</button>
+        <button class="btn pd-edit-btn" data-action="cancel-edit-comment-post" data-comment-id="${escHtml(cid)}">취소</button>
       </div>`;
     textEl.querySelector("textarea").focus();
     return;

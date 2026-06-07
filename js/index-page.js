@@ -44,9 +44,9 @@ async function loadPosts() {
     <div class="post-feed-skeleton">
       <div class="post-feed-skeleton-cover"></div>
       <div class="post-feed-skeleton-body">
-        <div class="post-feed-skeleton-line" style="width:55%"></div>
-        <div class="post-feed-skeleton-line" style="width:30%;height:11px"></div>
-        <div class="post-feed-skeleton-line" style="width:20%;height:10px;margin-top:4px"></div>
+        <div class="post-feed-skeleton-line post-feed-skeleton-line--title"></div>
+        <div class="post-feed-skeleton-line post-feed-skeleton-line--meta"></div>
+        <div class="post-feed-skeleton-line post-feed-skeleton-line--tag"></div>
       </div>
     </div>`).join("");
   pgEl.innerHTML = "";
@@ -69,9 +69,9 @@ async function doSearch(kw) {
     <div class="post-feed-skeleton">
       <div class="post-feed-skeleton-cover"></div>
       <div class="post-feed-skeleton-body">
-        <div class="post-feed-skeleton-line" style="width:55%"></div>
-        <div class="post-feed-skeleton-line" style="width:30%;height:11px"></div>
-        <div class="post-feed-skeleton-line" style="width:20%;height:10px;margin-top:4px"></div>
+        <div class="post-feed-skeleton-line post-feed-skeleton-line--title"></div>
+        <div class="post-feed-skeleton-line post-feed-skeleton-line--meta"></div>
+        <div class="post-feed-skeleton-line post-feed-skeleton-line--tag"></div>
       </div>
     </div>`).join("");
   metaEl.textContent = "";

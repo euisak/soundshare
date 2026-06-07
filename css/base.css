@@ -333,6 +333,7 @@ label {
 .post-list-dropdown-item.danger { color: var(--danger); }
 
 /* ── Empty / Skeleton ───────────────────── */
+.skeleton-tab { height: 200px; }
 .empty-state {
   text-align: center;
   padding: 40px 20px;
@@ -348,6 +349,22 @@ label {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+/* ── rd-pagination wrapper ──────────────── */
+.rd-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 20px;
+}
+.rd-pagination-ellipsis {
+  padding: 0 4px;
+  color: var(--muted);
+}
+
+/* ── Notice flex variant ─────────────────── */
+.notice-flex { flex: 1; margin: 0; }
 
 /* ── rd-page-btn (피드/리스트 페이지네이션) ─── */
 .rd-page-btn {
@@ -410,4 +427,102 @@ textarea.input {
   font-size: 16px;
   font-weight: 600;
   margin: 0 0 12px;
+}
+
+/* ── Form utilities ─────────────────────── */
+.input-with-btn {
+  display: flex;
+  gap: 8px;
+}
+.input-with-btn .input { flex: 1; }
+.btn-shrink { flex-shrink: 0; }
+.btn-full   { width: 100%; }
+.btn-flex   { flex: 1; }
+.form-label {
+  font-size: 13px;
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+.status-hint {
+  display: block;
+  margin-top: 5px;
+}
+.notice--mb { margin-bottom: 12px; }
+.notice--mt { margin-top: 14px; }
+.hidden-file { display: none; }
+
+/* ── Auth modal utilities ───────────────── */
+.auth-footer {
+  margin-top: 16px;
+  text-align: center;
+}
+.auth-sep {
+  margin: 0 8px;
+  opacity: 0.35;
+}
+
+/* ── Avatar size variants ───────────────── */
+.avatar-sm { width: 18px !important; height: 18px !important; font-size: 8px !important; }
+.avatar-md { width: 20px !important; height: 20px !important; font-size: 9px !important; }
+.avatar-lg { width: 32px !important; height: 32px !important; font-size: 13px !important; }
+
+/* ── Feed card wrapper (dropdown overlay) ── */
+.feed-card-wrap { position: relative; }
+.feed-card-more { position: absolute; top: 20px; right: 0; z-index: 2; }
+
+/* ── Feed meta actions ───────────────────── */
+.feed-meta-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+.feed-action-stat {
+  font-size: 11px !important;
+  padding: 2px 5px !important;
+  gap: 3px !important;
+}
+.feed-chip {
+  font-size: 11px !important;
+  padding: 2px 8px !important;
+  line-height: 1.3 !important;
+}
+.cursor-default { cursor: default; }
+.ml-auto { margin-left: auto; }
+.empty-msg {
+  text-align: center;
+  padding: 40px 0;
+}
+
+/* ── Avatar full-cover image ────────────── */
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── Search meta bar (index.html) ────────── */
+.search-meta-bar { margin-bottom: 14px; }
+
+/* ── Comment inline edit (mypage) ────────── */
+.comment-edit-textarea {
+  width: 100%;
+  min-height: 64px;
+  resize: vertical;
+  font-size: 13px;
+  padding: 8px 10px;
+  font-family: inherit;
+}
+.comment-edit-btns {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+.comment-edit-btn {
+  font-size: 12px;
+  padding: 5px 12px;
 }

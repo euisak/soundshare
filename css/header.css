@@ -219,6 +219,7 @@
   max-width: 240px;
   display: block;
 }
+.notify-comment-preview { font-style: normal; }
 .notify-item-time {
   font-size: 11px;
   color: var(--faint);

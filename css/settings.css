@@ -1,3 +1,53 @@
+/* ── Settings layout ───────────────────── */
+.settings-main {
+  width: min(560px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 24px 0 80px;
+}
+.settings-title {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0 0 4px;
+  letter-spacing: -.02em;
+}
+.settings-section {
+  padding: 28px 0;
+  border-bottom: 1px solid var(--line);
+}
+.settings-section--last { padding: 28px 0; }
+.settings-profile-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.settings-profile-info { flex: 1; min-width: 0; }
+.settings-profile-name { font-size: 16px; font-weight: 700; }
+.settings-profile-email { margin-top: 2px; }
+.settings-photo-save-row {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.settings-section-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 18px;
+}
+.settings-privacy-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+}
+.settings-privacy-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+.settings-privacy-desc { margin-top: 2px; }
+.settings-delete-confirm { margin-bottom: 12px; }
+
 /* ── Photo upload ───────────────────────── */
 .photo-upload-wrap {
   position: relative;

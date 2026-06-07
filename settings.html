@@ -13,7 +13,7 @@
   <body>
     <script src="js/header-loader.js"></script>
 
-    <main style="width:min(560px,calc(100% - 32px));margin:0 auto;padding:24px 0 80px">
+    <main class="settings-main">
 
       <button class="back-btn" onclick="history.length > 1 ? history.back() : location.href='mypage.html'">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -22,89 +22,89 @@
         뒤로
       </button>
 
-      <h1 style="font-size:22px;font-weight:800;margin:0 0 4px;letter-spacing:-.02em">설정</h1>
+      <h1 class="settings-title">설정</h1>
 
       <!-- ── 프로필 ──────────────────────────────────────────── -->
-      <div style="padding:28px 0;border-bottom:1px solid var(--line)">
-        <div style="display:flex;align-items:center;gap:16px">
+      <div class="settings-section">
+        <div class="settings-profile-row">
           <div class="photo-upload-wrap" id="photoUploadWrap" title="프로필 사진 변경">
             <div class="photo-upload-avatar" id="profileAvatar">?</div>
             <div class="photo-upload-overlay">사진<br>변경</div>
-            <input type="file" id="photoFileInput" accept=".jpg,.jpeg,.png" style="display:none" />
+            <input type="file" id="photoFileInput" accept=".jpg,.jpeg,.png" class="hidden-file" />
           </div>
-          <div style="flex:1;min-width:0">
-            <div id="profileName" style="font-size:16px;font-weight:700">-</div>
-            <div id="profileEmail" class="muted small" style="margin-top:2px">-</div>
+          <div class="settings-profile-info">
+            <div id="profileName" class="settings-profile-name">-</div>
+            <div id="profileEmail" class="muted small settings-profile-email">-</div>
           </div>
         </div>
-        <div id="photoSaveRow" hidden style="margin-top:14px;display:flex;align-items:center;gap:10px">
-          <div id="noticePhoto" class="notice" hidden style="flex:1;margin:0"></div>
-          <button class="btn primary" id="btnSavePhoto" style="flex-shrink:0">사진 저장</button>
-          <button class="btn" id="btnCancelPhoto" style="flex-shrink:0">취소</button>
+        <div id="photoSaveRow" hidden class="settings-photo-save-row">
+          <div id="noticePhoto" class="notice notice-flex" hidden></div>
+          <button class="btn primary btn-shrink" id="btnSavePhoto">사진 저장</button>
+          <button class="btn btn-shrink" id="btnCancelPhoto">취소</button>
         </div>
       </div>
 
       <!-- ── 닉네임 변경 ─────────────────────────────────────── -->
-      <div style="padding:28px 0;border-bottom:1px solid var(--line)">
-        <div style="font-size:15px;font-weight:700;margin:0 0 18px">닉네임 변경</div>
-        <div id="noticeNickname" class="notice" hidden style="margin-bottom:12px"></div>
+      <div class="settings-section">
+        <div class="settings-section-title">닉네임 변경</div>
+        <div id="noticeNickname" class="notice notice--mb" hidden></div>
         <form id="formNickname" class="stack" novalidate>
           <div>
-            <label for="newNickname" style="font-size:13px;display:block;margin-bottom:6px">새 닉네임 <span class="muted small">(최대 10자)</span></label>
-            <div style="display:flex;gap:8px">
+            <label for="newNickname" class="form-label">새 닉네임 <span class="muted small">(최대 10자)</span></label>
+            <div class="input-with-btn">
               <input id="newNickname" class="input" type="text" maxlength="10"
-                     placeholder="변경할 닉네임 입력" style="flex:1" autocomplete="off" />
-              <button type="button" class="btn" id="btnCheckNick" style="flex-shrink:0">중복확인</button>
+                     placeholder="변경할 닉네임 입력" autocomplete="off" />
+              <button type="button" class="btn btn-shrink" id="btnCheckNick">중복확인</button>
             </div>
-            <span id="nickStatus" class="small" style="display:block;margin-top:5px"></span>
+            <span id="nickStatus" class="small status-hint"></span>
           </div>
           <button class="btn primary" type="submit" id="btnSaveNick" disabled>저장</button>
         </form>
       </div>
 
       <!-- ── 비밀번호 변경 ──────────────────────────────────── -->
-      <div style="padding:28px 0;border-bottom:1px solid var(--line)">
-        <div style="font-size:15px;font-weight:700;margin:0 0 18px">비밀번호 변경</div>
-        <div id="noticePw" class="notice" hidden style="margin-bottom:12px"></div>
+      <div class="settings-section">
+        <div class="settings-section-title">비밀번호 변경</div>
+        <div id="noticePw" class="notice notice--mb" hidden></div>
         <form id="formPassword" class="stack" novalidate>
           <div>
-            <label for="currentPw" style="font-size:13px;display:block;margin-bottom:6px">현재 비밀번호</label>
+            <label for="currentPw" class="form-label">현재 비밀번호</label>
             <input id="currentPw" class="input" type="password" autocomplete="current-password"
                    placeholder="현재 비밀번호" maxlength="30" />
           </div>
           <div>
-            <label for="newPw" style="font-size:13px;display:block;margin-bottom:6px">새 비밀번호 <span class="muted small">(특수기호 포함 8~30자)</span></label>
+            <label for="newPw" class="form-label">새 비밀번호 <span class="muted small">(특수기호 포함 8~30자)</span></label>
             <input id="newPw" class="input" type="password" autocomplete="new-password"
                    placeholder="새 비밀번호" maxlength="30" />
           </div>
           <div>
-            <label for="newPwConfirm" style="font-size:13px;display:block;margin-bottom:6px">새 비밀번호 확인</label>
+            <label for="newPwConfirm" class="form-label">새 비밀번호 확인</label>
             <input id="newPwConfirm" class="input" type="password" autocomplete="new-password"
                    placeholder="새 비밀번호 재입력" maxlength="30" />
-            <span id="pwConfirmStatus" class="small" style="display:block;margin-top:5px"></span>
+            <span id="pwConfirmStatus" class="small status-hint"></span>
           </div>
           <button class="btn primary" type="submit" id="btnSavePw" disabled>변경</button>
         </form>
       </div>
 
       <!-- ── 공개 범위 ──────────────────────────────────────── -->
-      <div style="padding:28px 0;border-bottom:1px solid var(--line)">
-        <div style="font-size:15px;font-weight:700;margin:0 0 18px">공개 범위</div>
+      <div class="settings-section">
+        <div class="settings-section-title">공개 범위</div>
         <div>
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0">
+          <div class="settings-privacy-row">
             <div>
-              <div style="font-size:14px;font-weight:600">작성한 게시글</div>
-              <div class="muted small" style="margin-top:2px">내 프로필에서 작성한 글 목록을 공개합니다</div>
+              <div class="settings-privacy-name">작성한 게시글</div>
+              <div class="muted small settings-privacy-desc">내 프로필에서 작성한 글 목록을 공개합니다</div>
             </div>
             <label class="toggle">
               <input type="checkbox" id="togglePosts" />
               <span class="toggle-slider"></span>
             </label>
           </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0">
+          <div class="settings-privacy-row">
             <div>
-              <div style="font-size:14px;font-weight:600">작성한 댓글</div>
-              <div class="muted small" style="margin-top:2px">내 프로필에서 작성한 댓글 목록을 공개합니다</div>
+              <div class="settings-privacy-name">작성한 댓글</div>
+              <div class="muted small settings-privacy-desc">내 프로필에서 작성한 댓글 목록을 공개합니다</div>
             </div>
             <label class="toggle">
               <input type="checkbox" id="toggleComments" />
@@ -112,26 +112,26 @@
             </label>
           </div>
         </div>
-        <div id="noticePrivacy" class="notice" hidden style="margin-top:14px"></div>
+        <div id="noticePrivacy" class="notice notice--mt" hidden></div>
       </div>
 
       <!-- ── 회원탈퇴 ──────────────────────────────────────── -->
-      <div style="padding:28px 0">
-        <div id="noticeDelete" class="notice" hidden style="margin-bottom:12px"></div>
-        <div id="deleteConfirmArea" hidden style="margin-bottom:12px">
+      <div class="settings-section--last">
+        <div id="noticeDelete" class="notice notice--mb" hidden></div>
+        <div id="deleteConfirmArea" hidden class="settings-delete-confirm">
           <form id="formDelete" class="stack" novalidate>
             <div>
-              <label for="deletePw" style="font-size:13px;display:block;margin-bottom:6px">비밀번호를 입력해 탈퇴를 확인해주세요</label>
+              <label for="deletePw" class="form-label">비밀번호를 입력해 탈퇴를 확인해주세요</label>
               <input id="deletePw" class="input" type="password" autocomplete="current-password"
                      placeholder="현재 비밀번호" maxlength="30" />
             </div>
-            <div style="display:flex;gap:8px">
-              <button class="btn btn-danger" type="submit" style="flex:1">탈퇴 확인</button>
+            <div class="input-with-btn">
+              <button class="btn btn-danger btn-flex" type="submit">탈퇴 확인</button>
               <button class="btn" type="button" id="btnCancelDelete">취소</button>
             </div>
           </form>
         </div>
-        <button class="btn btn-danger" id="btnShowDelete" style="width:100%">회원 탈퇴</button>
+        <button class="btn btn-danger btn-full" id="btnShowDelete">회원 탈퇴</button>
       </div>
 
     </main>

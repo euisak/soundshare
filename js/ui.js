@@ -29,7 +29,7 @@ export async function resolveAvatars(container = document) {
     const url = _userPhotoCache.get(el.dataset.uid);
     if (url && !el.querySelector("img")) {
       el.textContent = "";
-      el.innerHTML = `<img src="${escHtml(url)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block">`;
+      el.innerHTML = `<img src="${escHtml(url)}" alt="" class="avatar-img">`;
     }
   });
 }
@@ -61,12 +61,12 @@ export function renderPostCard(post) {
   const firstTrack = trackList[0] || null;
   const thumbHtml = firstTrack?.albumArt
     ? `<img src="${escHtml(firstTrack.albumArt)}" alt="" />`
-    : `<span style="font-size:22px;opacity:.45">♪</span>`;
+    : `<span class="feed-thumb-empty">♪</span>`;
 
   const displayTags = post.tags || [];
   const tagsHtml = displayTags.length
     ? `<div class="feed-tags">${displayTags.slice(0, 2).map((t) =>
-        `<span class="chip" style="font-size:11px;padding:2px 8px;line-height:1.3">${escHtml(t)}</span>`
+        `<span class="chip feed-chip">${escHtml(t)}</span>`
       ).join("")}</div>`
     : "";
 
@@ -74,24 +74,24 @@ export function renderPostCard(post) {
   <a class="card feed-card" href="post.html#${escHtml(post.id)}" data-id="${escHtml(post.id)}">
     <div class="feed-thumb">${thumbHtml}</div>
     <div class="feed-content">
-      <div class="post-meta" style="font-size:12px">
+      <div class="post-meta feed-meta">
         ${post.authorId
           ? `<button class="post-author-link" type="button" onclick="event.stopPropagation();window.location.href='profile.html#${escHtml(post.authorId)}'">
-               <span class="post-author-avatar" data-uid="${escHtml(post.authorId)}" style="width:18px;height:18px;font-size:8px">${avatarLetter(post.authorName)}</span>
+               <span class="post-author-avatar avatar-sm" data-uid="${escHtml(post.authorId)}">${avatarLetter(post.authorName)}</span>
                <span>${escHtml(post.authorName)}</span>
              </button>`
-          : `<span class="post-author-link" style="cursor:default">
-               <span class="post-author-avatar" style="width:18px;height:18px;font-size:8px">${avatarLetter(post.authorName)}</span>
+          : `<span class="post-author-link cursor-default">
+               <span class="post-author-avatar avatar-sm">${avatarLetter(post.authorName)}</span>
                <span>${escHtml(post.authorName)}</span>
              </span>`}
         <span class="muted">·</span>
         <span class="muted">${timeAgo(post.createdAt)}</span>
-        <div style="margin-left:auto;display:flex;align-items:center;gap:5px;flex-shrink:0">
-          <span class="action-btn like-count" style="font-size:11px;padding:2px 5px;gap:3px">
+        <div class="feed-meta-actions">
+          <span class="action-btn like-count feed-action-stat">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
             ${post.likeCount || 0}
           </span>
-          <span class="action-btn" style="font-size:11px;padding:2px 5px;gap:3px">
+          <span class="action-btn feed-action-stat">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             ${post.commentCount || 0}
           </span>
@@ -106,7 +106,7 @@ export function renderPostCard(post) {
 export function renderComment(c, currentUid = null) {
   const isOwner = currentUid && c.authorId === currentUid;
   const moreMenu = isOwner ? `
-    <div class="post-list-more-wrap" style="margin-left:auto">
+    <div class="post-list-more-wrap ml-auto">
       <button class="post-list-more-btn comment-more-btn"
               data-comment-id="${escHtml(c.id)}" aria-label="댓글 메뉴">⋮</button>
       <div class="post-list-dropdown" data-comment-id="${escHtml(c.id)}" hidden>
@@ -122,11 +122,11 @@ export function renderComment(c, currentUid = null) {
     <div class="comment-header">
       ${c.authorId
         ? `<a class="post-author-link" href="profile.html#${escHtml(c.authorId)}">
-             <span class="post-author-avatar" data-uid="${escHtml(c.authorId)}" style="width:20px;height:20px;font-size:9px">${avatarLetter(c.authorName)}</span>
+             <span class="post-author-avatar avatar-md" data-uid="${escHtml(c.authorId)}">${avatarLetter(c.authorName)}</span>
              <strong>${escHtml(c.authorName)}</strong>
            </a>`
-        : `<span class="post-author-link" style="cursor:default">
-             <span class="post-author-avatar" style="width:20px;height:20px;font-size:9px">${avatarLetter(c.authorName)}</span>
+        : `<span class="post-author-link cursor-default">
+             <span class="post-author-avatar avatar-md">${avatarLetter(c.authorName)}</span>
              <strong>${escHtml(c.authorName)}</strong>
            </span>`}
       <span class="muted small">${timeAgo(c.createdAt)}</span>
@@ -221,9 +221,9 @@ export function renderFeedCard(post, { showAuthor = false, dropdownHtml = "" } =
   if (!dropdownHtml) return card;
 
   return `
-  <div style="position:relative">
+  <div class="feed-card-wrap">
     ${card}
-    <div class="post-list-more-wrap" style="position:absolute;top:20px;right:0;z-index:2">
+    <div class="post-list-more-wrap feed-card-more">
       <button class="post-list-more-btn" data-id="${pid}" aria-label="더보기">⋮</button>
       <div class="post-list-dropdown" data-id="${pid}" hidden>${dropdownHtml}</div>
     </div>
@@ -246,12 +246,12 @@ export function renderPagination(total, page, perPage, tab = null) {
   let nums = "", prevN = 0;
   for (let i = 1; i <= totalPages; i++) {
     if (i === 1 || i === totalPages || Math.abs(i - page) <= 2) {
-      if (prevN && i - prevN > 1) nums += `<span style="padding:0 4px;color:var(--muted)">…</span>`;
+      if (prevN && i - prevN > 1) nums += `<span class="rd-pagination-ellipsis">…</span>`;
       nums += `<button class="rd-page-btn${i === page ? " active" : ""}" data-page="${i}"${tabAttr}>${i}</button>`;
       prevN = i;
     }
   }
-  return `<div class="rd-pagination" style="display:flex;align-items:center;justify-content:center;gap:4px;margin-top:20px">${prev}${nums}${next}</div>`;
+  return `<div class="rd-pagination">${prev}${nums}${next}</div>`;
 }
 
 /**
@@ -260,17 +260,15 @@ export function renderPagination(total, page, perPage, tab = null) {
 export function renderCommentedItem({ post, comment }) {
   const pid = escHtml(post.id);
   return `
-  <div style="display:flex;align-items:center;gap:12px;padding:16px 0;border-bottom:1px solid var(--line)">
-    <div style="flex:1;min-width:0;overflow:hidden">
-      <a class="post-list-title-link" href="post.html#${pid}"
-         style="display:block;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+  <div class="commented-item">
+    <div class="commented-item-body">
+      <a class="post-list-title-link commented-item-title" href="post.html#${pid}">
         ${escHtml(post.title)}
       </a>
-      <div class="post-list-comment-text"
-           style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+      <div class="post-list-comment-text">
         ${escHtml(comment.text)}
       </div>
     </div>
-    <span class="post-list-time" style="flex-shrink:0">${timeAgo(comment.createdAt)}</span>
+    <span class="post-list-time">${timeAgo(comment.createdAt)}</span>
   </div>`;
 }

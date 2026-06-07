@@ -16,7 +16,7 @@
       </svg>
     </button>
 
-    <div id="authNotice" class="notice" hidden style="margin-bottom:14px"></div>
+    <div id="authNotice" class="notice notice--mb" hidden></div>
 
     <!-- 로그인 뷰 -->
     <div id="authViewLogin">
@@ -34,9 +34,9 @@
         </div>
         <button class="btn primary" type="submit">로그인</button>
       </form>
-      <p class="muted small" style="margin-top:16px;text-align:center">
+      <p class="muted small auth-footer">
         <button class="auth-view-btn" data-to="forgot">비밀번호 찾기</button>
-        <span style="margin:0 8px;opacity:0.35">|</span>
+        <span class="auth-sep">|</span>
         <button class="auth-view-btn" data-to="register">회원가입</button>
       </p>
     </div>
@@ -47,18 +47,18 @@
       <form id="formRegister" class="stack" novalidate>
         <div>
           <label for="regNickname">닉네임 <span class="muted small">(최대 10자)</span></label>
-          <div style="display:flex;gap:8px">
+          <div class="input-with-btn">
             <input id="regNickname" class="input" type="text" autocomplete="nickname"
-                   placeholder="다른 유저에게 보이는 이름" maxlength="10" style="flex:1" />
-            <button type="button" class="btn" id="btnCheckNickname" style="flex-shrink:0">중복확인</button>
+                   placeholder="다른 유저에게 보이는 이름" maxlength="10" />
+            <button type="button" class="btn btn-shrink" id="btnCheckNickname">중복확인</button>
           </div>
-          <span id="nicknameStatus" class="small" style="display:block;margin-top:5px"></span>
+          <span id="nicknameStatus" class="small status-hint"></span>
         </div>
         <div>
           <label for="regEmail">이메일</label>
           <input id="regEmail" class="input" type="email" autocomplete="email"
                  placeholder="이메일" maxlength="100" />
-          <span id="emailStatus" class="small" style="display:block;margin-top:5px"></span>
+          <span id="emailStatus" class="small status-hint"></span>
         </div>
         <div>
           <label for="regPassword">비밀번호 <span class="muted small">(특수기호 포함 8~30자)</span></label>
@@ -69,11 +69,11 @@
           <label for="regPasswordConfirm">비밀번호 확인</label>
           <input id="regPasswordConfirm" class="input" type="password" autocomplete="new-password"
                  placeholder="비밀번호를 한 번 더 입력해주세요" maxlength="30" />
-          <span id="passwordConfirmStatus" class="small" style="display:block;margin-top:5px"></span>
+          <span id="passwordConfirmStatus" class="small status-hint"></span>
         </div>
         <button class="btn primary" id="btnRegister" type="submit" disabled>회원가입</button>
       </form>
-      <p class="muted small" style="margin-top:16px;text-align:center">
+      <p class="muted small auth-footer">
         이미 계정이 있으신가요?
         <button class="auth-view-btn" data-to="login">로그인</button>
       </p>
@@ -82,7 +82,7 @@
     <!-- 비밀번호 찾기 뷰 -->
     <div id="authViewForgot" hidden>
       <h2 class="auth-modal-title">비밀번호 찾기</h2>
-      <p class="muted small" style="margin-bottom:16px">가입한 이메일로 재설정 링크를 보내드립니다.</p>
+      <p class="muted small notice--mb">가입한 이메일로 재설정 링크를 보내드립니다.</p>
       <form id="formForgot" class="stack" novalidate>
         <div>
           <label for="forgotEmail">이메일</label>
@@ -91,7 +91,7 @@
         </div>
         <button class="btn primary" type="submit">재설정 메일 보내기</button>
       </form>
-      <p class="muted small" style="margin-top:16px;text-align:center">
+      <p class="muted small auth-footer">
         <button class="auth-view-btn" data-to="login">← 로그인으로 돌아가기</button>
       </p>
     </div>

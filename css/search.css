@@ -1,3 +1,15 @@
+/* ── Search form ─────────────────────────── */
+.search-form-wrap { margin-bottom: 16px; }
+.search-form { display: flex; gap: 8px; }
+.search-form .input { flex: 1; }
+.search-field-chips {
+  margin-top: 8px;
+  gap: 6px;
+  align-items: center;
+}
+.search-field-label { white-space: nowrap; }
+.search-meta { margin-top: 8px; }
+
 /* ── Feed card (피드 목록 가로형 카드) ───────────────── */
 .card.feed-card {
   display: flex;
@@ -59,3 +71,10 @@
 }
 
 .feed-skeleton { height: 84px; }
+
+/* feed-thumb placeholder & meta row */
+.feed-thumb-empty {
+  font-size: 22px;
+  opacity: 0.45;
+}
+.feed-meta { font-size: 12px; }

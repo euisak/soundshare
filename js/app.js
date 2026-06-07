@@ -71,7 +71,7 @@ export function initTopbar() {
           )}</span>`
         : "";
       const preview = (!isLike && n.commentText)
-        ? `<div class="notify-item-title" style="font-style:normal">"${escHtml(
+        ? `<div class="notify-item-title notify-comment-preview">"${escHtml(
             n.commentText.length > 50 ? n.commentText.slice(0, 50) + "…" : n.commentText
           )}"</div>`
         : "";
@@ -144,7 +144,7 @@ export function initTopbar() {
         getDoc(doc(db, "users", user.uid)).then((snap) => {
           const photoURL = snap.data()?.photoURL;
           if (photoURL) {
-            avatar.innerHTML = `<img src="${photoURL}" alt="프로필" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
+            avatar.innerHTML = `<img src="${photoURL}" alt="프로필" class="avatar-img">`;
           }
         }).catch(() => {});
       } else {

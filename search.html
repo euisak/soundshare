@@ -16,24 +16,24 @@
     <main class="container">
       <div id="notice" class="notice" hidden></div>
 
-      <div style="margin-bottom:16px">
-        <form id="formSearch" style="display:flex;gap:8px">
+      <div class="search-form-wrap">
+        <form id="formSearch" class="search-form">
           <input id="searchInput" class="input" type="search"
-            placeholder="게시글 제목, 가수, 노래 제목 검색…" style="flex:1" />
+            placeholder="게시글 제목, 가수, 노래 제목 검색…" />
           <button class="btn primary" type="submit">검색</button>
         </form>
 
         <!-- 검색 조건 필터 (검색 결과 표시 시) -->
         <div id="searchFieldWrap" hidden>
-          <div class="chips" id="searchFieldChips" style="margin-top:8px;gap:6px;align-items:center">
-            <span class="muted small" style="white-space:nowrap">검색 조건</span>
+          <div class="chips search-field-chips" id="searchFieldChips">
+            <span class="muted small search-field-label">검색 조건</span>
             <button class="chip active" data-field="title" type="button">게시글 제목</button>
             <button class="chip active" data-field="artist" type="button">가수</button>
             <button class="chip active" data-field="song" type="button">노래 제목</button>
           </div>
         </div>
 
-        <div id="searchMeta" class="muted small" style="margin-top:8px"></div>
+        <div id="searchMeta" class="muted small search-meta"></div>
       </div>
 
       <div class="grid" id="results"></div>

@@ -86,10 +86,10 @@ function renderTracks() {
     <div class="le-release-item" draggable="true" data-idx="${i}">
       <span class="le-release-num">${i + 1}</span>
       ${t.albumArt
-        ? `<img class="le-release-thumb" src="${escHtml(t.albumArt)}" alt="" style="cursor:default" />`
-        : `<div class="le-release-thumb" style="display:flex;align-items:center;justify-content:center;font-size:18px">♪</div>`}
+        ? `<img class="le-release-thumb cursor-default" src="${escHtml(t.albumArt)}" alt="" />`
+        : `<div class="le-release-thumb le-thumb-empty">♪</div>`}
       <div class="le-release-info">
-        <span class="le-release-name" style="cursor:default">${escHtml(t.name)}</span>
+        <span class="le-release-name cursor-default">${escHtml(t.name)}</span>
         <div class="le-release-meta">${escHtml(t.artist)}${t.album ? " · " + escHtml(t.album) : ""}</div>
         <div class="le-release-note" contenteditable="true" data-idx="${i}"
              data-placeholder="이 곡에 대한 메모...">${escHtml(t.note || "")}</div>
@@ -184,7 +184,7 @@ async function doSearch(q, seq) {
       <div class="le-search-result" data-idx="${i}">
         ${r.albumArt
           ? `<img class="le-search-thumb" src="${escHtml(r.albumArt)}" alt="" />`
-          : '<div class="le-search-thumb" style="display:flex;align-items:center;justify-content:center;font-size:16px">♪</div>'}
+          : '<div class="le-search-thumb le-thumb-empty">♪</div>'}
         <div class="le-search-info">
           <div class="le-search-name">${escHtml(r.name)}</div>
           <div class="le-search-meta">${escHtml(r.artist)}${r.album ? " · " + escHtml(r.album) : ""}</div>
@@ -204,7 +204,7 @@ async function doSearch(q, seq) {
     });
   } catch (err) {
     if (seq !== searchSeq) return;
-    searchResultsEl.innerHTML = `<div class="le-search-msg" style="color:#e55">검색 중 오류가 발생했습니다.</div>`;
+    searchResultsEl.innerHTML = `<div class="le-search-msg le-search-error">검색 중 오류가 발생했습니다.</div>`;
     console.error(err);
   }
 }

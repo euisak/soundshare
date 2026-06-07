@@ -21,7 +21,7 @@ document.querySelector("#profileEmail").textContent = user.email;
 getDoc(doc(db, "users", user.uid)).then((snap) => {
   const photoURL = snap.data()?.photoURL;
   if (photoURL) {
-    mypageAvatarEl.innerHTML = `<img src="${photoURL}" alt="프로필" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
+    mypageAvatarEl.innerHTML = `<img src="${photoURL}" alt="프로필" class="avatar-img">`;
   }
 }).catch(() => {});
 
@@ -55,22 +55,20 @@ function renderCommentedItem({ post, comment }) {
   const pid = escHtml(post.id);
   const cid = escHtml(comment.id);
   return `
-  <div style="display:flex;align-items:center;gap:12px;padding:16px 0;border-bottom:1px solid var(--line)" data-id="${pid}">
-    <div style="flex:1;min-width:0;overflow:hidden">
-      <a class="post-list-title-link" href="post.html#${pid}"
-         style="display:block;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+  <div class="commented-item" data-id="${pid}">
+    <div class="commented-item-body">
+      <a class="post-list-title-link commented-item-title" href="post.html#${pid}">
         ${escHtml(post.title)}
       </a>
       <div class="comment-edit-area"
            data-post-id="${pid}" data-comment-id="${cid}" data-text="${escHtml(comment.text)}">
-        <div class="post-list-comment-text"
-             style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+        <div class="post-list-comment-text">
           ${escHtml(comment.text)}
         </div>
       </div>
     </div>
-    <span class="post-list-time" style="flex-shrink:0">${timeAgo(comment.createdAt)}</span>
-    <div class="post-list-more-wrap" style="flex-shrink:0">
+    <span class="post-list-time">${timeAgo(comment.createdAt)}</span>
+    <div class="post-list-more-wrap">
       <button class="post-list-more-btn" data-id="${pid}" aria-label="더보기">⋮</button>
       <div class="post-list-dropdown" data-id="${pid}" hidden>
         <button class="post-list-dropdown-item"
@@ -92,7 +90,7 @@ function renderTab(tab) {
   const content = document.querySelector("#tabContent");
 
   if (!data.length) {
-    content.innerHTML = `<div class="muted small" style="text-align:center;padding:40px 0">${EMPTY[tab]}</div>`;
+    content.innerHTML = `<div class="muted small empty-msg">${EMPTY[tab]}</div>`;
     return;
   }
 
@@ -111,7 +109,7 @@ function renderTab(tab) {
 async function loadTab(tab) {
   activeTab = tab;
   const content = document.querySelector("#tabContent");
-  content.innerHTML = '<div class="skeleton" style="height:200px;border-radius:12px"></div>';
+  content.innerHTML = '<div class="skeleton skeleton-tab"></div>';
   try {
     if (!cache[tab]) {
       if (tab === "my")             cache[tab] = await getUserPosts(user.uid);
@@ -120,7 +118,7 @@ async function loadTab(tab) {
     }
     renderTab(tab);
   } catch (err) {
-    content.innerHTML = `<div class="muted small" style="text-align:center;padding:40px 0">${escHtml(err.message)}</div>`;
+    content.innerHTML = `<div class="muted small empty-msg">${escHtml(err.message)}</div>`;
   }
 }
 
@@ -195,14 +193,12 @@ document.querySelector("#tabContent").addEventListener("click", async (e) => {
     const area = document.querySelector(`.comment-edit-area[data-post-id="${pid}"][data-comment-id="${cid}"]`);
     const curText = area.dataset.text;
     area.innerHTML = `
-      <textarea class="input" style="width:100%;min-height:64px;resize:vertical;font-size:13px;padding:8px 10px">${escHtml(curText)}</textarea>
-      <div style="display:flex;gap:6px;margin-top:6px">
-        <button class="btn primary" data-action="save-comment"
-                data-post-id="${pid}" data-comment-id="${cid}"
-                style="font-size:12px;padding:5px 12px">저장</button>
-        <button class="btn" data-action="cancel-edit-comment"
-                data-post-id="${pid}"
-                style="font-size:12px;padding:5px 12px">취소</button>
+      <textarea class="input comment-edit-textarea">${escHtml(curText)}</textarea>
+      <div class="comment-edit-btns">
+        <button class="btn primary comment-edit-btn" data-action="save-comment"
+                data-post-id="${pid}" data-comment-id="${cid}">저장</button>
+        <button class="btn comment-edit-btn" data-action="cancel-edit-comment"
+                data-post-id="${pid}">취소</button>
       </div>`;
     area.querySelector("textarea").focus();
     return;
@@ -224,7 +220,7 @@ document.querySelector("#tabContent").addEventListener("click", async (e) => {
         if (entry) entry.comment.text = newText;
       }
       area.dataset.text = newText;
-      area.innerHTML = `<div class="post-list-comment-text" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(newText)}</div>`;
+      area.innerHTML = `<div class="post-list-comment-text">${escHtml(newText)}</div>`;
       showToast("댓글이 수정되었습니다.");
     } catch (err) {
       showToast(err.message, "danger");
@@ -239,7 +235,7 @@ document.querySelector("#tabContent").addEventListener("click", async (e) => {
   if (cancelEdit) {
     const pid  = cancelEdit.dataset.postId;
     const area = document.querySelector(`.comment-edit-area[data-post-id="${pid}"]`);
-    area.innerHTML = `<div class="post-list-comment-text" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(area.dataset.text)}</div>`;
+    area.innerHTML = `<div class="post-list-comment-text">${escHtml(area.dataset.text)}</div>`;
     return;
   }
 

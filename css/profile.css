@@ -1,3 +1,44 @@
+/* ── Profile header ─────────────────────── */
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+.profile-avatar-lg {
+  width: 56px;
+  height: 56px;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.profile-info { flex: 1; min-width: 0; }
+.profile-name {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.profile-email { margin-top: 2px; }
+.commented-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+.commented-item-body {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+.commented-item-title {
+  display: block;
+  margin-bottom: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* ── Tabs ───────────────────────────────── */
 .tabs {
   display: flex;

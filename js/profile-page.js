@@ -10,7 +10,7 @@ const uid = window.location.hash.slice(1);
 const tabContent = document.querySelector("#tabContent");
 
 if (!uid || uid === "undefined" || uid === "null") {
-  tabContent.innerHTML = '<div class="muted small" style="text-align:center;padding:40px 0">사용자를 찾을 수 없습니다.</div>';
+  tabContent.innerHTML = '<div class="muted small empty-msg">사용자를 찾을 수 없습니다.</div>';
 } else {
   const currentUser = await new Promise((resolve) => {
     const unsub = onAuthStateChanged(auth, (u) => { unsub(); resolve(u); });
@@ -34,7 +34,7 @@ if (!uid || uid === "undefined" || uid === "null") {
   const avatarEl = document.querySelector("#profileAvatar");
   avatarEl.textContent = avatarLetter(displayName);
   if (userData.photoURL) {
-    avatarEl.innerHTML = `<img src="${userData.photoURL}" alt="프로필" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
+    avatarEl.innerHTML = `<img src="${userData.photoURL}" alt="프로필" class="avatar-img">`;
   }
   document.querySelector("#profileName").textContent = displayName;
 
@@ -47,7 +47,7 @@ if (!uid || uid === "undefined" || uid === "null") {
     const data = cache[tab];
     const page = pageState[tab];
     if (!data || !data.length) {
-      tabContent.innerHTML = `<div class="muted small" style="text-align:center;padding:40px 0">${tab === "posts" ? "작성한 글이 없습니다." : "작성한 댓글이 없습니다."}</div>`;
+      tabContent.innerHTML = `<div class="muted small empty-msg">${tab === "posts" ? "작성한 글이 없습니다." : "작성한 댓글이 없습니다."}</div>`;
       return;
     }
     const slice = data.slice((page - 1) * PER_PAGE, page * PER_PAGE);
@@ -61,14 +61,14 @@ if (!uid || uid === "undefined" || uid === "null") {
   async function loadTab(tab) {
     activeTab = tab;
     if (tab === "posts" && !postsPublic && !isOwn) {
-      tabContent.innerHTML = '<div class="muted small" style="text-align:center;padding:40px 0">사용자가 비공개로 설정했습니다.</div>';
+      tabContent.innerHTML = '<div class="muted small empty-msg">사용자가 비공개로 설정했습니다.</div>';
       return;
     }
     if (tab === "comments" && !commentsPublic && !isOwn) {
-      tabContent.innerHTML = '<div class="muted small" style="text-align:center;padding:40px 0">사용자가 비공개로 설정했습니다.</div>';
+      tabContent.innerHTML = '<div class="muted small empty-msg">사용자가 비공개로 설정했습니다.</div>';
       return;
     }
-    tabContent.innerHTML = '<div class="skeleton" style="height:200px;border-radius:12px"></div>';
+    tabContent.innerHTML = '<div class="skeleton skeleton-tab"></div>';
     try {
       if (!(tab in cache)) {
         if (tab === "posts") {
@@ -81,7 +81,7 @@ if (!uid || uid === "undefined" || uid === "null") {
       }
       renderTab(tab);
     } catch (err) {
-      tabContent.innerHTML = `<div class="muted small" style="text-align:center;padding:40px 0">${escHtml(err.message)}</div>`;
+      tabContent.innerHTML = `<div class="muted small empty-msg">${escHtml(err.message)}</div>`;
     }
   }
 
