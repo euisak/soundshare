@@ -1,7 +1,7 @@
 /* ── profile.css ─────────────────────────────────────────────── */
 /* 프로필/마이페이지 공통 — 프로필 헤더, 탭, 댓글 단 글 목록 */
 
-/* ── Profile header ─────────────────────── */
+/* ── 프로필 상단: 아바타·닉네임·이메일 영역 ─ */
 .profile-header {
   display: flex;
   align-items: center;
@@ -42,7 +42,7 @@
   text-overflow: ellipsis; /* 긴 제목 말줄임 */
 }
 
-/* ── Tabs ───────────────────────────────── */
+/* ── 게시글·댓글·좋아요 탭 전환 영역 ──────── */
 .tabs {
   display: flex;
   gap: 4px;
@@ -67,7 +67,7 @@
   border-bottom-color: #111; /* 활성 탭 검정 밑줄 */
 }
 
-/* post-list title / time / comment text */
+/* ── 댓글 단 글 목록의 제목·시간·댓글 미리보기 */
 .post-list-title-link {
   flex: 1;
   min-width: 0;

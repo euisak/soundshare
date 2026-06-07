@@ -1,7 +1,7 @@
 /* ── feed.css ────────────────────────────────────────────────── */
 /* 피드 카드 (post-feed-card) — index, mypage, profile 공통 */
 
-/* ── Feed 카드 ───────────────────────────── */
+/* ── 피드 목록의 게시글 카드 (클릭 시 게시글 상세로 이동) */
 .post-feed-card {
   display: flex;
   gap: 20px;
@@ -15,7 +15,7 @@
 .post-feed-card:last-child { border-bottom: none; }  /* 마지막 카드 구분선 제거 */
 .post-feed-card:hover { opacity: 0.82; }             /* 호버 시 살짝 투명 */
 
-/* 앨범아트 커버 스택 (최대 5장 겹침) */
+/* ── 카드 왼쪽: 앨범아트 최대 5장 겹쳐 표시 ─ */
 .post-cover-stack {
   position: relative;
   width: 390px;  /* 5장 × 60px 간격 + 150px = 390px */
@@ -60,7 +60,7 @@
   line-height: 1;
 }
 
-/* 카드 바디 */
+/* ── 카드 오른쪽: 제목·작성자·본문 미리보기·태그·통계 영역 */
 .post-feed-body {
   flex: 1;
   min-width: 0;       /* flex 자식의 말줄임 허용 */

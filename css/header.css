@@ -1,7 +1,7 @@
 /* ── header.css ──────────────────────────────────────────────── */
 /* 상단 헤더(탑바), 검색창, 알림 패널, 프로필 팝오버, 인증 모달 */
 
-/* ── Topbar ─────────────────────────────── */
+/* ── 상단 고정 헤더 바 ───────────────────── */
 .topbar {
   position: sticky;           /* 스크롤해도 상단 고정 */
   top: 0;
@@ -22,7 +22,7 @@
   padding: 14px 0;                       /* 헤더 위아래 여백 (좌우는 width 에서 처리) */
 }
 
-/* ── Brand ──────────────────────────────── */
+/* ── 헤더 좌측 로고 (SoundShare) ───────── */
 .brand {
   font-size: 15px;
   font-weight: 600;
@@ -32,7 +32,7 @@
   justify-self: start;
 }
 
-/* ── Topbar search ──────────────────────── */
+/* ── 헤더 가운데 검색창 ──────────────────── */
 .topbar-search {
   width: clamp(160px, 32vw, 400px); /* 최소 160px, 최대 400px (뷰포트 따라 반응) */
   position: relative;
@@ -69,7 +69,7 @@
 }
 .topbar-search-input::placeholder { color: var(--muted); }
 
-/* ── Write button ───────────────────────── */
+/* ── 헤더 우측 글쓰기 버튼 ──────────────── */
 .topbar-write-btn {
   font-size: 13px;
   font-weight: 600;
@@ -89,7 +89,7 @@
   border-color: #ccc;
 }
 
-/* ── Nav ────────────────────────────────── */
+/* ── 헤더 우측 버튼 묶음 (글쓰기·알림·프로필) */
 .nav {
   display: flex;
   align-items: center;
@@ -97,7 +97,7 @@
   justify-self: end;
 }
 
-/* ── Notify bell ────────────────────────── */
+/* ── 알림 종 버튼 + 읽지 않은 알림 빨간 뱃지 */
 .notify-bell {
   position: relative;
   display: flex;
@@ -228,7 +228,7 @@
   color: var(--faint);
 }
 
-/* ── Profile / Auth buttons ─────────────── */
+/* ── 비로그인: 로그인·회원가입 버튼 / 로그인: 프로필 아바타 + 팝오버 메뉴 */
 .auth-topbar {
   display: flex;
   align-items: center;
@@ -303,7 +303,7 @@
 .auth-profile-popover a:hover,
 .auth-profile-popover button:hover { background: #f3f3f3; }
 
-/* ── Auth Modal ─────────────────────────── */
+/* ── 로그인·회원가입·비밀번호 찾기 모달 ──── */
 .auth-modal-backdrop {
   position: fixed;
   inset: 0;                     /* top/right/bottom/left 0 단축 */

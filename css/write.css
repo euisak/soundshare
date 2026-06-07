@@ -1,7 +1,7 @@
 /* ── write.css ───────────────────────────────────────────────── */
 /* 게시글 작성/수정 페이지 (write.html) — 2열 레이아웃, 태그, 트랙 목록, 검색 */
 
-/* ── Write 페이지 (le-*) ────────────────────── */
+/* ── 글쓰기 페이지 전체 (모든 클래스는 le-* 접두사) */
 .title-counter {
   font-size: 11px;
   color: #bbb;
@@ -10,7 +10,7 @@
 }
 .write-notice { margin-bottom: 16px; }
 
-/* ── Thumb empty placeholder ────────────── */
+/* ── 검색 결과의 앨범아트 없을 때 빈 썸네일 ─ */
 .le-thumb-empty {
   display: flex;
   align-items: center;
@@ -19,7 +19,7 @@
 }
 .le-search-thumb.le-thumb-empty { font-size: 16px; }
 
-/* ── Search error ────────────────────────── */
+/* ── 음악 검색 실패 시 오류 메시지 ──────────── */
 .le-search-error { color: #e55; }
 
 .list-page {
@@ -82,7 +82,7 @@
   height: calc(100vh - 61px); /* 헤더 높이(61px) 제외한 나머지 전체 */
 }
 
-/* 왼쪽 패널 */
+/* ── 왼쪽 패널: 제목·본문·태그·공개범위 입력 영역 */
 .le-left {
   width: 360px;
   flex-shrink: 0;
@@ -121,7 +121,7 @@
   background: #fff0f0;
 }
 
-/* 설명 textarea */
+/* ── 본문 입력 textarea ──────────────────── */
 .le-desc-content {
   width: 100%;
   height: 300px;
@@ -142,7 +142,7 @@
   border-color: #bbb;
 }
 
-/* 태그 */
+/* ── 태그 입력 영역 (입력 후 Enter로 칩 추가) */
 .le-tags-wrap {
   display: flex;
   flex-wrap: wrap;
@@ -199,7 +199,7 @@
   font-weight: 600;
 }
 
-/* 설정 */
+/* ── 왼쪽 패널 하단: 공개범위 설정 영역 ───── */
 .le-settings-label {
   font-size: 13px;
   font-weight: 600;
@@ -246,7 +246,7 @@
 }
 .le-select:focus { border-color: #999; }
 
-/* 오른쪽 패널 */
+/* ── 오른쪽 패널: 음악 검색 + 선택된 트랙 목록 */
 .le-right {
   flex: 1;
   display: flex;
@@ -378,7 +378,7 @@
 .le-release-drag:active { cursor: grabbing; }
 .le-release-item.le-dragging { opacity: 0.35; } /* 드래그 중인 아이템 반투명 */
 
-/* 검색 바 */
+/* ── 오른쪽 패널 상단 iTunes 음악 검색 바 ── */
 .le-search-bar {
   flex-shrink: 0;
   padding-bottom: 16px;

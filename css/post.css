@@ -1,7 +1,7 @@
 /* ── post.css ────────────────────────────────────────────────── */
 /* 게시글 상세 (post.html) — 댓글, 트랙 목록, 좋아요, 메모, 미리듣기 버튼 */
 
-/* ── Comments ───────────────────────────── */
+/* ── 댓글 목록 (마이페이지 댓글 탭에서도 공통 사용) */
 .comment-list {
   display: flex;
   flex-direction: column;
@@ -28,7 +28,7 @@
   word-break: break-word;
 }
 
-/* ── Post Detail ─────────────────────────────────────────────────────── */
+/* ── 게시글 상세 본문 영역 (제목·내용·트랙 목록·태그) */
 .pd-page {
   width: min(720px, calc(100% - 32px)); /* 게시글 본문 최대 720px */
   margin: 0 auto;
@@ -144,7 +144,7 @@
   border-radius: 999px;
   white-space: nowrap;
 }
-/* 게시글 상세 댓글: 배경 없이 구분선만 */
+/* ── 게시글 상세 페이지 댓글: 배경 제거, 구분선만 표시 */
 .pd-comment-list .comment-item {
   background: none;
   border: none;
@@ -155,7 +155,7 @@
 .pd-comment-list .comment-item:last-child { border-bottom: 0; }
 #commentInput::placeholder { color: #ccc; }
 
-/* ── Post detail dynamic elements ────────── */
+/* ── JS가 동적으로 생성하는 게시글 상세 요소들 */
 .pd-tags-row {
   display: flex;
   flex-wrap: wrap;
@@ -193,6 +193,7 @@
   font-size: 15px;
   font-weight: 600;
 }
+/* ── 댓글 섹션 헤더 ("댓글 n개" 제목 + 구분선) */
 .pd-comments-header {
   padding-bottom: 14px;
   border-bottom: 1px solid var(--line);
@@ -204,6 +205,7 @@
   gap: 6px;
   margin: 0;
 }
+/* ── 댓글 작성 폼 (아바타 + 입력창 + 제출 버튼) */
 .pd-comment-form { margin-top: 24px; }
 .pd-comment-form-user {
   display: flex;

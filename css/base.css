@@ -45,7 +45,7 @@ a {
   padding: 24px 0 48px;
 }
 
-/* ── Buttons ────────────────────────────── */
+/* ── 공통 버튼 ──────────────────────────── */
 .btn {
   appearance: none;
   border: 1px solid var(--line);
@@ -162,7 +162,7 @@ label {
   font-size: 13px;
 }
 
-/* ── Chips ──────────────────────────────── */
+/* ── 필터 칩 (검색 조건·태그 선택 등) ────── */
 .chips {
   display: flex;
   flex-wrap: wrap;
@@ -192,7 +192,7 @@ label {
   color: var(--text);
 }
 
-/* ── Back button ────────────────────────── */
+/* ── 뒤로가기 버튼 (게시글 상세·프로필 상단) */
 .back-btn {
   display: inline-flex;
   align-items: center;
@@ -210,7 +210,7 @@ label {
 }
 .back-btn:hover { color: var(--text); }
 
-/* ── Post meta ──────────────────────────── */
+/* ── 게시글 작성자 정보 (아바타 + 닉네임) ── */
 .post-meta {
   display: flex;
   align-items: center;
@@ -264,7 +264,7 @@ label {
   word-break: break-word;
 }
 
-/* ── Action bar ─────────────────────────── */
+/* ── 액션 버튼 (좋아요·수정·삭제 등 공통) ── */
 .action-btn {
   display: inline-flex;
   align-items: center;
@@ -285,7 +285,7 @@ label {
   color: var(--text);
 }
 
-/* ── Dropdown menu (댓글·게시글 ⋮) ─────── */
+/* ── ⋮ 더보기 드롭다운 (게시글·댓글 수정/삭제 메뉴) */
 .post-list-more-wrap {
   position: relative;
   flex-shrink: 0;
@@ -335,7 +335,7 @@ label {
 .post-list-dropdown-item:hover { background: var(--bg-sub); }
 .post-list-dropdown-item.danger { color: var(--danger); }
 
-/* ── Empty / Skeleton ───────────────────── */
+/* ── 빈 상태 메시지 + 로딩 스켈레톤 ──────── */
 .skeleton-tab { height: 200px; }
 .empty-state {
   text-align: center;
@@ -353,7 +353,7 @@ label {
   100% { background-position: -200% 0; } /* 왼쪽으로 이동 */
 }
 
-/* ── rd-pagination wrapper ──────────────── */
+/* ── 페이지네이션 (이전/다음/번호 버튼) ──── */
 .rd-pagination {
   display: flex;
   align-items: center;
@@ -366,10 +366,10 @@ label {
   color: var(--muted);
 }
 
-/* ── Notice flex variant ─────────────────── */
+/* ── 인라인 알림 박스 (flex 레이아웃 내부용) */
 .notice-flex { flex: 1; margin: 0; }
 
-/* ── rd-page-btn (피드/리스트 페이지네이션) ─── */
+/* ── 페이지네이션 버튼 (숫자·이전·다음) ───── */
 .rd-page-btn {
   border: 1px solid #e0e0e0;
   background: #fff;
@@ -392,7 +392,7 @@ label {
   cursor: not-allowed;
 }
 
-/* ── Toast ──────────────────────────────── */
+/* ── 화면 하단 토스트 메시지 (저장됨·오류 등) */
 .toast {
   position: fixed;
   bottom: 24px;
@@ -412,7 +412,7 @@ label {
   transform: translateX(-50%) translateY(0);    /* 제자리로 슬라이드 인 */
 }
 
-/* ── Input focus ────────────────────────── */
+/* ── 입력창 포커스 상태 ──────────────────── */
 .input:focus {
   border-color: rgba(0, 0, 0, 0.4);
   background: #fff;
@@ -425,14 +425,14 @@ textarea.input {
   line-height: 1.6;
 }
 
-/* ── Section title ──────────────────────── */
+/* ── 섹션 제목 텍스트 ────────────────────── */
 .section-title {
   font-size: 16px;
   font-weight: 600;
   margin: 0 0 12px;
 }
 
-/* ── Form utilities ─────────────────────── */
+/* ── 폼 유틸리티 (입력+버튼 한 줄 배치 등) ─ */
 .input-with-btn {
   display: flex;
   gap: 8px;
@@ -455,7 +455,7 @@ textarea.input {
 .notice--mt { margin-top: 14px; }
 .hidden-file { display: none; }
 
-/* ── Auth modal utilities ───────────────── */
+/* ── 로그인 모달 하단 링크 영역 ──────────── */
 .auth-footer {
   margin-top: 16px;
   text-align: center;
@@ -465,16 +465,16 @@ textarea.input {
   opacity: 0.35;
 }
 
-/* ── Avatar size variants ───────────────── */
-.avatar-sm { width: 18px !important; height: 18px !important; font-size: 8px !important; }  /* 피드 작성자 */
-.avatar-md { width: 20px !important; height: 20px !important; font-size: 9px !important; }  /* 댓글 */
-.avatar-lg { width: 32px !important; height: 32px !important; font-size: 13px !important; } /* 댓글 입력폼 */
+/* ── 아바타 크기 변형 ─────────────────────── */
+.avatar-sm { width: 18px !important; height: 18px !important; font-size: 8px !important; }  /* 피드 카드 작성자 아바타 */
+.avatar-md { width: 20px !important; height: 20px !important; font-size: 9px !important; }  /* 댓글 아바타 */
+.avatar-lg { width: 32px !important; height: 32px !important; font-size: 13px !important; } /* 댓글 입력폼 내 아바타 */
 
-/* ── Feed card wrapper (dropdown overlay) ── */
+/* ── 피드 카드 + ⋮ 메뉴 겹침 래퍼 ─────────── */
 .feed-card-wrap { position: relative; }
 .feed-card-more { position: absolute; top: 20px; right: 0; z-index: 2; }
 
-/* ── Feed meta actions ───────────────────── */
+/* ── 내 피드 카드의 수정·삭제 액션 영역 ────── */
 .feed-meta-actions {
   margin-left: auto;
   display: flex;
@@ -499,7 +499,7 @@ textarea.input {
   padding: 40px 0;
 }
 
-/* ── Avatar full-cover image ────────────── */
+/* ── 아바타 안에 들어가는 프로필 사진 ──────── */
 .avatar-img {
   width: 100%;
   height: 100%;
@@ -508,10 +508,10 @@ textarea.input {
   display: block;
 }
 
-/* ── Search meta bar (index.html) ────────── */
+/* ── 메인 피드 검색 결과 건수 표시 바 ──────── */
 .search-meta-bar { margin-bottom: 14px; }
 
-/* ── Comment inline edit (mypage) ────────── */
+/* ── 마이페이지 댓글 인라인 수정 입력창 ────── */
 .comment-edit-textarea {
   width: 100%;
   min-height: 64px;
