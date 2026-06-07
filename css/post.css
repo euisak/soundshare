@@ -10,7 +10,7 @@
 .comment-item {
   padding: 10px 12px;
   border-radius: 10px;
-  background: var(--bg-sub);
+  background: var(--bg-sub); /* 댓글 배경 */
   border: 1px solid var(--line);
 }
 .comment-header {
@@ -23,7 +23,7 @@
 .comment-text {
   font-size: 14px;
   line-height: 1.6;
-  white-space: pre-wrap;
+  white-space: pre-wrap;     /* 줄바꿈 유지 */
   overflow-wrap: break-word;
   word-break: break-word;
 }
@@ -40,7 +40,7 @@
   letter-spacing: -0.02em;
   margin: 10px 0 12px;
   line-height: 1.4;
-  overflow-wrap: break-word;
+  overflow-wrap: break-word; /* 긴 단어 줄바꿈 */
   word-break: break-word;
 }
 .pd-body {
@@ -48,7 +48,7 @@
   line-height: 1.7;
   color: #555;
   margin: 0 0 14px;
-  white-space: pre-wrap;
+  white-space: pre-wrap;     /* 줄바꿈·공백 유지 */
   overflow-wrap: break-word;
   word-break: break-word;
 }
@@ -63,14 +63,14 @@
   gap: 10px;
   padding: 8px 10px;
   border-radius: 10px;
-  transition: background 0.12s;
+  transition: background 0.12s; /* 호버 배경 전환 */
 }
 .pd-track-num {
   min-width: 18px;
   text-align: right;
   font-size: 12px;
   color: var(--muted);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: tabular-nums; /* 숫자 너비 고정 */
   flex-shrink: 0;
 }
 .pd-track-art {
@@ -78,7 +78,7 @@
   height: 42px;
   border-radius: 6px;
   flex-shrink: 0;
-  background: #f0f0f0;
+  background: #f0f0f0;  /* 앨범아트 없을 때 배경 */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -89,20 +89,17 @@
 .pd-track-art img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover; /* 비율 유지하며 꽉 채움 */
   display: block;
 }
-.pd-track-body {
-  flex: 1;
-  min-width: 0;
-}
+.pd-track-body { flex: 1; min-width: 0; } /* 말줄임 허용 */
 .pd-track-name {
   font-size: 13px;
   font-weight: 600;
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+  text-overflow: ellipsis; /* 한 줄 말줄임 */
   display: block;
 }
 .pd-track-meta {
@@ -113,15 +110,8 @@
   text-overflow: ellipsis;
   margin-top: 1px;
 }
-.pd-track-ext {
-  display: flex;
-  gap: 8px;
-  margin-top: 4px;
-}
-.pd-track-ext a {
-  font-size: 11px;
-  text-decoration: none;
-}
+.pd-track-ext { display: flex; gap: 8px; margin-top: 4px; }
+.pd-track-ext a { font-size: 11px; text-decoration: none; }
 .pd-track-ext a:hover { filter: brightness(0.8); text-decoration: underline; }
 .link-apple   { color: #f87171; } /* Apple Music 링크 색상 */
 .link-spotify { color: #4ade80; } /* Spotify 링크 색상 */
@@ -138,14 +128,11 @@
   justify-content: center;
   transition: background 0.12s, color 0.12s;
   flex-shrink: 0;
-  align-self: flex-start;
+  align-self: flex-start; /* 트랙 정보 상단에 정렬 */
   margin-top: 7px;
 }
-.pd-play-btn:hover {
-  background: var(--bg-sub);
-  color: var(--text);
-}
-.pd-play-btn.is-playing { color: #111; }
+.pd-play-btn:hover { background: var(--bg-sub); color: var(--text); }
+.pd-play-btn.is-playing { color: #111; } /* 재생 중일 때 강조 */
 .pd-tag {
   display: inline-flex;
   align-items: center;
@@ -157,6 +144,7 @@
   border-radius: 999px;
   white-space: nowrap;
 }
+/* 게시글 상세 댓글: 배경 없이 구분선만 */
 .pd-comment-list .comment-item {
   background: none;
   border: none;
@@ -196,7 +184,7 @@
   align-items: center;
   gap: 7px;
   margin-top: 18px;
-  appearance: none;
+  appearance: none; /* 브라우저 기본 버튼 스타일 제거 */
   border: none;
   background: none;
   padding: 0;
@@ -245,7 +233,7 @@
 .pd-comment-textarea {
   width: 100%;
   height: 90px;
-  resize: none;
+  resize: none;          /* 크기 조절 핸들 숨김 */
   overflow-y: auto;
   border: 1px solid var(--line);
   border-radius: 12px;

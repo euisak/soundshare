@@ -15,8 +15,8 @@
   letter-spacing: -0.03em;
 }
 
-/* 정렬 드롭다운 */
-.feed-sort-wrap { position: relative; }
+/* ── 정렬 드롭다운 ─────────────────────────── */
+.feed-sort-wrap { position: relative; } /* 드롭다운 기준점 */
 .feed-sort-btn {
   border: none;
   background: none;
@@ -30,18 +30,18 @@
   align-items: center;
   gap: 3px;
 }
-.feed-sort-btn strong { font-weight: 600; }
+.feed-sort-btn strong { font-weight: 600; } /* 현재 정렬 기준 강조 */
 .feed-sort-menu {
   position: absolute;
   right: 0;
-  top: calc(100% + 6px);
+  top: calc(100% + 6px); /* 버튼 아래 6px 간격 */
   min-width: 130px;
   padding: 6px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fff;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
-  z-index: 12;
+  z-index: 12; /* 피드 카드보다 위 */
 }
 .feed-sort-menu button {
   width: 100%;
@@ -58,7 +58,7 @@
 }
 .feed-sort-menu button:hover { background: #f3f3f3; }
 
-/* 포스트 카드 스켈레톤 */
+/* ── 피드 카드 스켈레톤 (로딩 중) ─────────────── */
 .post-feed-skeleton {
   display: flex;
   gap: 20px;
@@ -67,7 +67,7 @@
 }
 .post-feed-skeleton:last-child { border-bottom: none; }
 .post-feed-skeleton-cover {
-  width: 390px;          /* 실제 커버 스택과 동일한 너비 */
+  width: 390px;  /* 실제 커버 스택(.post-cover-stack)과 동일한 너비 */
   height: 150px;
   flex-shrink: 0;
   border-radius: 10px;
@@ -89,6 +89,7 @@
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
-.post-feed-skeleton-line--title  { width: 55%; }
-.post-feed-skeleton-line--meta   { width: 30%; height: 11px; }
-.post-feed-skeleton-line--tag    { width: 20%; height: 10px; margin-top: 4px; }
+/* 각 스켈레톤 줄의 너비로 콘텐츠 형태 암시 */
+.post-feed-skeleton-line--title { width: 55%; }
+.post-feed-skeleton-line--meta  { width: 30%; height: 11px; }
+.post-feed-skeleton-line--tag   { width: 20%; height: 10px; margin-top: 4px; }
