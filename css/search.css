@@ -1,14 +1,24 @@
 /* ── search.css ──────────────────────────────────────────────── */
 /* 검색 페이지 (search.html) — 검색 폼, 필터 칩 */
 
-/* ── Search form ─────────────────────────── */
+/* 검색 폼 + 필터 칩 + 결과 건수를 묶는 전체 래퍼 */
 .search-form-wrap { margin-bottom: 16px; }
+
+/* 검색 입력창과 검색 버튼을 한 줄로 배치 */
 .search-form { display: flex; gap: 8px; }
+
+/* 검색 입력창이 버튼을 제외한 나머지 너비를 전부 차지 */
 .search-form .input { flex: 1; }
+
+/* 검색 조건 필터 칩 목록 (게시글 제목 / 가수 / 노래 제목) */
 .search-field-chips {
   margin-top: 8px;
   gap: 6px;
   align-items: center;
 }
+
+/* "검색 조건" 라벨 텍스트 (줄바꿈 방지) */
 .search-field-label { white-space: nowrap; }
+
+/* 검색 결과 건수 표시 (예: "아이유" 검색 결과 12건) */
 .search-meta { margin-top: 8px; }

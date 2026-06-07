@@ -2,12 +2,16 @@
 /* 메인 피드 전용 (index.html) — 페이지 헤더, 정렬 드롭다운, 피드 스켈레톤 */
 
 /* ── 메인 피드 상단: 페이지 타이틀 + 정렬 버튼 줄 */
+
+/* "홈" 타이틀과 정렬 드롭다운을 양 끝으로 배치하는 한 줄 */
 .feed-page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 20px;
 }
+
+/* 페이지 타이틀 ("홈") */
 .feed-page-title {
   font-size: 24px;
   font-weight: 600;
@@ -15,8 +19,12 @@
   letter-spacing: -0.03em;
 }
 
-/* ── 정렬 드롭다운 ─────────────────────────── */
-.feed-sort-wrap { position: relative; } /* 드롭다운 기준점 */
+/* ── 최신순/인기순/댓글순 정렬 드롭다운 메뉴 ── */
+
+/* 드롭다운 패널이 이 요소 기준으로 절대위치로 붙음 */
+.feed-sort-wrap { position: relative; }
+
+/* "최신순 ▾" 같이 현재 정렬 기준을 보여주는 버튼 */
 .feed-sort-btn {
   border: none;
   background: none;
@@ -30,7 +38,11 @@
   align-items: center;
   gap: 3px;
 }
-.feed-sort-btn strong { font-weight: 600; } /* 현재 정렬 기준 강조 */
+
+/* 버튼 안 현재 정렬 기준 텍스트 (굵게 강조) */
+.feed-sort-btn strong { font-weight: 600; }
+
+/* 정렬 옵션 선택 드롭다운 패널 */
 .feed-sort-menu {
   position: absolute;
   right: 0;
@@ -43,6 +55,8 @@
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
   z-index: 12; /* 피드 카드보다 위 */
 }
+
+/* 드롭다운 안 정렬 옵션 버튼 (최신순 / 인기순 / 댓글순) */
 .feed-sort-menu button {
   width: 100%;
   border: 0;
@@ -56,18 +70,26 @@
   padding: 8px 9px;
   text-align: left;
 }
+
+/* 정렬 옵션 버튼 호버 */
 .feed-sort-menu button:hover { background: #f3f3f3; }
 
-/* ── 피드 카드 스켈레톤 (로딩 중) ─────────────── */
+/* ── 피드 카드 로딩 중 스켈레톤 플레이스홀더 ── */
+
+/* 게시글 카드 모양의 회색 로딩 플레이스홀더 (실제 카드와 동일한 레이아웃) */
 .post-feed-skeleton {
   display: flex;
   gap: 20px;
   padding: 24px 0;
   border-bottom: 1px solid var(--line);
 }
+
+/* 마지막 스켈레톤 카드 하단 구분선 제거 */
 .post-feed-skeleton:last-child { border-bottom: none; }
+
+/* 앨범아트 스택 자리 (실제 커버 스택과 동일한 390×150) */
 .post-feed-skeleton-cover {
-  width: 390px;  /* 실제 커버 스택(.post-cover-stack)과 동일한 너비 */
+  width: 390px;
   height: 150px;
   flex-shrink: 0;
   border-radius: 10px;
@@ -75,6 +97,8 @@
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite; /* base.css @keyframes shimmer 재사용 */
 }
+
+/* 스켈레톤 카드 오른쪽 텍스트 자리 */
 .post-feed-skeleton-body {
   flex: 1;
   display: flex;
@@ -82,6 +106,8 @@
   justify-content: center;
   gap: 10px;
 }
+
+/* 스켈레톤 텍스트 줄 (제목·작성자·태그 자리) */
 .post-feed-skeleton-line {
   height: 13px;
   border-radius: 6px;
@@ -89,7 +115,12 @@
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
-/* 각 스켈레톤 줄의 너비로 콘텐츠 형태 암시 */
+
+/* 제목 자리 (55% 너비) */
 .post-feed-skeleton-line--title { width: 55%; }
+
+/* 작성자·시간 자리 (30% 너비, 살짝 얇음) */
 .post-feed-skeleton-line--meta  { width: 30%; height: 11px; }
+
+/* 태그 자리 (20% 너비, 가장 얇음) */
 .post-feed-skeleton-line--tag   { width: 20%; height: 10px; margin-top: 4px; }

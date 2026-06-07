@@ -2,17 +2,23 @@
 /* 게시글 상세 (post.html) — 댓글, 트랙 목록, 좋아요, 메모, 미리듣기 버튼 */
 
 /* ── 댓글 목록 (마이페이지 댓글 탭에서도 공통 사용) */
+
+/* 댓글 목록 전체를 세로로 쌓는 컨테이너 */
 .comment-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
+
+/* 댓글 하나 (회색 배경 박스) */
 .comment-item {
   padding: 10px 12px;
   border-radius: 10px;
-  background: var(--bg-sub); /* 댓글 배경 */
+  background: var(--bg-sub);
   border: 1px solid var(--line);
 }
+
+/* 댓글 상단 한 줄: 작성자 아바타 + 닉네임 + 작성 시간 + ⋮ 메뉴 */
 .comment-header {
   display: flex;
   align-items: center;
@@ -20,65 +26,81 @@
   margin-bottom: 4px;
   font-size: 13px;
 }
+
+/* 댓글 본문 텍스트 (줄바꿈·공백 유지) */
 .comment-text {
   font-size: 14px;
   line-height: 1.6;
-  white-space: pre-wrap;     /* 줄바꿈 유지 */
+  white-space: pre-wrap;
   overflow-wrap: break-word;
   word-break: break-word;
 }
 
 /* ── 게시글 상세 본문 영역 (제목·내용·트랙 목록·태그) */
+
+/* 게시글 상세 전체 페이지 영역 (최대 720px, 좁은 화면 여백 유지) */
 .pd-page {
-  width: min(720px, calc(100% - 32px)); /* 게시글 본문 최대 720px */
+  width: min(720px, calc(100% - 32px));
   margin: 0 auto;
   padding: 24px 0 80px;
 }
+
+/* 게시글 제목 */
 .pd-post-title {
   font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.02em;
   margin: 10px 0 12px;
   line-height: 1.4;
-  overflow-wrap: break-word; /* 긴 단어 줄바꿈 */
+  overflow-wrap: break-word;
   word-break: break-word;
 }
+
+/* 게시글 본문 텍스트 (줄바꿈·공백 그대로 유지) */
 .pd-body {
   font-size: 14px;
   line-height: 1.7;
   color: #555;
   margin: 0 0 14px;
-  white-space: pre-wrap;     /* 줄바꿈·공백 유지 */
+  white-space: pre-wrap;
   overflow-wrap: break-word;
   word-break: break-word;
 }
+
+/* 트랙 목록 전체를 세로로 쌓는 컨테이너 */
 .pd-track-list {
   display: flex;
   flex-direction: column;
   margin: 14px 0;
 }
+
+/* 트랙 한 줄: 번호 + 앨범아트 + 곡명/가수 + 링크 + 재생 버튼 */
 .pd-track-item {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 8px 10px;
   border-radius: 10px;
-  transition: background 0.12s; /* 호버 배경 전환 */
+  transition: background 0.12s;
 }
+
+/* 트랙 번호 (1, 2, 3 …) */
 .pd-track-num {
   min-width: 18px;
   text-align: right;
   font-size: 12px;
   color: var(--muted);
-  font-variant-numeric: tabular-nums; /* 숫자 너비 고정 */
+  font-variant-numeric: tabular-nums; /* 숫자 너비 고정으로 세로 정렬 맞춤 */
   flex-shrink: 0;
 }
+
+/* 앨범아트 썸네일 (42×42, 없으면 회색 배경) */
 .pd-track-art {
   width: 42px;
   height: 42px;
   border-radius: 6px;
   flex-shrink: 0;
-  background: #f0f0f0;  /* 앨범아트 없을 때 배경 */
+  background: #f0f0f0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -86,22 +108,30 @@
   font-size: 18px;
   color: #bbb;
 }
+
+/* 앨범아트 이미지 */
 .pd-track-art img {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* 비율 유지하며 꽉 채움 */
+  object-fit: cover;
   display: block;
 }
-.pd-track-body { flex: 1; min-width: 0; } /* 말줄임 허용 */
+
+/* 곡명 + 가수명 + 외부 링크를 세로로 쌓는 영역 */
+.pd-track-body { flex: 1; min-width: 0; }
+
+/* 곡명 (한 줄 말줄임) */
 .pd-track-name {
   font-size: 13px;
   font-weight: 600;
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis; /* 한 줄 말줄임 */
+  text-overflow: ellipsis;
   display: block;
 }
+
+/* 가수명 + 앨범명 (한 줄 말줄임) */
 .pd-track-meta {
   font-size: 12px;
   color: var(--muted);
@@ -110,11 +140,23 @@
   text-overflow: ellipsis;
   margin-top: 1px;
 }
+
+/* Apple Music / Spotify 외부 링크 묶음 */
 .pd-track-ext { display: flex; gap: 8px; margin-top: 4px; }
+
+/* 외부 링크 텍스트 */
 .pd-track-ext a { font-size: 11px; text-decoration: none; }
+
+/* 외부 링크 호버 시 밑줄 + 살짝 어둡게 */
 .pd-track-ext a:hover { filter: brightness(0.8); text-decoration: underline; }
-.link-apple   { color: #f87171; } /* Apple Music 링크 색상 */
-.link-spotify { color: #4ade80; } /* Spotify 링크 색상 */
+
+/* Apple Music 링크 색상 (빨간 계열) */
+.link-apple   { color: #f87171; }
+
+/* Spotify 링크 색상 (초록 계열) */
+.link-spotify { color: #4ade80; }
+
+/* 트랙 오디오 미리듣기 재생/일시정지 버튼 */
 .pd-play-btn {
   width: 28px;
   height: 28px;
@@ -128,11 +170,17 @@
   justify-content: center;
   transition: background 0.12s, color 0.12s;
   flex-shrink: 0;
-  align-self: flex-start; /* 트랙 정보 상단에 정렬 */
+  align-self: flex-start; /* 트랙 정보 상단 기준으로 정렬 */
   margin-top: 7px;
 }
+
+/* 재생 버튼 호버 */
 .pd-play-btn:hover { background: var(--bg-sub); color: var(--text); }
-.pd-play-btn.is-playing { color: #111; } /* 재생 중일 때 강조 */
+
+/* 현재 재생 중인 트랙의 버튼 (진하게 강조) */
+.pd-play-btn.is-playing { color: #111; }
+
+/* 게시글 하단 태그 칩 (알약형) */
 .pd-tag {
   display: inline-flex;
   align-items: center;
@@ -144,7 +192,10 @@
   border-radius: 999px;
   white-space: nowrap;
 }
+
 /* ── 게시글 상세 페이지 댓글: 배경 제거, 구분선만 표시 */
+
+/* 게시글 상세의 댓글은 박스 없이 구분선으로만 나눔 */
 .pd-comment-list .comment-item {
   background: none;
   border: none;
@@ -152,39 +203,57 @@
   border-bottom: 1px solid var(--line);
   padding: 20px 0;
 }
+
+/* 마지막 댓글 하단 구분선 제거 */
 .pd-comment-list .comment-item:last-child { border-bottom: 0; }
+
+/* 댓글 입력창 플레이스홀더 색 */
 #commentInput::placeholder { color: #ccc; }
 
 /* ── JS가 동적으로 생성하는 게시글 상세 요소들 */
+
+/* 게시글 하단 태그 칩들을 가로로 나열하는 영역 */
 .pd-tags-row {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   margin: 12px 0;
 }
+
+/* 게시글 본문 전체 묶음 (제목·본문·트랙·태그·좋아요) */
 .pd-article { margin-bottom: 36px; }
+
+/* 작성자 정보 + 수정/삭제 버튼 한 줄 */
 .pd-meta-row { margin-bottom: 4px; }
+
+/* 작성자 닉네임 */
 .pd-author-name {
   font-size: 13px;
   font-weight: 600;
   color: var(--text);
 }
+
+/* "비공개" 뱃지 텍스트 */
 .pd-private-badge {
   font-size: 12px;
   color: var(--muted);
 }
+
+/* 작성자 정보 줄 우측: 수정·삭제 버튼 묶음 */
 .pd-meta-actions {
   margin-left: auto;
   display: flex;
   align-items: center;
   gap: 6px;
 }
+
+/* 게시글 좋아요 버튼 (하트 아이콘 + 좋아요 수) */
 .pd-like-btn {
   display: inline-flex;
   align-items: center;
   gap: 7px;
   margin-top: 18px;
-  appearance: none; /* 브라우저 기본 버튼 스타일 제거 */
+  appearance: none;
   border: none;
   background: none;
   padding: 0;
@@ -193,49 +262,69 @@
   font-size: 15px;
   font-weight: 600;
 }
+
 /* ── 댓글 섹션 헤더 ("댓글 n개" 제목 + 구분선) */
+
+/* "댓글 n개" 제목 행 (하단에 구분선) */
 .pd-comments-header {
   padding-bottom: 14px;
   border-bottom: 1px solid var(--line);
   margin-bottom: 0;
 }
+
+/* "댓글 n개" 제목 텍스트 */
 .pd-comments-title {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   margin: 0;
 }
+
 /* ── 댓글 작성 폼 (아바타 + 입력창 + 제출 버튼) */
+
+/* 댓글 작성 폼 전체 */
 .pd-comment-form { margin-top: 24px; }
+
+/* 댓글 작성자 아바타 + 닉네임 한 줄 */
 .pd-comment-form-user {
   display: flex;
   gap: 10px;
   align-items: center;
   margin-bottom: 10px;
 }
+
+/* 댓글 작성자 닉네임 */
 .pd-comment-form-name {
   font-size: 14px;
   font-weight: 600;
 }
+
+/* 아바타 공간 + 입력창/버튼 영역을 가로로 배치 */
 .pd-comment-form-input-row {
   display: flex;
   gap: 12px;
   align-items: flex-start;
 }
+
+/* 아바타 너비만큼 입력창을 오른쪽으로 밀어주는 빈 공간 */
 .pd-comment-form-spacer {
   width: 32px;
   flex-shrink: 0;
 }
+
+/* 댓글 입력창 + 제출 버튼을 세로로 쌓는 영역 */
 .pd-comment-form-fields {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
+
+/* 댓글 입력 textarea */
 .pd-comment-textarea {
   width: 100%;
   height: 90px;
-  resize: none;          /* 크기 조절 핸들 숨김 */
+  resize: none;
   overflow-y: auto;
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -246,6 +335,8 @@
   outline: none;
   box-sizing: border-box;
 }
+
+/* 댓글 제출 버튼 */
 .pd-comment-submit {
   width: 100%;
   background: #111;
@@ -257,16 +348,24 @@
   cursor: pointer;
   transition: background 0.15s;
 }
+
+/* 댓글 제출 버튼 호버 */
 .pd-comment-submit:hover { background: #333; }
+
+/* 댓글 인라인 수정 시 저장/취소 버튼 묶음 */
 .pd-edit-actions {
   display: flex;
   gap: 6px;
   margin-top: 8px;
 }
+
+/* 댓글 인라인 수정 저장/취소 버튼 */
 .pd-edit-btn {
   font-size: 12px;
   padding: 5px 12px;
 }
+
+/* 트랙별 메모 토글 버튼 ("메모 보기 / 숨기기") */
 .pd-note-btn {
   appearance: none;
   border: 0;
@@ -282,7 +381,11 @@
   gap: 3px;
   transition: color 0.12s;
 }
+
+/* 메모 토글 버튼 호버 */
 .pd-note-btn:hover { color: var(--text); }
+
+/* 트랙 메모 본문 (왼쪽 인용선 스타일) */
 .pd-note-body {
   font-size: 13px;
   color: #666;
@@ -290,7 +393,7 @@
   white-space: pre-wrap;
   margin-top: 6px;
   padding: 8px 12px;
-  border-left: 2px solid var(--line); /* 왼쪽 인용 스타일 구분선 */
+  border-left: 2px solid var(--line); /* 인용 스타일 왼쪽 구분선 */
   background: #fafafa;
   border-radius: 0 6px 6px 0;
 }

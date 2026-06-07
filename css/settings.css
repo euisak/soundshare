@@ -2,41 +2,63 @@
 /* 설정 페이지 (settings.html) — 프로필 사진 업로드, 닉네임·비밀번호 변경, 토글 스위치, 회원탈퇴 */
 
 /* ── 설정 페이지 전체 레이아웃 ──────────── */
+
+/* 설정 폼 전체 영역 (최대 560px, 좁은 화면에서 양쪽 16px 여백) */
 .settings-main {
-  width: min(560px, calc(100% - 32px)); /* 설정 폼 최대 560px */
+  width: min(560px, calc(100% - 32px));
   margin: 0 auto;
   padding: 24px 0 80px;
 }
+
+/* 설정 페이지 상단 "설정" 타이틀 */
 .settings-title {
   font-size: 22px;
   font-weight: 800;
   margin: 0 0 4px;
   letter-spacing: -.02em;
 }
+
+/* 설정 섹션 하나 (구분선으로 섹션 간 구분) */
 .settings-section {
   padding: 28px 0;
   border-bottom: 1px solid var(--line);
 }
+
+/* 마지막 설정 섹션 (하단 구분선 없음) */
 .settings-section--last { padding: 28px 0; }
+
+/* 프로필 상단: 아바타 + 닉네임/이메일 가로 배치 */
 .settings-profile-row {
   display: flex;
   align-items: center;
   gap: 16px;
 }
+
+/* 닉네임 + 이메일을 세로로 쌓는 영역 */
 .settings-profile-info { flex: 1; min-width: 0; }
+
+/* 현재 닉네임 텍스트 */
 .settings-profile-name { font-size: 16px; font-weight: 700; }
+
+/* 현재 이메일 텍스트 */
 .settings-profile-email { margin-top: 2px; }
+
+/* 사진 선택 후 나타나는 "저장" 버튼 행 */
 .settings-photo-save-row {
   margin-top: 14px;
   display: flex;
   align-items: center;
   gap: 10px;
 }
+
+/* 각 설정 섹션의 소제목 (예: "닉네임 변경", "비밀번호 변경") */
 .settings-section-title {
   font-size: 15px;
   font-weight: 700;
   margin: 0 0 18px;
 }
+
+/* 공개범위 설정 한 항목: 설명 텍스트 + 토글 스위치 양 끝 배치 */
 .settings-privacy-row {
   display: flex;
   align-items: center;
@@ -44,14 +66,22 @@
   gap: 12px;
   padding: 12px 0;
 }
+
+/* 공개범위 항목 이름 (예: "게시글 공개") */
 .settings-privacy-name {
   font-size: 14px;
   font-weight: 600;
 }
+
+/* 공개범위 항목 설명 텍스트 */
 .settings-privacy-desc { margin-top: 2px; }
+
+/* 회원탈퇴 확인 입력창 위 안내 문구 */
 .settings-delete-confirm { margin-bottom: 12px; }
 
 /* ── 프로필 사진 업로드 (아바타 클릭 → 파일 선택 → 호버 시 "사진 변경" 오버레이 표시) */
+
+/* 아바타 + 오버레이를 겹치게 묶는 클릭 가능한 래퍼 */
 .photo-upload-wrap {
   position: relative;
   width: 72px;
@@ -59,6 +89,8 @@
   flex-shrink: 0;
   cursor: pointer;
 }
+
+/* 설정 페이지 프로필 아바타 원형 (72px, 사진 없으면 그라데이션) */
 .photo-upload-avatar {
   width: 72px;
   height: 72px;
@@ -72,6 +104,8 @@
   color: #fff;
   overflow: hidden;
 }
+
+/* 아바타 안 프로필 사진 */
 .photo-upload-avatar img {
   width: 100%;
   height: 100%;
@@ -79,6 +113,8 @@
   border-radius: 50%;
   display: block;
 }
+
+/* 아바타 위에 겹치는 "사진 변경" 반투명 오버레이 (기본 숨김, 호버 시 표시) */
 .photo-upload-overlay {
   position: absolute;
   inset: 0;
@@ -87,7 +123,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0;            /* 기본 숨김 → 호버 시 나타남 */
+  opacity: 0;           /* 기본 숨김 */
   transition: opacity 0.15s;
   font-size: 10px;
   font-weight: 600;
@@ -95,13 +131,15 @@
   text-align: center;
   line-height: 1.4;
   letter-spacing: 0.01em;
-  pointer-events: none;  /* 클릭 이벤트는 .photo-upload-wrap이 처리 */
-}
-.photo-upload-wrap:hover .photo-upload-overlay {
-  opacity: 1; /* 호버 시 "사진 변경" 오버레이 표시 */
+  pointer-events: none; /* 클릭은 래퍼(.photo-upload-wrap)가 처리 */
 }
 
+/* 아바타 호버 시 "사진 변경" 오버레이 표시 */
+.photo-upload-wrap:hover .photo-upload-overlay { opacity: 1; }
+
 /* ── 토글 스위치 (게시글 공개·댓글 허용 등 공개범위 설정) */
+
+/* 토글 스위치 전체 래퍼 (44×24px) */
 .toggle {
   position: relative;
   display: inline-block;
@@ -109,20 +147,26 @@
   height: 24px;
   flex-shrink: 0;
 }
+
+/* 실제 체크박스 input (시각적으로 숨기고 토글 슬라이더로 대체) */
 .toggle input {
-  opacity: 0;            /* 실제 체크박스 숨김 */
+  opacity: 0;
   width: 0;
   height: 0;
   position: absolute;
 }
+
+/* 토글 트랙 (비활성: 회색 / 활성: 검정) */
 .toggle-slider {
   position: absolute;
   inset: 0;
-  background: #d0d0d0;  /* 비활성 회색 */
+  background: #d0d0d0;
   border-radius: 24px;
   cursor: pointer;
   transition: background 0.2s;
 }
+
+/* 토글 손잡이 원형 (흰색, 왼쪽에서 시작) */
 .toggle-slider::before {
   content: "";
   position: absolute;
@@ -130,9 +174,13 @@
   height: 18px;
   left: 3px;
   top: 3px;
-  background: #fff;     /* 흰색 원형 손잡이 */
+  background: #fff;
   border-radius: 50%;
   transition: transform 0.2s;
 }
-.toggle input:checked + .toggle-slider { background: #111; }                    /* 활성 검정 */
-.toggle input:checked + .toggle-slider::before { transform: translateX(20px); } /* 손잡이 오른쪽 이동 */
+
+/* 활성(체크) 상태: 트랙 검정으로 변경 */
+.toggle input:checked + .toggle-slider { background: #111; }
+
+/* 활성(체크) 상태: 손잡이 오른쪽으로 이동 */
+.toggle input:checked + .toggle-slider::before { transform: translateX(20px); }

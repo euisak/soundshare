@@ -2,6 +2,8 @@
 /* 프로필/마이페이지 공통 — 프로필 헤더, 탭, 댓글 단 글 목록 */
 
 /* ── 프로필 상단: 아바타·닉네임·이메일 영역 ─ */
+
+/* 프로필 상단 전체 (아바타 + 이름/이메일을 가로로 배치) */
 .profile-header {
   display: flex;
   align-items: center;
@@ -9,19 +11,31 @@
   margin-bottom: 28px;
   flex-wrap: wrap; /* 좁은 화면에서 줄바꿈 */
 }
+
+/* 프로필 페이지 큰 아바타 원형 (56px) */
 .profile-avatar-lg {
   width: 56px;
   height: 56px;
   font-size: 22px;
   flex-shrink: 0; /* 아바타 크기 고정 */
 }
-.profile-info { flex: 1; min-width: 0; } /* 긴 이름 말줄임 허용 */
+
+/* 닉네임 + 이메일을 세로로 쌓는 영역 */
+.profile-info { flex: 1; min-width: 0; }
+
+/* 프로필 닉네임 */
 .profile-name {
   font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.02em;
 }
+
+/* 프로필 이메일 */
 .profile-email { margin-top: 2px; }
+
+/* ── 댓글 탭: 내가 댓글 단 게시글 목록 항목 */
+
+/* 댓글 단 글 목록의 한 항목 (게시글 제목 + 댓글 미리보기 + 시간) */
 .commented-item {
   display: flex;
   align-items: center;
@@ -29,26 +43,34 @@
   padding: 16px 0;
   border-bottom: 1px solid var(--line); /* 항목 구분선 */
 }
+
+/* 게시글 제목 + 댓글 미리보기를 세로로 쌓는 영역 */
 .commented-item-body {
   flex: 1;
-  min-width: 0;   /* 말줄임 허용 */
+  min-width: 0;
   overflow: hidden;
 }
+
+/* 게시글 제목 링크 (한 줄 말줄임) */
 .commented-item-title {
   display: block;
   margin-bottom: 5px;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis; /* 긴 제목 말줄임 */
+  text-overflow: ellipsis;
 }
 
 /* ── 게시글·댓글·좋아요 탭 전환 영역 ──────── */
+
+/* 탭 버튼들을 가로로 나열하는 탭 바 (하단에 구분선) */
 .tabs {
   display: flex;
   gap: 4px;
   border-bottom: 1px solid var(--line);
   margin-bottom: 16px;
 }
+
+/* 탭 버튼 하나 (게시글 / 댓글 / 좋아요) */
 .tab-btn {
   padding: 10px 16px;
   background: none;
@@ -58,16 +80,20 @@
   font-weight: 500;
   font-size: 14px;
   font-family: inherit;
-  border-bottom: 2px solid transparent; /* 비활성 탭 밑줄 투명 */
+  border-bottom: 2px solid transparent; /* 비활성 탭은 밑줄 투명 */
   margin-bottom: -1px;                  /* .tabs 하단 테두리와 겹쳐 이음새 숨김 */
   transition: color 0.15s, border-color 0.15s;
 }
+
+/* 현재 선택된 탭 (검정 밑줄 + 텍스트 진하게) */
 .tab-btn.active {
   color: var(--text);
-  border-bottom-color: #111; /* 활성 탭 검정 밑줄 */
+  border-bottom-color: #111;
 }
 
-/* ── 댓글 단 글 목록의 제목·시간·댓글 미리보기 */
+/* ── 탭 콘텐츠: 게시글 제목·시간·댓글 미리보기 */
+
+/* 게시글 제목 링크 (한 줄 말줄임, 나머지 너비 전부 차지) */
 .post-list-title-link {
   flex: 1;
   min-width: 0;
@@ -77,21 +103,25 @@
   text-decoration: none;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis; /* 한 줄 말줄임 */
+  text-overflow: ellipsis;
 }
+
+/* 게시글 작성 시간 (고정 너비, 줄바꿈 없음) */
 .post-list-time {
-  flex-shrink: 0;    /* 날짜 너비 고정 */
+  flex-shrink: 0;
   font-size: 12px;
   color: var(--muted);
   white-space: nowrap;
 }
+
+/* 댓글 내용 미리보기 (최대 2줄 말줄임) */
 .post-list-comment-text {
   flex: 1;
   min-width: 0;
   font-size: 13px;
   color: var(--muted);
   display: -webkit-box;
-  -webkit-line-clamp: 2;        /* 최대 2줄 말줄임 */
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   line-height: 1.5;
