@@ -120,6 +120,8 @@
   text-decoration: none;
 }
 .pd-track-ext a:hover { filter: brightness(0.8); text-decoration: underline; }
+.link-apple   { color: #f87171; }
+.link-spotify { color: #4ade80; }
 .pd-play-btn {
   width: 28px;
   height: 28px;
