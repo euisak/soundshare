@@ -84,7 +84,10 @@ export async function getPosts({ sort = "recent", limitN = 30 } = {}) {
 
 // 게시글 검색
 // Firestore full-text 검색 미지원으로 최신 게시글 50개를 가져온 뒤 클라이언트에서 필터링
-export async function searchPosts(keyword, fields = ["title", "artist", "song"]) {
+export async function searchPosts(keyword, fields = ["title", "artist", "song", "album"]) {
+  // keyword: 사용자가 입력한 검색어
+  // fields: 검색 대상 필드 배열
+  // 기본 검색 대상: 제목(title), 아티스트(artist), 곡명(song), 앨범명(album)
   const q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(50));
   const snap = await getDocs(q);
 

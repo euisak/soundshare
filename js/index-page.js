@@ -86,7 +86,9 @@ async function doSearch(kw) {
     </div>`).join("");
   metaEl.textContent = "";
   try {
-    const searchResult = await searchPosts(kw, ["title", "artist", "song", "album"]);
+    // kw: 헤더 검색창에서 사용자가 입력한 검색어
+    // searchPosts() 기본 검색 대상: 제목, 아티스트, 곡명, 앨범명
+    const searchResult = await searchPosts(kw);
     // 검색 결과에서도 비공개 게시글 제외
     // 단, 현재 사용자가 작성자인 경우 표시
     filteredPosts = searchResult.filter(p => p.visibility !== "private" || p.authorId === currentUser?.uid);
