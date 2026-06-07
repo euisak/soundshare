@@ -8,7 +8,8 @@
 <body>
 
 <!-- ── Auth Modal ──────────────────────────────────────────────── -->
-<!-- header-loader.js 가 이 파일을 fetch 해서 #authModal 만 body에 삽입 -->
+<!-- header-loader.js가 이 파일을 불러와 #authModal만 각 페이지에 삽입한다. -->
+<!-- 로그인, 회원가입, 비밀번호 찾기 화면을 한 모달 안에서 hidden으로 전환한다. -->
 <div id="authModal" class="auth-modal-backdrop" hidden>
   <div class="auth-modal-box">
     <button class="auth-modal-close" id="btnCloseAuth" aria-label="닫기"> <!-- 닫기 버튼 -->
@@ -17,9 +18,9 @@
       </svg>
     </button>
 
-    <div id="authNotice" class="notice notice--mb" hidden></div> <!-- 로그인/가입 에러 -->
+    <div id="authNotice" class="notice notice--mb" hidden></div> <!-- 인증 성공/실패 메시지 표시 -->
 
-    <!-- 로그인 뷰 -->
+    <!-- 로그인 뷰: 이메일/비밀번호 입력 후 app.js에서 로그인 처리 -->
     <div id="authViewLogin">
       <h2 class="auth-modal-title">로그인</h2>
       <form id="formLogin" class="stack" novalidate>
@@ -36,13 +37,14 @@
         <button class="btn primary" type="submit">로그인</button>
       </form>
       <p class="muted small auth-footer">
+        <!-- data-to 값으로 비밀번호 찾기/회원가입 화면으로 전환 -->
         <button class="auth-view-btn" data-to="forgot">비밀번호 찾기</button>
         <span class="auth-sep">|</span>
         <button class="auth-view-btn" data-to="register">회원가입</button>
       </p>
     </div>
 
-    <!-- 회원가입 뷰 (data-to="register" 클릭 시 표시) -->
+    <!-- 회원가입 뷰: 닉네임, 이메일, 비밀번호 입력 후 Firebase Auth 계정 생성 -->
     <div id="authViewRegister" hidden>
       <h2 class="auth-modal-title">회원가입</h2>
       <form id="formRegister" class="stack" novalidate>
@@ -51,6 +53,7 @@
           <div class="input-with-btn">
             <input id="regNickname" class="input" type="text" autocomplete="nickname"
                    placeholder="다른 유저에게 보이는 이름" maxlength="10" />
+            <!-- Firestore users 컬렉션에서 같은 닉네임이 있는지 확인 -->
             <button type="button" class="btn btn-shrink" id="btnCheckNickname">중복확인</button>
           </div>
           <span id="nicknameStatus" class="small status-hint"></span>
@@ -80,7 +83,7 @@
       </p>
     </div>
 
-    <!-- 비밀번호 찾기 뷰 (data-to="forgot" 클릭 시 표시) -->
+    <!-- 비밀번호 찾기 뷰: 가입 이메일 확인 후 재설정 메일 전송 -->
     <div id="authViewForgot" hidden>
       <h2 class="auth-modal-title">비밀번호 찾기</h2>
       <p class="muted small notice--mb">가입한 이메일로 재설정 링크를 보내드립니다.</p>

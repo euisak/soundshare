@@ -77,6 +77,8 @@ tagsWrapEl.addEventListener("click", (e) => {
 // ── 장르 (저장용으로만 유지) ─────────────────────────
 
 // ── 트랙 목록 ────────────────────────────────────────
+// 검색 결과에서 선택한 곡들을 tracks 배열에 저장한다.
+// 이 배열이 게시글 저장 시 Firestore posts 문서의 tracks 필드로 들어간다.
 const tracks = [];                                                   // 추가된 트랙 배열
 const releasesListEl  = document.getElementById("releasesList");    // 트랙 목록 컨테이너
 const releasesCountEl = document.getElementById("releasesCount");   // 트랙 수 표시
@@ -178,6 +180,8 @@ searchInputEl.addEventListener("input", (e) => {
 
 async function doSearch(q, seq) {
   try {
+    // iTunes API에서 검색어에 맞는 트랙 목록을 가져온다.
+    // seq 값으로 오래된 검색 응답이 뒤늦게 도착해도 화면을 덮어쓰지 않게 한다.
     const results = await searchTracksItunes(q, 25);  // iTunes API로 검색
     if (seq !== searchSeq) return; // 오래된 응답 무시 (새 검색어가 들어온 경우)
     if (!results.length) {
@@ -197,7 +201,11 @@ async function doSearch(q, seq) {
 
     searchResultsEl.querySelectorAll(".le-search-result").forEach((el) => {
       el.addEventListener("click", () => {
+        // 검색 결과 HTML의 data-idx 값으로 results 배열에서 실제 트랙 데이터를 찾는다.
+        // dataset 값은 문자열이므로 Number()로 숫자 인덱스로 변환한다.
         const r = results[Number(el.dataset.idx)];
+        // 검색 결과를 클릭하면 tracks 배열에 추가한다.
+        // 같은 id의 곡이 이미 있으면 중복으로 추가하지 않는다.
         if (!tracks.find((x) => x.id === r.id)) { // 중복 추가 방지
           tracks.push(r);
           renderTracks();
@@ -238,6 +246,9 @@ document.getElementById("btnPublish").addEventListener("click", async () => {
   btn.textContent = editId ? "수정 중…" : "게시 중…"; // 중복 제출 방지
 
   try {
+    // 게시글 저장에 필요한 데이터를 하나의 payload로 묶는다.
+    // tracks 배열에는 사용자가 검색해서 추가한 곡 정보와 곡별 메모가 포함된다.
+    // 이 payload는 createPost()/updatePost()로 전달되어 Firestore에 저장된다.
     const payload = {
       title,
       body:       document.getElementById("postBody").value,
@@ -248,13 +259,16 @@ document.getElementById("btnPublish").addEventListener("click", async () => {
 
     let targetId;
     if (editId) {
+      // URL hash에 게시글 id가 있으면 수정 모드로 처리한다.
       await updatePost(editId, payload);
       targetId = editId;
       showToast("수정되었습니다!");
     } else {
+      // 새 게시글이면 createPost()가 Firestore posts 컬렉션에 문서를 생성하고 id를 반환한다.
       targetId = await createPost(payload);
       showToast("게시글이 등록되었습니다! 🎵");
     }
+    // 저장이 끝나면 생성/수정된 게시글 상세 페이지로 이동한다.
     window.location.replace(`post.html?edited=1#${targetId}`);
   } catch (err) {
     const noticeEl = document.getElementById("notice");

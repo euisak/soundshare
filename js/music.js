@@ -27,19 +27,27 @@ function itunesJSONP(url) {
   });
 }
 
-// 노래 검색 (KR + US 병렬 요청 후 중복 제거 및 관련도 정렬)
-export async function searchTracksItunes(q, limitN = 30) {
+// 노래 검색 함수
+// 사용자가 입력한 검색어를 iTunes Search API에 보내고, 게시글에 추가할 트랙 목록으로 변환한다.
+// KR/US 결과를 함께 가져와 국내곡과 해외곡을 모두 검색할 수 있게 한다.
+export async function searchTracksItunes(q, limitN = 25) {
+  // iTunes Search API 요청 주소를 만든다.
+  // term은 검색어, entity=song은 노래만 검색하겠다는 의미이다.
+  // encodeURIComponent()는 한글/공백/특수문자가 URL에서 깨지지 않게 변환한다.
   const base = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=${limitN}`;
 
-  // KR + US 병렬 검색 (한국 음악 + 해외 음악 모두 커버)
+  // 한국 스토어와 미국 스토어를 동시에 검색한다.
+  // Promise.allSettled()를 사용하면 둘 중 하나가 실패해도 성공한 쪽 결과는 사용할 수 있다.
   const [krRes, usRes] = await Promise.allSettled([
     itunesJSONP(base + "&country=KR"),
     itunesJSONP(base + "&country=US"),
   ]);
+  // 검색 성공 시 results 배열을 사용하고, 실패한 경우 빈 배열로 처리한다.
   const krResults = krRes.status === "fulfilled" ? (krRes.value.results || []) : [];
   const usResults = usRes.status === "fulfilled" ? (usRes.value.results || []) : [];
 
-  // KR 우선으로 병합 (중복 trackId 제거)
+  // KR 결과를 먼저 넣고 US 결과를 뒤에 붙인다.
+  // 같은 trackId가 있으면 한 번만 추가해 중복 검색 결과를 제거한다.
   const seen = new Set();
   const merged = [];
   for (const t of [...krResults, ...usResults]) {
@@ -50,7 +58,8 @@ export async function searchTracksItunes(q, limitN = 30) {
   }
   if (!merged.length) return [];
 
-  // 관련도 점수 계산 (곡명 일치 > 가수 일치 > 앨범 일치 순)
+  // 관련도 점수 계산
+  // 곡명 일치 결과를 가장 우선하고, 그 다음 가수명/앨범명 일치 결과를 보여준다.
   const lq    = q.toLowerCase().trim();
   const words = lq.split(/\s+/).filter(Boolean);
 
@@ -74,12 +83,14 @@ export async function searchTracksItunes(q, limitN = 30) {
     return 0;
   }
 
-  // 관련도순 정렬 → 관련도 같으면 원래 순서(인기순) 유지
+  // 관련도순으로 정렬한 뒤, 화면에서 사용할 트랙 객체 형태로 변환한다.
+  // albumArt, previewUrl, appleMusicUrl 등은 상세 페이지에서 앨범아트/미리듣기/외부 링크로 사용된다.
   return merged
     .map((t, i) => ({ t, r: relevance(t), i }))
     .filter(({ r }) => r > 0)
     .sort((a, b) => b.r - a.r || a.i - b.i)
     .map(({ t }) => ({
+      // iTunes 원본 데이터에서 화면 출력과 Firestore 저장에 필요한 값만 추린다.
       id: String(t.trackId),
       name: t.trackName,
       artist: t.artistName,

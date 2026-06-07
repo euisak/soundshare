@@ -59,6 +59,8 @@ async function ensureUserDoc(user, nickname) {
 // ── 모달용 export 함수들 ──────────────────────────────────────────
 
 export async function signInModal(email, password) {
+  // Firebase Auth에 이메일과 비밀번호를 전달해 로그인을 요청한다.
+  // 로그인 성공 시 Firebase가 현재 사용자 상태를 자동으로 갱신한다.
   if (!email || !password) throw new Error("이메일/비밀번호를 입력해주세요.");
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("이메일 형식이 올바르지 않습니다.");
   try {
@@ -69,25 +71,34 @@ export async function signInModal(email, password) {
 }
 
 export async function signUpModal(nickname, email, password) {
+  // 회원가입에 필요한 값이 모두 입력되었는지 확인한다.
+  // 이후 Firebase Auth 계정 생성과 Firestore 사용자 문서 저장을 순서대로 처리한다.
   if (!nickname || !email || !password) throw new Error("닉네임, 이메일, 비밀번호를 모두 입력해주세요.");
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("이메일 형식이 올바르지 않습니다.");
   const pwErr = validatePassword(password);
   if (pwErr) throw new Error(pwErr);
   let cred;
   try {
+    // Firebase Auth에 이메일/비밀번호 기반 계정을 생성한다.
     cred = await createUserWithEmailAndPassword(auth, email, password);
   } catch (err) {
     throw new Error(authError(err.code) || err.message || "오류가 발생했습니다.");
   }
+  // Firestore users 컬렉션에서 같은 닉네임이 있는지 확인한다.
+  // 중복이면 방금 생성한 Auth 계정을 삭제하고 가입을 중단한다.
   if (await isNicknameTaken(nickname)) {
     await cred.user.delete();
     throw new Error("이미 사용 중인 닉네임입니다.");
   }
+  // Auth 프로필의 displayName에 닉네임을 저장해 화면 표시 이름으로 사용한다.
   if (nickname) await updateProfile(cred.user, { displayName: nickname });
+  // Firestore users 컬렉션에 uid, email, nickname, createdAt 정보를 저장한다.
   await ensureUserDoc(cred.user, nickname);
 }
 
 export async function sendResetEmail(email) {
+  // 입력한 이메일이 가입된 이메일인지 먼저 확인한다.
+  // 가입된 이메일인 경우에만 Firebase 비밀번호 재설정 메일을 전송한다.
   if (!email) throw new Error("이메일을 입력해주세요.");
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("이메일 형식이 올바르지 않습니다.");
 

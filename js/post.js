@@ -9,9 +9,14 @@ import {
 import { addNotification } from "./notify.js";
 
 // 게시글 생성
+// write-page.js에서 만든 payload를 Firestore posts 컬렉션에 저장한다.
 export async function createPost({ title, body, tags, tracks }) {
+  // createPost(payload)로 전달된 객체 구조 분해
+  // payload 내부 값: 제목, 본문, 태그, 트랙 목록
   const user = auth.currentUser;
   if (!user) throw new Error("로그인이 필요합니다.");
+  // 현재 로그인한 사용자의 uid와 displayName을 작성자 정보로 함께 저장한다.
+  // tracks에는 검색으로 추가한 곡 목록, 앨범아트, 미리듣기 URL, 곡별 메모가 들어간다.
   const ref = await addDoc(collection(db, "posts"), {
     authorId: user.uid,
     authorName: user.displayName || user.email.split("@")[0],
@@ -52,20 +57,39 @@ export async function incrementViewCount(postId) {
   } catch { /* 조용히 무시 */ }
 }
 
-// 게시글 목록 (정렬: recent | popular | oldest)
+// 게시글 목록 조회
+// sort 값에 따라 Firestore posts 컬렉션 조회 기준 변경
+// recent: 작성일 최신순, popular: 좋아요 많은 순, oldest: 작성일 오래된순
 export async function getPosts({ sort = "recent", limitN = 30 } = {}) {
-  const q = sort === "popular"
-    ? query(collection(db, "posts"), orderBy("likeCount", "desc"), limit(limitN))
-    : query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(limitN));
+  let q;
+
+  if (sort === "popular") {
+    // 인기순 조회
+    // likeCount 내림차순으로 좋아요가 많은 게시글부터 가져옴
+    q = query(collection(db, "posts"), orderBy("likeCount", "desc"), limit(limitN));
+  } else if (sort === "oldest") {
+    // 오래된순 조회
+    // createdAt 오름차순으로 먼저 작성된 게시글부터 가져옴
+    q = query(collection(db, "posts"), orderBy("createdAt", "asc"), limit(limitN));
+  } else {
+    // 최신순 조회
+    // 기본값 recent 포함, createdAt 내림차순으로 최근 작성된 게시글부터 가져옴
+    q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(limitN));
+  }
+
   const snap = await getDocs(q);
+  // Firestore 문서 id와 문서 데이터를 합쳐 화면 렌더링용 객체로 변환
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
-// 게시글 검색 (Firestore full-text 미지원 → 최신 50개 클라이언트 필터링)
+// 게시글 검색
+// Firestore full-text 검색 미지원으로 최신 게시글 50개를 가져온 뒤 클라이언트에서 필터링
 export async function searchPosts(keyword, fields = ["title", "artist", "song"]) {
   const q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(50));
   const snap = await getDocs(q);
 
+  // 검색 비교용 문자열 정규화
+  // 대소문자와 공백 차이를 줄여 검색 정확도 보완
   const normalize = (str) => (str || "").toLowerCase().replace(/\s+/g, ""); // 대소문자·띄어쓰기 무시
   const kw = normalize(keyword);
   if (!kw) return [];
@@ -73,8 +97,11 @@ export async function searchPosts(keyword, fields = ["title", "artist", "song"])
   return snap.docs
     .map((d) => ({ id: d.id, ...d.data() }))
     .filter((p) => {
+      // 제목 검색
       if (fields.includes("title") && normalize(p.title).includes(kw)) return true;
       const tracks = p.tracks?.length ? p.tracks : (p.track ? [p.track] : []);
+      // 트랙 정보 검색
+      // 곡명, 아티스트명, 앨범명 중 하나라도 검색어 포함 시 결과에 포함
       if (tracks.some((t) => {
         if (fields.includes("song")   && normalize(t.name).includes(kw))   return true;
         if (fields.includes("artist") && normalize(t.artist).includes(kw)) return true;

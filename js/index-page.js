@@ -40,7 +40,9 @@ function renderPage() {
   resolveAvatars(listEl); // 아바타 사진 비동기 로드
 }
 
-// 게시글 목록 로드 (스켈레톤 → 데이터)
+// 게시글 목록 로드
+// post.js의 getPosts()로 Firestore posts 컬렉션 조회
+// currentSort 값에 따라 최신순/인기순 기준 적용
 async function loadPosts() {
   headerEl.hidden = false;
   barEl.hidden    = true;
@@ -56,6 +58,8 @@ async function loadPosts() {
   pgEl.innerHTML = "";
   try {
     const allPosts = await getPosts({ sort: currentSort });
+    // 비공개 게시글 필터링
+    // private 글은 작성자 본인에게만 표시
     filteredPosts = allPosts.filter(p => p.visibility !== "private" || p.authorId === currentUser?.uid); // 비공개 글 필터
     currentPage = 1;
     renderPage();
@@ -64,7 +68,9 @@ async function loadPosts() {
   }
 }
 
-// 헤더 검색 실행 (피드 → 검색 결과 전환)
+// 헤더 검색 실행
+// 검색어를 post.js의 searchPosts()로 전달
+// 제목, 아티스트, 곡명, 앨범명 기준으로 결과 필터링
 async function doSearch(kw) {
   headerEl.hidden = true;  // 정렬 드롭다운 숨김
   barEl.hidden    = false; // 검색 메타 표시
@@ -81,6 +87,8 @@ async function doSearch(kw) {
   metaEl.textContent = "";
   try {
     const searchResult = await searchPosts(kw, ["title", "artist", "song", "album"]);
+    // 검색 결과에서도 비공개 게시글 제외
+    // 단, 현재 사용자가 작성자인 경우 표시
     filteredPosts = searchResult.filter(p => p.visibility !== "private" || p.authorId === currentUser?.uid);
     metaEl.textContent = `"${kw}" 검색 결과 ${filteredPosts.length}건`;
     currentPage = 1;
@@ -124,6 +132,8 @@ sortBtn.addEventListener("click", (e) => {
 sortMenu.addEventListener("click", (e) => {
   const btn = e.target.closest("[data-sort]");
   if (!btn) return;
+  // 정렬 메뉴에서 선택한 data-sort 값을 currentSort에 저장
+  // 이후 loadPosts() 재실행으로 정렬된 게시글 목록 다시 조회
   currentSort = btn.dataset.sort;
   sortLbl.textContent = sortLabels[currentSort];
   sortMenu.hidden = true;

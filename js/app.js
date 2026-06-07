@@ -176,6 +176,8 @@ export function initAuthModal() {
   if (!modal) return;
 
   const noticeEl = qs("#authNotice");
+  // 모달 안의 세 화면을 객체로 관리한다.
+  // key 값(login/register/forgot)은 버튼의 data-to 속성값과 연결된다.
   const views = {
     login:    qs("#authViewLogin"),
     register: qs("#authViewRegister"),
@@ -274,6 +276,8 @@ export function initAuthModal() {
   // ── 뷰 전환 ─────────────────────────────────────────────────────
   function showView(name) {
     setNotice("", "");
+    // 전달받은 name과 같은 key의 화면만 표시하고, 나머지 화면은 숨긴다.
+    // 예: name이 "register"이면 회원가입 화면만 보인다.
     Object.entries(views).forEach(([k, el]) => { if (el) el.hidden = k !== name; });
     if (name !== "register") {
       resetNicknameState();
@@ -310,6 +314,8 @@ export function initAuthModal() {
   }
 
   // ── 뷰 전환 버튼 ────────────────────────────────────────────────
+  // data-to 속성을 가진 화면 전환 버튼을 모두 찾고 클릭 이벤트를 등록한다.
+  // 버튼 클릭 시 data-to 값을 showView()에 전달해 해당 화면만 표시한다.
   modal.querySelectorAll("[data-to]").forEach((btn) => {
     btn.addEventListener("click", () => showView(btn.dataset.to));
   });
